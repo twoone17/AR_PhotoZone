@@ -11,7 +11,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.ar.core.examples.java.geospatial.R
 import kotlinx.android.synthetic.main.activity_hello.*
 
-
+// branch test
 class HelloActivity : AppCompatActivity() {
 
     private val frame: RelativeLayout by lazy { // activity_main의 화면 부분
