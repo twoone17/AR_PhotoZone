@@ -7,12 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.ar.core.examples.java.geospatial.R
 
-class SecondFragment : Fragment() {
+class Fragment1 : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_second, container, false)
+        return inflater.inflate(R.layout.fragment_first, container, false)
     }
 
 }
