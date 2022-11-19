@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.app.board
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -27,8 +28,7 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
         private val imgProfile: ImageView = itemView.findViewById(R.id.img_rv_photo)
 
         fun bind(item: BoardData) {
-            Glide.with(itemView).load(item.img).into(imgProfile)
-
+            Glide.with(itemView).load(item.img).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
         }
     }
 
