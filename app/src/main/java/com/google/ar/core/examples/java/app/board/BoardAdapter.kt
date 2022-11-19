@@ -11,7 +11,7 @@ import com.google.ar.core.examples.java.geospatial.R
 class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAdapter.ViewHolder>() {
 
     interface OnItemClickListener{
-        fun onItemClick(view: View, position : Int)
+        fun onItemClick(view: View, boardData: BoardData ,position : Int)
     }
 
     private var listener : OnItemClickListener? = null
@@ -46,7 +46,7 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
             val pos = adapterPosition
             if(pos != RecyclerView.NO_POSITION) {
                 itemView.setOnClickListener {
-                    listener?.onItemClick(itemView, pos)
+                    listener?.onItemClick(itemView, item, pos)
                 }
             }
         }

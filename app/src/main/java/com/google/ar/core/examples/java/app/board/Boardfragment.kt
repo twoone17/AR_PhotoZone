@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.app.board
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -29,6 +30,16 @@ class Boardfragment : Fragment() {
     private fun initRecycler(v : View) {
         boardAdapter = BoardAdapter(this.requireContext())
         val recyclerView: RecyclerView = v.findViewById(R.id.recyclerView_BoardItem)
+
+        boardAdapter.setOnItemClickListener(object : BoardAdapter.OnItemClickListener{
+            override fun onItemClick(view: View, boardData: BoardData ,position: Int) {
+                Intent(requireContext(), BoardClickActivity::class.java).apply {
+                    putExtra("boardData", boardData)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }.run { startActivity(this) }
+            }
+        })
+
         recyclerView.adapter = boardAdapter
         val gm = GridLayoutManager(v.context, 2)
         recyclerView.layoutManager = gm
@@ -59,11 +70,6 @@ class Boardfragment : Fragment() {
                 Log.e(TAG, "content : ", exception)
             }
     }
-
-    // 여기까지는 리사이클러뷰를 초기화하고 파이어베이스에서 데이터를 불러오는 부분이었다.
-    //////////////////////////////////////////////////////////////////////////
-    // 여기서부터는 게시글 사진을 클릭했을때에 대한 처리를 다룬 로직이다.
-
 
 
 }
