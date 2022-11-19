@@ -1,6 +1,5 @@
 package com.google.ar.core.examples.java.app.board
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +9,16 @@ import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.geospatial.R
 
 class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAdapter.ViewHolder>() {
+
+    interface OnItemClickListener{
+        fun onItemClick(view: View, position : Int)
+    }
+
+    private var listener : OnItemClickListener? = null
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.listener = listener
+    }
 
     var datas = mutableListOf<BoardData>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -21,7 +30,11 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(datas[position])
+
+
     }
+
+
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
@@ -29,6 +42,13 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
 
         fun bind(item: BoardData) {
             Glide.with(itemView).load(item.img).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
+
+            val pos = adapterPosition
+            if(pos != RecyclerView.NO_POSITION) {
+                itemView.setOnClickListener {
+                    listener?.onItemClick(itemView, pos)
+                }
+            }
         }
     }
 
