@@ -10,6 +10,16 @@ import com.google.ar.core.examples.java.geospatial.R
 
 class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAdapter.ViewHolder>() {
 
+    interface OnItemClickListener{
+        fun onItemClick(view: View, boardData: BoardData ,position : Int)
+    }
+
+    private var listener : OnItemClickListener? = null
+
+    fun setOnItemClickListener(listener: OnItemClickListener) {
+        this.listener = listener
+    }
+
     var datas = mutableListOf<BoardData>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.fragment_board_recycler_element,parent,false)
@@ -20,15 +30,25 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(datas[position])
+
+
     }
+
+
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
         private val imgProfile: ImageView = itemView.findViewById(R.id.img_rv_photo)
 
         fun bind(item: BoardData) {
-            Glide.with(itemView).load(item.img).into(imgProfile)
+            Glide.with(itemView).load(item.img).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
 
+            val pos = adapterPosition
+            if(pos != RecyclerView.NO_POSITION) {
+                itemView.setOnClickListener {
+                    listener?.onItemClick(itemView, item, pos)
+                }
+            }
         }
     }
 
