@@ -12,7 +12,7 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
 
     var datas = mutableListOf<BoardData>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.item_recycler_ex,parent,false)
+        val view = LayoutInflater.from(context).inflate(R.layout.fragment_board_recycler_element,parent,false)
         return ViewHolder(view)
     }
 
