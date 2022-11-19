@@ -1,10 +1,11 @@
-package com.google.ar.core.examples.java.activity
+package com.google.ar.core.examples.java.app
 
 import android.os.Bundle
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.ar.core.examples.java.app.board.Boardfragment
 import com.google.ar.core.examples.java.geospatial.R
 
 // branch test
@@ -32,7 +33,7 @@ class HelloActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_board -> {
-                    replaceFragment(Fragment2())
+                    replaceFragment(Boardfragment())
                     true
                 }
                 R.id.nav_search -> {

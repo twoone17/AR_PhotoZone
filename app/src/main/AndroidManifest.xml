@@ -47,7 +47,7 @@
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:screenOrientation="locked"/>
 
-      <activity android:name ="com.google.ar.core.examples.java.activity.HelloActivity"
+      <activity android:name ="com.google.ar.core.examples.java.app.HelloActivity"
           android:theme="@style/Theme.AppCompat"
           android:exported="true">
       <intent-filter>
