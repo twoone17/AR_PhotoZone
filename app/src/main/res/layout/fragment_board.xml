@@ -21,7 +21,7 @@
 
     <at.markushi.ui.CircleButton
         android:theme="@style/AlertDialogCustom"
-        android:id="@+id/upload"
+        android:id="@+id/uploadButton"
         android:layout_width="64dip"
         android:layout_height="64dip"
         android:layout_alignParentRight="true"
