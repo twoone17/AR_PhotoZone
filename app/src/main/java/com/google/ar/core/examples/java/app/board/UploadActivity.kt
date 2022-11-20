@@ -9,4 +9,6 @@ class UploadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_upload)
     }
+
+    // 의성형 하고싶은거 다 해
 }

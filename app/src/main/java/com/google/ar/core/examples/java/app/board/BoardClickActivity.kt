@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.app.board
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,13 @@ class BoardClickActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_board_click)
 
+        initBoardWithIntentData()
+        pressLikeButton()
+        pressSaveButton()
+    }
+
+    // 인텐트로 넘어온 데이터를 뷰에 뿌려주는 함수
+    private fun initBoardWithIntentData() {
         val intent = intent
         val boardData = intent.getSerializableExtra("boardData") as BoardData?
 
@@ -21,8 +29,18 @@ class BoardClickActivity : AppCompatActivity() {
             Glide.with(this).load(boardData.img).error(R.drawable.ic_baseline_error_outline_24).into(post_image)
             username.text = boardData.userId
             description.text = boardData.description
-            likes.text = boardData.likes.toString()
+            publisher.text = boardData.userId
+            var likeString = boardData.likes.toString() + " likes"
+            likes.text = likeString
+            likes.text = likeString
         }
+    }
+
+    private fun pressLikeButton() {
+
+    }
+
+    private fun pressSaveButton() {
 
     }
 }
