@@ -9,8 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.fragment_board.*
 
 class Boardfragment : Fragment() {
 
@@ -23,7 +25,15 @@ class Boardfragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val v =  inflater.inflate(R.layout.fragment_board, container, false)
+        // 리사이클러뷰 초기화 -> 파이어베이스 데이터 로드
         initRecycler(v)
+
+        val uploadButton : FloatingActionButton = v.findViewById(R.id.uploadButton)
+        uploadButton.setOnClickListener{
+            val nextIntent = Intent(requireContext(), UploadActivity::class.java)
+            startActivity(nextIntent)
+        }
+
         return v
     }
 
