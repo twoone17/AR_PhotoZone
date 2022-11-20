@@ -19,18 +19,16 @@
         android:scrollbars="vertical"/>
 
 
-    <at.markushi.ui.CircleButton
-        android:theme="@style/AlertDialogCustom"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/uploadButton"
-        android:layout_width="64dip"
-        android:layout_height="64dip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginRight="3dp"
-        android:layout_marginBottom="100dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginBottom="58dp"
         android:src="@drawable/ic_baseline_border_color_24"
-        app:cb_color="#FBEFEF"
-        app:cb_pressedRingWidth="8dip"
-        tools:ignore="MissingConstraints" />
+        android:theme="@style/Theme.MaterialComponents"
+        app:backgroundTint="@color/enterprise_background" />
 
 </RelativeLayout>
