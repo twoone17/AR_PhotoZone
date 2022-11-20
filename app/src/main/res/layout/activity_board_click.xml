@@ -135,16 +135,6 @@
                 android:text="댓글 더보기"
                 android:textColor="@color/colorAccent" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="  착용 제품 " />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/AddedItemList"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" />
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 

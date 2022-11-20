@@ -29,7 +29,7 @@
         <activity
             android:name="com.google.ar.core.examples.java.app.board.BoardClickActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat" />
+            android:theme="@style/AppTheme" />
         <activity
             android:name=".GeospatialActivity"
             android:configChanges="orientation|screenSize"
@@ -39,7 +39,7 @@
         <activity
             android:name="com.google.ar.core.examples.java.app.HelloActivity"
             android:exported="true"
-            android:theme="@style/Theme.AppCompat">
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

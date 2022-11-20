@@ -31,6 +31,12 @@
   <!-- Application theme. -->
   <style name="AppTheme" parent="AppBaseTheme">
     <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    <item name="colorPrimary">@color/white</item>
+    <item name="colorPrimaryDark">@color/enterprise_background</item>
+    <item name="colorAccent">@color/colorAccent</item>
+
+    <item name="windowActionBar">false</item>
+    <item name="windowNoTitle">true</item>
   </style>
 
   <style name="AlertDialogCustom" parent="Theme.AppCompat.Light.Dialog.Alert">
