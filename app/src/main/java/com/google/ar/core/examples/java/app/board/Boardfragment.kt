@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.ar.core.examples.java.app.board.DTO.BoardData
 import com.google.ar.core.examples.java.app.board.upload.UploadActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.FirebaseFirestore

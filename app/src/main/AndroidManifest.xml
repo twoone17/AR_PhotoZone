@@ -30,6 +30,9 @@
             android:name="com.google.ar.core.examples.java.app.board.upload.UploadActivity"
             android:exported="true" />
         <activity
+            android:name="com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity"
+            android:exported="true" />
+        <activity
             android:name="com.google.ar.core.examples.java.app.board.BoardClickActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />

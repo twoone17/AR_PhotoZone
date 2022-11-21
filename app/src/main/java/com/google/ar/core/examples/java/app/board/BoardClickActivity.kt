@@ -1,10 +1,9 @@
 package com.google.ar.core.examples.java.app.board
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import com.bumptech.glide.Glide
+import com.google.ar.core.examples.java.app.board.DTO.BoardData
 import com.google.ar.core.examples.java.geospatial.R
 import kotlinx.android.synthetic.main.activity_board_click.*
 

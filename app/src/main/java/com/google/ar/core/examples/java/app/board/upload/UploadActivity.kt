@@ -18,7 +18,7 @@ class UploadActivity : AppCompatActivity() {
             println("LOG : 업로드 버튼 클릭")
             image_added.setOnClickListener{
                 println("LOG : 사진 이미지 클릭 ")
-                val nextIntent = Intent(this, UploadImageView::class.java)
+                val nextIntent = Intent(this, UploadImageViewActivity::class.java)
                 startActivity(nextIntent)
             }
 

@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.app.board
+package com.google.ar.core.examples.java.app.board.DTO
 
 import java.io.Serializable
 
