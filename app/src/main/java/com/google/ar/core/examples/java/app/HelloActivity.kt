@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.ar.core.examples.java.app.board.Boardfragment
+import com.google.ar.core.examples.java.app.profile.ProfileFragment
 import com.google.ar.core.examples.java.geospatial.R
 
 // branch test
@@ -41,7 +42,7 @@ class HelloActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nav_profile -> {
-                    replaceFragment(Fragment4())
+                    replaceFragment(ProfileFragment())
                     true
                 }
                 else -> false
