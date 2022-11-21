@@ -36,6 +36,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-database'
     // Obj - a simple Wavefront OBJ file loader
     // https://github.com/javagl/Obj
+    implementation 'com.google.firebase:firebase-storage'
     implementation 'de.javagl:obj:0.2.1'
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'androidx.appcompat:appcompat:1.1.0'
