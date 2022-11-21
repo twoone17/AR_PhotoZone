@@ -1,7 +1,9 @@
 package com.google.ar.core.examples.java.app.board.upload
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.ar.core.examples.java.app.board.DTO.UploadData
 import com.google.ar.core.examples.java.geospatial.R
 import kotlinx.android.synthetic.main.upload_main_recycler.*
@@ -19,17 +21,23 @@ class UploadImageViewActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.upload_main_recycler)
+        var listManager = GridLayoutManager(this, 2)
+        upload_main_recycler.layoutManager = listManager
         initRecycler()
     }
     private fun initRecycler() {
         uploadAdapter = UploadAdapter(this)
         upload_main_recycler.adapter = uploadAdapter
 
-
         datas.apply {
             add(UploadData(img = R.drawable.kkarmi))
             add(UploadData(img = R.drawable.kkarmi))
-
+            add(UploadData(img = R.drawable.kkarmi))
+            add(UploadData(img = R.drawable.kkarmi))
+            add(UploadData(img = R.drawable.kkarmi))
+            add(UploadData(img = R.drawable.kkarmi))
+            add(UploadData(img = R.drawable.kkarmi))
+            add(UploadData(img = R.drawable.kkarmi))
 
             uploadAdapter.datas = datas
             uploadAdapter.notifyDataSetChanged()
