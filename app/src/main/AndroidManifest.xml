@@ -27,7 +27,7 @@
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name="com.google.ar.core.examples.java.app.board.UploadActivity"
+            android:name="com.google.ar.core.examples.java.app.board.upload.UploadActivity"
             android:exported="true" />
         <activity
             android:name="com.google.ar.core.examples.java.app.board.BoardClickActivity"
