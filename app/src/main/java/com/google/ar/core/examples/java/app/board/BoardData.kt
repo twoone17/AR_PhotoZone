@@ -9,7 +9,8 @@ data class BoardData(
     val description : String,
     val likes : Int,
     val publisher : String,
-    val userId : String
+    val userId : String,
+    val documentId : String
 
     // 지형정보, 게시자 정보 등등 SNS 정보들 추가 예정
 ) : Serializable

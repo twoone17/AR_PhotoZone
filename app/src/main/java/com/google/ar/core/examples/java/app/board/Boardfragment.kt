@@ -19,7 +19,6 @@ class Boardfragment : Fragment() {
     private lateinit var boardAdapter: BoardAdapter
     val datas = mutableListOf<BoardData>()
     val TAG = "BoardFragment"
-    var imgURLs = mutableListOf<String>()
     val db = FirebaseFirestore.getInstance()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -67,14 +66,13 @@ class Boardfragment : Fragment() {
                         "테스트용 게시글입니다.",
                         2,
                         "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
-                        "Iron_Woong"))
+                        "Iron_Woong",
+                        links.id))
                     boardAdapter.datas = datas
                     boardAdapter.notifyDataSetChanged()
                 }
-                // 자꾸 리스트가 listener를 나가면 초기화된다.
-                imgURLs.apply { add(links.data["imgURL"].toString()) }
             }
-            println(imgURLs.size)
+
         }.addOnFailureListener { exception ->
                 Log.e(TAG, "error on loading datas")
                 Log.e(TAG, "content : ", exception)
