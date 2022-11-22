@@ -25,6 +25,8 @@ class BoardClickActivity : AppCompatActivity() {
 
     // 좋아요 데이터 삽입용 해쉬맵
     var likeMap = HashMap<String, String>()
+    // users -> uid -> BoardLikes -> ... 에 들어갈 게시글 정보를 담기 위한 해쉬맵
+    var likePostInfoMap = HashMap<String, String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +43,10 @@ class BoardClickActivity : AppCompatActivity() {
             isLikePressed(boardData)
             // 좋아요 버튼 클릭에 대해 처리하는 함수
             pressLikeButton(boardData)
+
+            // 해당 게시글을 이미 저장했는지 확인해주는 함수
+            isSavePressed(boardData)
+
             // 저장 버튼 클릭에 대해 처리하는 함수
             pressSaveButton()
         }
@@ -56,6 +62,7 @@ class BoardClickActivity : AppCompatActivity() {
             likes.text = likeString
     }
 
+    // 좋아요를 헤당 게시글에 이미 눌렀는지 확인해주는 함수
     private fun isLikePressed(boardData: BoardData) {
         // 임시 자동 로그인, 로그인 화면 구현 시 삭제 예정
             if(currentUser != null) {
@@ -72,11 +79,12 @@ class BoardClickActivity : AppCompatActivity() {
                 }.addOnFailureListener { error ->
                     Log.e(TAG, "isLikePressed : " + error )
                 }
+            } else {
+                liked = false
             }
-        // 현재 유저가 null이 아니어야 모든 로직이 실행될 수 있다.
     }
 
-
+    // 서버로부터 좋아요 개수를 받아오는 함수
     private fun getLikeCountsFromServer(boardData: BoardData){
         var likesReference : CollectionReference = db.collection("app_board").document(boardData.documentId).collection("Likes")
 
@@ -94,43 +102,75 @@ class BoardClickActivity : AppCompatActivity() {
 
     }
 
-
+    // 좋아요 버튼 클릭에 대해 처리하는 함수
     private fun pressLikeButton(boardData : BoardData) {
-        var likesReference : CollectionReference = db.collection("app_board").document(boardData.documentId).collection("Likes")
-        var forUpdateLikesCountDocument : DocumentReference = db.collection("app_board").document(boardData.documentId)
         if(currentUser != null) {
-            like.setOnClickListener {
-                if (liked) {
-                    like.setImageResource(R.drawable.ic_liked)
-                    likeCount++
-                    likeMap.put("User", currentUser.uid)
-                    likesReference.document(currentUser.uid).set(likeMap)
-                    likes.text = "$likeCount likes"
-                    boardData.likes = likeCount
-                    forUpdateLikesCountDocument.set(boardData)
-                    liked = false
-                } else {
-                    like.setImageResource(R.drawable.ic_like)
-                    likesReference.document(currentUser.uid).delete()
-                    likeCount--
-                    likes.text = "$likeCount likes"
-                    boardData.likes = likeCount
-                    forUpdateLikesCountDocument.set(boardData)
-                    liked = true
+            var uid = currentUser.uid
+            var likesReference: CollectionReference =
+                db.collection("app_board").document(boardData.documentId).collection("Likes")
+            var forUpdateLikesCountDocument: DocumentReference =
+                db.collection("app_board").document(boardData.documentId)
+            var forModifingBoardLikesCollection: CollectionReference =
+                db.collection("users").document(uid).collection("BoardLikes")
+            if (currentUser != null) {
+                like.setOnClickListener {
+                    if (liked) {
+                        like.setImageResource(R.drawable.ic_liked)
+                        likeCount++
+                        likeMap.put("User", currentUser.uid)
+                        likesReference.document(currentUser.uid).set(likeMap)
+                        likePostInfoMap.put("post", boardData.documentId)
+                        forModifingBoardLikesCollection.document(boardData.documentId).set(likePostInfoMap)
+                        likes.text = "$likeCount likes"
+                        boardData.likes = likeCount
+                        forUpdateLikesCountDocument.set(boardData)
+                        liked = false
+                    } else {
+                        like.setImageResource(R.drawable.ic_like)
+                        likesReference.document(currentUser.uid).delete()
+                        likeCount--
+                        likes.text = "$likeCount likes"
+                        boardData.likes = likeCount
+                        forUpdateLikesCountDocument.set(boardData)
+                        // 좋아요 누른 게시글에서 삭제
+                        forModifingBoardLikesCollection.document(boardData.documentId).delete()
+                        liked = true
+                    }
                 }
             }
         }
     }
 
-    private fun pressSaveButton() {
-        if(saved) {
-            save.setImageResource(R.drawable.ic_save_black)
-            Log.e(TAG, "pressSaveButton: " + "저장됨")
-            saved = false
+
+    // 해당 게시글을 이미 저장했는지 확인해주는 함수
+    private fun isSavePressed(boardData: BoardData) {
+        if(currentUser != null) {
+            val uid = currentUser.uid
+            var savesReference : CollectionReference = db.collection("app_board").document(boardData.documentId).collection("Saves")
+            savesReference.document(uid).get().addOnSuccessListener { result ->
+                if(result.exists()) {
+                    save.setImageResource(R.drawable.ic_save_black)
+                    saved = false
+                } else {
+                    save.setImageResource(R.drawable.ic_savee_black)
+                    saved = true
+                }
+            }
         } else {
-            save.setImageResource(R.drawable.ic_savee_black)
-            Log.e(TAG, "pressSaveButton: " + "저장됨")
-            saved = true
+            saved = false
+        }
+    }
+
+    // 저장 버튼 클릭에 대해 처리하는 함수
+    private fun pressSaveButton() {
+        save.setOnClickListener {
+            if (saved) {
+                save.setImageResource(R.drawable.ic_save_black)
+                saved = false
+            } else {
+                save.setImageResource(R.drawable.ic_savee_black)
+                saved = true
+            }
         }
     }
 
