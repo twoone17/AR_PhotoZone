@@ -1,16 +1,13 @@
 package com.google.ar.core.examples.java.app.board
 
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.geospatial.R
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.android.synthetic.main.activity_board_click.*
@@ -108,12 +105,17 @@ class BoardClickActivity : AppCompatActivity() {
                     likeCount++
                     likeMap.put("User", currentUser.uid)
                     likesReference.document(currentUser.uid).set(likeMap)
+                    likes.text = "$likeCount likes"
+                    boardData.likes = likeCount
+                    forUpdateLikesCountDocument.set(boardData)
                     liked = false
                 } else {
                     like.setImageResource(R.drawable.ic_like)
                     likesReference.document(currentUser.uid).delete()
                     likeCount--
-
+                    likes.text = "$likeCount likes"
+                    boardData.likes = likeCount
+                    forUpdateLikesCountDocument.set(boardData)
                     liked = true
                 }
             }
@@ -129,4 +131,5 @@ class BoardClickActivity : AppCompatActivity() {
             saved = true
         }
     }
+
 }
