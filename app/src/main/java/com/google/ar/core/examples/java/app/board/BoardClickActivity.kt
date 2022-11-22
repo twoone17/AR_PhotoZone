@@ -21,7 +21,7 @@ class BoardClickActivity : AppCompatActivity() {
     val db = FirebaseFirestore.getInstance()
     var liked = true
     var saved = true
-    var likeCount = 0
+    var likeCount = 0L
 
     // 좋아요 데이터 삽입용 해쉬맵
     var likeMap = HashMap<String, String>()
@@ -48,7 +48,7 @@ class BoardClickActivity : AppCompatActivity() {
 
     // 인텐트로 넘어온 데이터를 뷰에 뿌려주는 함수
     private fun initBoardWithIntentData(boardData: BoardData) {
-            Glide.with(this).load(boardData.img).error(R.drawable.ic_baseline_error_outline_24).into(post_image)
+            Glide.with(this).load(boardData.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(post_image)
             username.text = boardData.userId
             description.text = boardData.description
             publisher.text = boardData.userId
@@ -125,9 +125,11 @@ class BoardClickActivity : AppCompatActivity() {
     private fun pressSaveButton() {
         if(saved) {
             save.setImageResource(R.drawable.ic_save_black)
+            Log.e(TAG, "pressSaveButton: " + "저장됨")
             saved = false
         } else {
             save.setImageResource(R.drawable.ic_savee_black)
+            Log.e(TAG, "pressSaveButton: " + "저장됨")
             saved = true
         }
     }

@@ -5,9 +5,9 @@ import java.io.Serializable
 
 // 게시판에 필요한 데이터들을 가지는 DTO class
 data class BoardData(
-    val img : String,
+    val imgURL : String,
     var description : String,
-    var likes : Int,
+    var likes : Long,
     val publisher : String,
     val userId : String,
     val documentId : String
