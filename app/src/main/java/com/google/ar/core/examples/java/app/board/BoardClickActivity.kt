@@ -27,6 +27,10 @@ class BoardClickActivity : AppCompatActivity() {
     var likeMap = HashMap<String, String>()
     // users -> uid -> BoardLikes -> ... 에 들어갈 게시글 정보를 담기 위한 해쉬맵
     var likePostInfoMap = HashMap<String, String>()
+    // 저장 게시글 데이터 삽입용 해쉬맵
+    var saveMap = HashMap<String, String>()
+    // users -> uid -> BoardSaves -> ... 에 들어갈 게시글 정보를 담기 위한 해쉬맵
+    var savePostInfoMap = HashMap<String, String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +52,7 @@ class BoardClickActivity : AppCompatActivity() {
             isSavePressed(boardData)
 
             // 저장 버튼 클릭에 대해 처리하는 함수
-            pressSaveButton()
+            pressSaveButton(boardData)
         }
     }
 
@@ -112,12 +116,12 @@ class BoardClickActivity : AppCompatActivity() {
                 db.collection("app_board").document(boardData.documentId)
             var forModifingBoardLikesCollection: CollectionReference =
                 db.collection("users").document(uid).collection("BoardLikes")
-            if (currentUser != null) {
+
                 like.setOnClickListener {
                     if (liked) {
                         like.setImageResource(R.drawable.ic_liked)
                         likeCount++
-                        likeMap.put("User", currentUser.uid)
+                        likeMap.put("user", currentUser.uid)
                         likesReference.document(currentUser.uid).set(likeMap)
                         likePostInfoMap.put("post", boardData.documentId)
                         forModifingBoardLikesCollection.document(boardData.documentId).set(likePostInfoMap)
@@ -137,7 +141,6 @@ class BoardClickActivity : AppCompatActivity() {
                         liked = true
                     }
                 }
-            }
         }
     }
 
@@ -162,14 +165,30 @@ class BoardClickActivity : AppCompatActivity() {
     }
 
     // 저장 버튼 클릭에 대해 처리하는 함수
-    private fun pressSaveButton() {
-        save.setOnClickListener {
-            if (saved) {
-                save.setImageResource(R.drawable.ic_save_black)
-                saved = false
-            } else {
-                save.setImageResource(R.drawable.ic_savee_black)
-                saved = true
+    private fun pressSaveButton(boardData: BoardData) {
+
+        if(currentUser != null) {
+            var uid = currentUser.uid
+            var savesReference: CollectionReference =
+                db.collection("app_board").document(boardData.documentId).collection("Saves")
+            var forModifingBoardSavesCollection: CollectionReference =
+                db.collection("users").document(uid).collection("BoardSaves")
+
+
+            save.setOnClickListener {
+                if (saved) {
+                    save.setImageResource(R.drawable.ic_save_black)
+                    saveMap.put("user", uid)
+                    savesReference.document(uid).set(saveMap)
+                    savePostInfoMap.put("post", boardData.documentId)
+                    forModifingBoardSavesCollection.document(boardData.documentId).set(savePostInfoMap)
+                    saved = false
+                } else {
+                    save.setImageResource(R.drawable.ic_savee_black)
+                    savesReference.document(uid).delete()
+                    forModifingBoardSavesCollection.document(boardData.documentId).delete()
+                    saved = true
+                }
             }
         }
     }
