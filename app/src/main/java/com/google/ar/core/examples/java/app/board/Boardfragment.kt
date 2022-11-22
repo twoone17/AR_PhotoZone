@@ -64,7 +64,7 @@ class Boardfragment : Fragment() {
                 datas.apply {
                     add(BoardData(img = links.data["imgURL"].toString(),
                         "테스트용 게시글입니다.",
-                        2,
+                        0,
                         "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
                         "Iron_Woong",
                         links.id))
