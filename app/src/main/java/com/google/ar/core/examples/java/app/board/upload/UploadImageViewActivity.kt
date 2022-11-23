@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.app.board.upload
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -21,11 +22,13 @@ class UploadImageViewActivity : AppCompatActivity(){
 
     lateinit var uploadAdapter: UploadAdapter
     val datas = mutableListOf<UploadData>()
+    val imgDataSend = mutableListOf<UploadData>()
+    val storageRef = FirebaseStorage.getInstance()
+    private var MutalbeList : MutableList<UploadData> = arrayListOf()
+
+    val StringDownloadUrl = storageRef.reference.child("Gallery/userid/picID1.PNG").downloadUrl
 
 
-    //파이어베이스 storage 접근
-//    lateinit var storage: FirebaseStorage
-    // Create a storage reference from our app
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,20 +43,21 @@ class UploadImageViewActivity : AppCompatActivity(){
         uploadAdapter = UploadAdapter(this)
         upload_main_recycler.adapter = uploadAdapter
 
-//        var storageRef = storage.reference
-        //userid에 해당하는 갤러리를 불러온다
-        //TODO:의성) 추후에 실제 uid로 변경
-//        var imagesRef: StorageReference = storageRef.child("Gallery/userid/picID1.png")
-
+        println("StringDownloadUrl = ${StringDownloadUrl}")
 
         datas.apply {
-            add(UploadData(img = R.drawable.kkarmi))
-            add(UploadData(img = R.drawable.kkarmi))
-            add(UploadData(img = R.drawable.kkarmi))
+            add(UploadData(img = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300"))
 
             uploadAdapter.datas = datas
             uploadAdapter.notifyDataSetChanged()
 
         }
+
+        MutalbeList.add(UploadData(img = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300"))
+
+        val intent = Intent(this, UploadActivity::class.java)
+        intent.putExtra("key",ArrayList(MutalbeList))
+        startActivity(intent)
+
     }
 }
