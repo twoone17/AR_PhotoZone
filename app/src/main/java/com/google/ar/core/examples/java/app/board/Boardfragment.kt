@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.android.synthetic.main.fragment_board.*
 
 class Boardfragment : Fragment() {
 
@@ -23,12 +24,12 @@ class Boardfragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        val v = inflater.inflate(R.layout.fragment_board, container, false)
+        val v =  inflater.inflate(R.layout.fragment_board, container, false)
         // 리사이클러뷰 초기화 -> 파이어베이스 데이터 로드
         initRecycler(v)
 
-        val uploadButton: FloatingActionButton = v.findViewById(R.id.uploadButton)
-        uploadButton.setOnClickListener {
+        val uploadButton : FloatingActionButton = v.findViewById(R.id.uploadButton)
+        uploadButton.setOnClickListener{
             val nextIntent = Intent(requireContext(), UploadActivity::class.java)
             startActivity(nextIntent)
         }
@@ -36,12 +37,12 @@ class Boardfragment : Fragment() {
         return v
     }
 
-    private fun initRecycler(v: View) {
+    private fun initRecycler(v : View) {
         boardAdapter = BoardAdapter(this.requireContext())
         val recyclerView: RecyclerView = v.findViewById(R.id.recyclerView_BoardItem)
 
-        boardAdapter.setOnItemClickListener(object : BoardAdapter.OnItemClickListener {
-            override fun onItemClick(view: View, boardData: BoardData, position: Int) {
+        boardAdapter.setOnItemClickListener(object : BoardAdapter.OnItemClickListener{
+            override fun onItemClick(view: View, boardData: BoardData ,position: Int) {
                 Intent(requireContext(), BoardClickActivity::class.java).apply {
                     putExtra("boardData", boardData)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -61,25 +62,24 @@ class Boardfragment : Fragment() {
 
         db.collection("app_board").get().addOnSuccessListener { result ->
             for (links in result) {
-                println("links in result 확인 : ${links.id} => ${links.data}")
                 datas.apply {
-                    add(BoardData(img = links.data["imgURL"].toString(),
-                            "테스트용 게시글입니다.",
-                            2,
-                            "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
-                            "Iron_Woong"))
+                    add(BoardData(imgURL = links.data["imgURL"].toString(),
+                        description = links.data["description"].toString(),
+                        likes = links.data["likes"] as Long,
+                        publisher = links.data["publisher"].toString(),
+                        userId = links.data["userId"].toString(),
+                        links.id))
                     boardAdapter.datas = datas
                     boardAdapter.notifyDataSetChanged()
                 }
                 // 자꾸 리스트가 listener를 나가면 초기화된다.
                 imgURLs.apply { add(links.data["imgURL"].toString()) }
             }
-
-
+            println(imgURLs.size)
         }.addOnFailureListener { exception ->
-            Log.e(TAG, "error on loading datas")
-            Log.e(TAG, "content : ", exception)
-        }
+                Log.e(TAG, "error on loading datas")
+                Log.e(TAG, "content : ", exception)
+            }
     }
 
 

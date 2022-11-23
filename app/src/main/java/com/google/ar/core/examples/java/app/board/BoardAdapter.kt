@@ -41,7 +41,7 @@ class BoardAdapter(private val context: Context) : RecyclerView.Adapter<BoardAda
         private val imgProfile: ImageView = itemView.findViewById(R.id.img_rv_photo)
 
         fun bind(item: BoardData) {
-            Glide.with(itemView).load(item.img).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
+            Glide.with(itemView).load(item.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
 
             val pos = adapterPosition
             if(pos != RecyclerView.NO_POSITION) {
