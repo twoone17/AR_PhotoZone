@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.ar.core.examples.java.app.board.DTO.BoardData
 import com.google.ar.core.examples.java.app.board.DTO.UploadData
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.FirebaseFirestore
@@ -21,10 +22,8 @@ import kotlinx.android.synthetic.main.upload_main_recycler.*
 class UploadImageViewActivity : AppCompatActivity(){
 
     lateinit var uploadAdapter: UploadAdapter
-    val datas = mutableListOf<UploadData>()
-    val imgDataSend = mutableListOf<UploadData>()
+    val datas = mutableListOf<BoardData>()
     val storageRef = FirebaseStorage.getInstance()
-    private var MutalbeList : MutableList<UploadData> = arrayListOf()
 
     val StringDownloadUrl = storageRef.reference.child("Gallery/userid/picID1.PNG").downloadUrl
 
@@ -39,9 +38,9 @@ class UploadImageViewActivity : AppCompatActivity(){
         initRecycler()
 
         uploadAdapter.setOnItemClickListener(object : UploadAdapter.OnItemClickListener {
-            override fun onItemClick(view: View, uploadData: UploadData, position: Int) {
+            override fun onItemClick(view: View, boardData: BoardData, position: Int) {
                 Intent(this@UploadImageViewActivity, UploadActivity::class.java).apply {
-                    putExtra("uploadData", uploadData)
+                    putExtra("uploadData", boardData)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }.run { startActivity(this) }
             }
@@ -51,10 +50,16 @@ class UploadImageViewActivity : AppCompatActivity(){
         uploadAdapter = UploadAdapter(this)
         upload_main_recycler.adapter = uploadAdapter
 
-        println("StringDownloadUrl = ${StringDownloadUrl}")
+
 
         datas.apply {
-            add(UploadData(img = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300"))
+            add(
+                    BoardData(img = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300",
+                    "테스트용 게시글입니다.",
+                    2,
+                    "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
+                    "Iron_Woong"))
+
 
             uploadAdapter.datas = datas
             uploadAdapter.notifyDataSetChanged()

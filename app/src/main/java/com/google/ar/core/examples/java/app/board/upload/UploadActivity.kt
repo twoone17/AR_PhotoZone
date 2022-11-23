@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.examples.java.app.board.Boardfragment
+import com.google.ar.core.examples.java.app.board.DTO.BoardData
 import com.google.ar.core.examples.java.app.board.DTO.UploadData
 import com.google.ar.core.examples.java.geospatial.R
 
@@ -18,7 +19,7 @@ class UploadActivity : AppCompatActivity() {
         val image_added = findViewById<ImageView>(R.id.image_added)
         val close = findViewById<ImageView>(R.id.close)
 
-        val uploaddata = intent.getSerializableExtra("uploadData") as UploadData?
+        val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
 
         uploadButton.setOnClickListener {
