@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.google.ar.core.examples.java.app.board.upload.UploadActivity">
+    tools:context="com.google.ar.core.examples.java.app.board.UploadActivity">
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/bar"
         android:layout_width="match_parent"

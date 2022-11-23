@@ -5,12 +5,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.ar.core.examples.java.app.board.DTO.BoardData
-import com.google.ar.core.examples.java.app.board.DTO.UploadData
+import com.google.ar.core.examples.java.app.board.BoardData
+import com.google.ar.core.examples.java.app.board.UploadActivity
 import com.google.ar.core.examples.java.geospatial.R
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.upload_main_recycler.*
 
 /**

@@ -1,13 +1,11 @@
-package com.google.ar.core.examples.java.app.board.upload
+package com.google.ar.core.examples.java.app.board
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.google.ar.core.examples.java.app.board.Boardfragment
-import com.google.ar.core.examples.java.app.board.DTO.BoardData
-import com.google.ar.core.examples.java.app.board.DTO.UploadData
+import com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity
 import com.google.ar.core.examples.java.geospatial.R
 
 class UploadActivity : AppCompatActivity() {
