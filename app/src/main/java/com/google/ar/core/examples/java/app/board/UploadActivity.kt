@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity
 import com.google.ar.core.examples.java.geospatial.R
+import kotlinx.android.synthetic.main.activity_board_click.*
 
 class UploadActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,6 +22,9 @@ class UploadActivity : AppCompatActivity() {
         val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
 
+        if(uploaddata!=null) {
+            Glide.with(this).load(uploaddata!!.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(image_added)
+        }
         uploadButton.setOnClickListener {
             println("!! 업로드 버튼 클릭 !!")
         }

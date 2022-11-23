@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.app.board.UploadActivity
 import com.google.ar.core.examples.java.geospatial.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import kotlinx.android.synthetic.main.upload_main_recycler.*
 
@@ -22,8 +25,10 @@ class UploadImageViewActivity : AppCompatActivity(){
     lateinit var uploadAdapter: UploadAdapter
     val datas = mutableListOf<BoardData>()
     val storageRef = FirebaseStorage.getInstance()
-
+    val db = FirebaseFirestore.getInstance()
     val StringDownloadUrl = storageRef.reference.child("Gallery/userid/picID1.PNG").downloadUrl
+    private var auth = Firebase.auth
+    private val currentUser = auth.currentUser
 
 
 
@@ -48,16 +53,17 @@ class UploadImageViewActivity : AppCompatActivity(){
         uploadAdapter = UploadAdapter(this)
         upload_main_recycler.adapter = uploadAdapter
 
-
-
-        datas.apply {
-            add(
-                    BoardData(imgURL = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300",
-                    "테스트용 게시글입니다.",
-                    2,
-                    "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
-                    "Iron_Woong",""))
-
+        db.collection("users").document(auth.currentUser!!.uid).collection("posts").get()
+                .addOnSuccessListener { result ->
+            for(links in result) {
+                datas.apply {
+                    add(BoardData(imgURL = links.data["imgURL"].toString(),
+                            description = links.data["description"].toString(),
+                            likes = links.data["likes"] as Long,
+                            publisher = links.data["publisher"].toString(),
+                            userId = links.data["userId"].toString(),
+                            links.id))
+            }
 
             uploadAdapter.datas = datas
             uploadAdapter.notifyDataSetChanged()
@@ -66,5 +72,5 @@ class UploadImageViewActivity : AppCompatActivity(){
 
         val intent = Intent(this, UploadActivity::class.java)
 
-    }
+    }}
 }
