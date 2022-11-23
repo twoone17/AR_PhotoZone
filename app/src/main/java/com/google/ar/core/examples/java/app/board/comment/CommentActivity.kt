@@ -1,10 +1,13 @@
 package com.google.ar.core.examples.java.app.board.comment
 
+import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.Toast
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,6 +39,7 @@ class CommentActivity : AppCompatActivity() {
         val intent = intent
         val documentId = intent.getStringExtra("post_document_Id").toString()
 
+        add_comment.setText("왜 키보드가 자꾸 안올라오지?")
         initRecycler(documentId)
         pressCommentPushButton(documentId)
     }
@@ -106,8 +110,9 @@ class CommentActivity : AppCompatActivity() {
             commentMap.put("uid", currentUser.uid)
             commentMap.put("posted_time", localDateTime.toString())
 
-            commentReference.document(currentUser.uid + " / " + commentReference.id).set(commentMap).addOnSuccessListener {
+            commentReference.document(currentUser.uid + "&&&" + localDateTime.toString()).set(commentMap).addOnSuccessListener {
                refreshActivity()
+                add_comment.setText("")
             }.addOnFailureListener { error ->
                 Log.e(TAG, "addComment: " + error)
             }
