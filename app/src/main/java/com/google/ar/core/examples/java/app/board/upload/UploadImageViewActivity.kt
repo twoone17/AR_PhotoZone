@@ -52,11 +52,11 @@ class UploadImageViewActivity : AppCompatActivity(){
 
         datas.apply {
             add(
-                    BoardData(img = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300",
+                    BoardData(imgURL = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300",
                     "테스트용 게시글입니다.",
                     2,
                     "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
-                    "Iron_Woong"))
+                    "Iron_Woong",""))
 
 
             uploadAdapter.datas = datas

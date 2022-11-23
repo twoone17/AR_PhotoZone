@@ -43,7 +43,7 @@ class UploadAdapter(private val context: Context) : RecyclerView.Adapter<UploadA
         private val imgProfile: ImageView = itemView.findViewById(R.id.upload_item_recycler)
 
         fun bind(item: BoardData) {
-            Glide.with(itemView).load(item.img).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
+            Glide.with(itemView).load(item.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imgProfile)
 
             val pos = adapterPosition
             if(pos != RecyclerView.NO_POSITION) {

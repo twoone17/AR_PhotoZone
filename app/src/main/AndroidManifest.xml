@@ -48,7 +48,11 @@
         <activity
             android:name="com.google.ar.core.examples.java.app.HelloActivity"
             android:exported="true"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"/>
+            <activity
+                android:name="com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity"
+                android:exported="true"
+                android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
