@@ -20,6 +20,7 @@ class UploadActivity : AppCompatActivity() {
     private var auth = Firebase.auth
     private val currentUser = auth.currentUser
     val db = FirebaseFirestore.getInstance()
+    var imgURL:String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +32,12 @@ class UploadActivity : AppCompatActivity() {
 
         val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
-        val imgURL = uploaddata!!.imgURL
+
 
         //사진을 고르면 고른 사진을 띄워준다
         if (uploaddata != null) {
-            Glide.with(this).load(uploaddata!!.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(image_added)
+            imgURL = uploaddata!!.imgURL
+            Glide.with(this).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).into(image_added)
         }
 
 
@@ -43,7 +45,7 @@ class UploadActivity : AppCompatActivity() {
             println("!! 업로드 버튼 클릭 !!")
             val now = LocalDateTime.now()
             val documentID = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH))
-            val data = BoardData(imgURL = imgURL,
+            val data = BoardData(imgURL = imgURL!!,
                     description = "업로드 연습용 description1",
                     likes = 5,
                     publisher = auth.currentUser!!.uid,
