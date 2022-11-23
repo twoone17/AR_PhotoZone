@@ -1,7 +1,12 @@
 package com.google.ar.core.examples.java.app.board
 
+import android.app.Service
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -29,10 +34,23 @@ class UploadActivity : AppCompatActivity() {
         val uploadButton = findViewById<TextView>(R.id.upload)
         val image_added = findViewById<ImageView>(R.id.image_added)
         val close = findViewById<ImageView>(R.id.close)
+        var editText = findViewById<EditText>(R.id.description)
+        var description = editText.text.toString()
 
         val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
 
+
+        //TODO: 아니 왜 editText 키보드 안올라오냐
+        editText.setOnClickListener{
+            fun onClick(v: View?) {
+                editText.clearFocus()
+                editText.requestFocus()
+                val imm: InputMethodManager = this.getSystemService(Service.INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.showSoftInput(editText, 0)
+                imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
+            }
+        }
 
         //사진을 고르면 고른 사진을 띄워준다
         if (uploaddata != null) {
@@ -41,13 +59,16 @@ class UploadActivity : AppCompatActivity() {
         }
 
 
+
         uploadButton.setOnClickListener {
             println("!! 업로드 버튼 클릭 !!")
             val now = LocalDateTime.now()
             val documentID = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH))
+
+
             val data = BoardData(imgURL = imgURL!!,
-                    description = "업로드 연습용 description1",
-                    likes = 5,
+                    description = description,
+                    likes = 0,
                     publisher = auth.currentUser!!.uid,
                     userId = auth.currentUser!!.uid,
                     documentID)
