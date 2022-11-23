@@ -96,7 +96,7 @@ class UploadUsingPicaActivity : AppCompatActivity() {
                 userId = auth.currentUser!!.uid,
                 "documentid")
 
-        db.collection("posts")
+        db.collection("users").document(auth.currentUser!!.uid).collection("posts")
                 .add(data)
                 .addOnSuccessListener { documentReference ->
                     Toast.makeText(this, "Saved to DB", Toast.LENGTH_LONG).show()
