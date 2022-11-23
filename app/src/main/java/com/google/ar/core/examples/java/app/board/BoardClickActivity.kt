@@ -1,9 +1,11 @@
 package com.google.ar.core.examples.java.app.board
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import com.bumptech.glide.Glide
+import com.google.ar.core.examples.java.app.board.comment.CommentActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
@@ -40,19 +42,19 @@ class BoardClickActivity : AppCompatActivity() {
         val boardData = intent.getSerializableExtra("boardData") as BoardData?
         if(boardData != null) {
 
-            getLikeCountsFromServer(boardData)
-
             initBoardWithIntentData(boardData)
+            // 서버로부터 좋아요 개수를 받아오는 함수
+            getLikeCountsFromServer(boardData)
             // 좋아요를 헤당 게시글에 이미 눌렀는지 확인해주는 함수
             isLikePressed(boardData)
             // 좋아요 버튼 클릭에 대해 처리하는 함수
             pressLikeButton(boardData)
-
             // 해당 게시글을 이미 저장했는지 확인해주는 함수
             isSavePressed(boardData)
-
             // 저장 버튼 클릭에 대해 처리하는 함수
             pressSaveButton(boardData)
+            // 댓글 버튼들 (더보기, 댓글 아이콘) 클릭에 대해 처리하는 함수
+            pressCommentButtons(boardData)
         }
     }
 
@@ -190,6 +192,25 @@ class BoardClickActivity : AppCompatActivity() {
                     saved = true
                 }
             }
+        }
+    }
+
+    private fun pressCommentButtons(boardData: BoardData) {
+        // "댓글 더보기" 버튼
+        comments.setOnClickListener {
+            // Intent로 현재 게시글 id 넘기기
+            Intent(this, CommentActivity::class.java).apply {
+                putExtra("post_document_Id", boardData.documentId)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.run { startActivity(this) }
+        }
+
+        // 댓글 아이콘 버튼
+        comment.setOnClickListener {
+            Intent(this, CommentActivity::class.java).apply {
+                putExtra("post_document_Id", boardData.documentId)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.run { startActivity(this) }
         }
     }
 
