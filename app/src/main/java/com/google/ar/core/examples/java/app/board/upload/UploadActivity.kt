@@ -18,7 +18,7 @@ class UploadActivity : AppCompatActivity() {
         val image_added = findViewById<ImageView>(R.id.image_added)
         val close = findViewById<ImageView>(R.id.close)
 
-        val uploaddata = intent.getSerializableExtra("key") as UploadData?
+        val uploaddata = intent.getSerializableExtra("uploadData") as UploadData?
         println("uploaddata = ${uploaddata}")
 
         uploadButton.setOnClickListener {

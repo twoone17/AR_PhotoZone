@@ -38,6 +38,14 @@ class UploadImageViewActivity : AppCompatActivity(){
 
         initRecycler()
 
+        uploadAdapter.setOnItemClickListener(object : UploadAdapter.OnItemClickListener {
+            override fun onItemClick(view: View, uploadData: UploadData, position: Int) {
+                Intent(this@UploadImageViewActivity, UploadActivity::class.java).apply {
+                    putExtra("uploadData", uploadData)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }.run { startActivity(this) }
+            }
+        })
     }
     private fun initRecycler() {
         uploadAdapter = UploadAdapter(this)
@@ -53,11 +61,7 @@ class UploadImageViewActivity : AppCompatActivity(){
 
         }
 
-        MutalbeList.add(UploadData(img = "https://firebasestorage.googleapis.com/v0/b/toyproject-sns.appspot.com/o/post%2FD1TUcv401BUcKU8YVlMp4z41oJ73%2F1653846416681.jpg?alt=media&token=8f2295c2-2f55-4565-b9b4-f8afd1920300"))
-
         val intent = Intent(this, UploadActivity::class.java)
-        intent.putExtra("key",ArrayList(MutalbeList))
-        startActivity(intent)
 
     }
 }
