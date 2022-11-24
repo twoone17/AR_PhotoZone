@@ -26,6 +26,7 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
+
         <activity
             android:name="com.google.ar.core.examples.java.app.board.UploadActivity"
             android:exported="true" />
@@ -42,19 +43,27 @@
         <activity
             android:name="com.google.ar.core.examples.java.app.HelloActivity"
             android:exported="true"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme" /> <!-- Indicates whether "Google Play Services for AR" (ARCore) is "required" or "optional". -->
+        <activity
+            android:name="com.google.ar.core.examples.java.login.LoginActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- Indicates whether "Google Play Services for AR" (ARCore) is "required" or "optional". -->
+        </activity>
+        <activity
+            android:name="com.google.ar.core.examples.java.login.SignupActivity"
+            android:exported="true" />
+
         <meta-data
             android:name="com.google.ar.core"
             android:value="required" />
         <meta-data
             android:name="com.google.android.ar.API_KEY"
             android:value="AIzaSyB1CL1sEiRBxo9ul2COQXRzQvMgh2x2ywg" />
+
     </application>
 
 </manifest>
