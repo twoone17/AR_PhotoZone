@@ -10,8 +10,12 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.geospatial.R
+import com.google.firebase.firestore.DocumentSnapshot
 
-class BookmarkAdapter (val context : Context, val boardDataList : MutableList<BoardData>) : BaseAdapter() {
+class BookmarkAdapter (val context : Context) : BaseAdapter() {
+
+    val boardDataList = mutableListOf<BoardData>()
+
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         /* LayoutInflater는 item을 Adapter에서 사용할 View로 부풀려주는(inflate) 역할을 한다. */
         val view: View = LayoutInflater.from(context).inflate(R.layout.activity_bookmark_list_element, null)
@@ -28,6 +32,11 @@ class BookmarkAdapter (val context : Context, val boardDataList : MutableList<Bo
         name.text = postInfo.userId
 
         return view
+    }
+
+    fun addItem(data: BoardData) {
+        boardDataList.add(data)
+        notifyDataSetChanged()
     }
 
     override fun getItem(position: Int): Any {

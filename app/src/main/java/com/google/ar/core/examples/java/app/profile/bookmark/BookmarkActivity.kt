@@ -3,28 +3,35 @@ package com.google.ar.core.examples.java.app.profile.bookmark
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.ListView
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.activity_bookmark.*
 
 class BookmarkActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var bookmarkAdapter: BookmarkAdapter
-    var savedBoardList = mutableListOf<BoardData>()
     val TAG = "BookmarkActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bookmark)
-
         initListView()
     }
 
     private fun initListView() {
+        val listView = findViewById<ListView>(R.id.listview1)
+        bookmarkAdapter = BookmarkAdapter(this)
+        listView.adapter = bookmarkAdapter
+        getListViewFromServer()
+    }
+
+    private fun getListViewFromServer() {
         auth = Firebase.auth
         val currentUser = auth.currentUser
         val db = FirebaseFirestore.getInstance()
@@ -37,9 +44,19 @@ class BookmarkActivity : AppCompatActivity() {
             savedPostRef.get().addOnSuccessListener { result ->
                 for (savedPostInfo in result) {
                     var postId = savedPostInfo.get("post").toString()
-
+                    boardPostRef.document(postId).get().addOnSuccessListener { documentSnapshot ->
+                        val boardDataElement = BoardData(
+                            documentSnapshot.get("imgURL").toString(),
+                            documentSnapshot.get("description").toString(),
+                            documentSnapshot.get("likes") as Long,
+                            documentSnapshot.get("publisher").toString(),
+                            documentSnapshot.get("userId").toString(),
+                            documentSnapshot.get("documentId").toString(),
+                        )
+                        bookmarkAdapter.addItem(boardDataElement)
+                    }
                 }
-                Log.e(TAG, "initListView: " + savedBoardList.size)
+
             }.addOnFailureListener { error ->
                 Log.e(TAG, "initListView: " + error )
             }
