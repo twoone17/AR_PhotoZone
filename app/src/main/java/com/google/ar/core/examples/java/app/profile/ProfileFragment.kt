@@ -7,10 +7,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.ar.core.examples.java.app.board.BoardClickActivity
 import com.google.ar.core.examples.java.app.board.BoardData
+import com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -28,8 +30,18 @@ class ProfileFragment : Fragment() {
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val v =  inflater.inflate(R.layout.fragment_profile, container, false)
+        pressBookmarkButton(v)
         initRecycler(v)
         return v
+    }
+
+
+    private fun pressBookmarkButton(view : View) {
+        val bookmarkButton : ImageButton = view.findViewById(R.id.bookmarkButton)
+        bookmarkButton.setOnClickListener {
+            val nextIntent = Intent(requireContext(), BookmarkActivity::class.java)
+            startActivity(nextIntent)
+        }
     }
 
     private fun initRecycler(view : View) {
