@@ -1,9 +1,12 @@
 package com.google.ar.core.examples.java.app.profile.bookmark
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.widget.AdapterView
 import android.widget.ListView
+import com.google.ar.core.examples.java.app.board.BoardClickActivity
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.FirebaseAuth
@@ -28,6 +31,16 @@ class BookmarkActivity : AppCompatActivity() {
         val listView = findViewById<ListView>(R.id.listview1)
         bookmarkAdapter = BookmarkAdapter(this)
         listView.adapter = bookmarkAdapter
+
+        listView.setOnItemClickListener { adapterView, view, position, id ->
+            val boardData = bookmarkAdapter.getItem(position)
+            // 게시판에서와 동일하게 boardData를 Intent로 BoardPostClickEvent를 호출한다.
+            Intent(applicationContext, BoardClickActivity::class.java).apply {
+                putExtra("boardData", boardData)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.run { startActivity(this) }
+        }
+
         getListViewFromServer()
     }
 

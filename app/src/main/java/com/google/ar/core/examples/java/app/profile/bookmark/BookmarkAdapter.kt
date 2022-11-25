@@ -39,7 +39,7 @@ class BookmarkAdapter (val context : Context) : BaseAdapter() {
         notifyDataSetChanged()
     }
 
-    override fun getItem(position: Int): Any {
+    override fun getItem(position: Int): BoardData {
         return boardDataList[position]
     }
 
