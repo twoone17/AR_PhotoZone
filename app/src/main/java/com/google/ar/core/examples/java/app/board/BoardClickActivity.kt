@@ -123,8 +123,8 @@ class BoardClickActivity : AppCompatActivity() {
                     if (liked) {
                         like.setImageResource(R.drawable.ic_liked)
                         likeCount++
-                        likeMap.put("user", currentUser.uid)
-                        likesReference.document(currentUser.uid).set(likeMap)
+                        likeMap.put("user", uid)
+                        likesReference.document(uid).set(likeMap)
                         likePostInfoMap.put("post", boardData.documentId)
                         forModifingBoardLikesCollection.document(boardData.documentId).set(likePostInfoMap)
                         likes.text = "$likeCount likes"
@@ -133,7 +133,7 @@ class BoardClickActivity : AppCompatActivity() {
                         liked = false
                     } else {
                         like.setImageResource(R.drawable.ic_like)
-                        likesReference.document(currentUser.uid).delete()
+                        likesReference.document(uid).delete()
                         likeCount--
                         likes.text = "$likeCount likes"
                         boardData.likes = likeCount
