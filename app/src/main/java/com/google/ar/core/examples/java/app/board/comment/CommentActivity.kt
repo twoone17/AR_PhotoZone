@@ -39,9 +39,17 @@ class CommentActivity : AppCompatActivity() {
         val intent = intent
         val documentId = intent.getStringExtra("post_document_Id").toString()
 
-        add_comment.setText("왜 키보드가 자꾸 안올라오지?")
+        val inputMethodManager = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        initCommentEditText(inputMethodManager)
         initRecycler(documentId)
         pressCommentPushButton(documentId)
+    }
+
+    private fun initCommentEditText(inputMethodManager: InputMethodManager) {
+        add_comment.setOnClickListener {
+            inputMethodManager.showSoftInput(add_comment, 0)
+            inputMethodManager.showSoftInput(add_comment, InputMethodManager.SHOW_IMPLICIT)
+        }
     }
 
     private fun initRecycler(documentId: String) {

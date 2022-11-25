@@ -82,18 +82,26 @@
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.784">
 
-
+                        <ImageButton
+                            android:id="@+id/ClosetButton"
+                            android:layout_width="160dp"
+                            android:layout_height="80dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="18dp"
+                            android:padding="0dp"
+                            android:src="@drawable/bluebookmark"
+                            android:scaleType="fitXY"
+                            android:paddingLeft="20dp" />
 
                         <ImageButton
                             android:id="@+id/bookmarkButton"
                             android:layout_width="160dp"
                             android:layout_height="80dp"
-
                             android:layout_marginRight="15dp"
                             android:padding="0dp"
-                            android:src="@drawable/bluebookmark"
+                            android:paddingLeft="20dp"
                             android:scaleType="fitXY"
-                            android:paddingLeft="20dp" />
+                            android:src="@drawable/bluebookmark" />
 
                     </LinearLayout>
                 </LinearLayout>

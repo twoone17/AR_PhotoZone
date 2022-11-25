@@ -36,8 +36,8 @@ class HelloActivity : AppCompatActivity() {
         auth = Firebase.auth
         // 임시로 일단 로그인을 시작과 동시에 시켜놓겠음
         // 뒤에서 인증 때문에 자꾸 구현이 막힌다
-//        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@")
-        auth.signInWithEmailAndPassword("euisung@naver.com", "2580as2580@")
+        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@")
+//        auth.signInWithEmailAndPassword("euisung@naver.com", "2580as2580@")
 
 
 
