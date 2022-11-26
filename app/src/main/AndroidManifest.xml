@@ -27,9 +27,11 @@
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
 
+        <!--구글맵 API 키-->
+        <!--API 키 노출때문에 string xml 안에 정의해두고 해당 파일은 커밋하지 않았습니다. 추후에 공유하도록 하겠습니다!-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU" />
+            android:value="@string/googleAPIKey" />
 
         <activity
             android:name="com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity"
