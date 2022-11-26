@@ -26,6 +26,11 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU" />
+
         <activity
             android:name="com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity"
             android:exported="true" />
@@ -42,6 +47,9 @@
             android:name="com.google.ar.core.examples.java.app.board.BoardClickActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
+        <activity
+            android:name="com.google.ar.core.examples.java.retrofit_rest.MapActivity"
+            android:exported="true" />
         <activity
             android:name=".GeospatialActivity"
             android:configChanges="orientation|screenSize"

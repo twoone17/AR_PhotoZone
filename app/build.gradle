@@ -53,6 +53,13 @@ dependencies {
     implementation 'com.google.firebase:firebase-common-ktx:20.2.0'
     implementation 'com.google.firebase:firebase-auth-ktx'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+    // 철웅 추가 - REST 통신을 위한 retrofit2와 구글맵, 티맵
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-scalars:2.6.4'
+    implementation files('libs/com.skt.Tmap_1.74.jar')
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.android.gms:play-services-location:21.0.1'
 }
 repositories {
     mavenCentral()
