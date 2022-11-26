@@ -30,7 +30,7 @@
         <!--구글맵 API 키-->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU" />
+            android:value="@string/googleAPIKey" />
 
         <activity
             android:name="com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity"
