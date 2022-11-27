@@ -239,8 +239,6 @@ class ProfileFragment : Fragment() {
             //프로필 사진 불러오기
 //            val pathReference = storageReference!!.child("gs://sceneform-android1.appspot.com/myProfile/${currentUser.uid}")
             val pathReference = storageReference!!.child("myProfile/${currentUser.uid}")
-            println("currentUser = ${currentUser.uid}")
-            println("fileNameProfile = ${fileNameProfile}")
             pathReference.downloadUrl.addOnSuccessListener { uri ->
 //                circle_img.setImageURI(uri)
                 Glide.with(requireContext()).load(uri).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
