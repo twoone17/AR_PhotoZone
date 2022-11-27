@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.app.board
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,8 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.activity_board_click.*
 
 class BoardClickActivity : AppCompatActivity() {
@@ -21,6 +24,11 @@ class BoardClickActivity : AppCompatActivity() {
     private var auth = Firebase.auth
     private val currentUser = auth.currentUser
     val db = FirebaseFirestore.getInstance()
+    private var filePath: Uri? = null
+    private var firebaseStore: FirebaseStorage? = null
+    private var storageReference: StorageReference? = null
+
+
     var liked = true
     var saved = true
     var likeCount = 0L
@@ -40,6 +48,8 @@ class BoardClickActivity : AppCompatActivity() {
 
         val intent = intent
         val boardData = intent.getSerializableExtra("boardData") as BoardData?
+        firebaseStore = FirebaseStorage.getInstance()
+        storageReference = FirebaseStorage.getInstance().reference
         if(boardData != null) {
 
             initBoardWithIntentData(boardData)
@@ -61,11 +71,15 @@ class BoardClickActivity : AppCompatActivity() {
     // 인텐트로 넘어온 데이터를 뷰에 뿌려주는 함수
     private fun initBoardWithIntentData(boardData: BoardData) {
             Glide.with(this).load(boardData.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(post_image)
+            Glide.with(this).load(boardData.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(image_profile)
             username.text = boardData.userId
             description.text = boardData.description
             publisher.text = boardData.userId
             var likeString = boardData.likes.toString() + " likes"
             likes.text = likeString
+
+
+        //boardData에서 프로필 이미지 띄우기
     }
 
     // 좋아요를 헤당 게시글에 이미 눌렀는지 확인해주는 함수
