@@ -2,27 +2,29 @@ package com.google.ar.core.examples.java.app.board.comment
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.Toast
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.ar.core.examples.java.app.board.BoardAdapter
+import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.BoardClickActivity
-import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.activity_board_click.*
 import kotlinx.android.synthetic.main.activity_comment.*
+import kotlinx.android.synthetic.main.fragment_profile.*
 import java.time.LocalDateTime
+import kotlin.math.log
 
 class CommentActivity : AppCompatActivity() {
 
@@ -32,13 +34,17 @@ class CommentActivity : AppCompatActivity() {
     val db = FirebaseFirestore.getInstance()
     private lateinit var commentAdapter: CommentAdapter
     val datas = mutableListOf<CommentData>()
+    private var firebaseStore: FirebaseStorage? = null
+    private var storageReference: StorageReference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_comment)
+
+        firebaseStore = FirebaseStorage.getInstance()
+        storageReference = FirebaseStorage.getInstance().reference
         val intent = intent
         val documentId = intent.getStringExtra("post_document_Id").toString()
-
         val inputMethodManager = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         initCommentEditText(inputMethodManager)
         initRecycler(documentId)
@@ -53,6 +59,7 @@ class CommentActivity : AppCompatActivity() {
     }
 
     private fun initRecycler(documentId: String) {
+
         commentAdapter = CommentAdapter(this)
         val recyclerView: RecyclerView = findViewById(R.id.comment_list_recycler_view)
 
@@ -72,7 +79,22 @@ class CommentActivity : AppCompatActivity() {
         recyclerView.layoutManager = gm
 
         readCommentsFromServer(documentId, commentAdapter)
+        readProfileImgFromServer()
     }
+
+    private fun readProfileImgFromServer() {
+        val comment_profile_img : CircleImageView = findViewById(R.id.image_profile)
+
+        if(currentUser!=null)
+        {
+
+            //boardData에서 프로필 이미지 띄우기
+            println("currentUser = ${currentUser.uid}")
+            val pathReference = storageReference!!.child("myProfile/${currentUser.uid}")
+            pathReference.downloadUrl.addOnSuccessListener { uri ->
+                Glide.with(this).load(uri).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(comment_profile_img)
+            }
+    }}
 
 
     // 서버로부터 댓글들을 읽어오는 함수

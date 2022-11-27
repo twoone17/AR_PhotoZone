@@ -1,9 +1,11 @@
 package com.google.ar.core.examples.java.app.board
 
 import android.content.Intent
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.core.content.ContentProviderCompat.requireContext
 import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.comment.CommentActivity
 import com.google.ar.core.examples.java.geospatial.R
@@ -12,7 +14,10 @@ import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.activity_board_click.*
+import kotlinx.android.synthetic.main.fragment_profile.*
 
 class BoardClickActivity : AppCompatActivity() {
 
@@ -21,6 +26,11 @@ class BoardClickActivity : AppCompatActivity() {
     private var auth = Firebase.auth
     private val currentUser = auth.currentUser
     val db = FirebaseFirestore.getInstance()
+    private var filePath: Uri? = null
+    private var firebaseStore: FirebaseStorage? = null
+    private var storageReference: StorageReference? = null
+
+
     var liked = true
     var saved = true
     var likeCount = 0L
@@ -40,6 +50,8 @@ class BoardClickActivity : AppCompatActivity() {
 
         val intent = intent
         val boardData = intent.getSerializableExtra("boardData") as BoardData?
+        firebaseStore = FirebaseStorage.getInstance()
+        storageReference = FirebaseStorage.getInstance().reference
         if(boardData != null) {
 
             initBoardWithIntentData(boardData)
@@ -66,6 +78,16 @@ class BoardClickActivity : AppCompatActivity() {
             publisher.text = boardData.userId
             var likeString = boardData.likes.toString() + " likes"
             likes.text = likeString
+
+
+        if(currentUser!=null)
+        {
+        //boardData에서 프로필 이미지 띄우기
+        val pathReference = storageReference!!.child("myProfile/${boardData.publisher}")
+        pathReference.downloadUrl.addOnSuccessListener { uri ->
+            Glide.with(this).load(uri).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(image_profile)
+        }
+        }
     }
 
     // 좋아요를 헤당 게시글에 이미 눌렀는지 확인해주는 함수
