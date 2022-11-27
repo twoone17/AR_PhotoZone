@@ -16,6 +16,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.google.android.gms.tasks.Continuation
+import com.google.android.gms.tasks.Task
 import com.google.ar.core.examples.java.app.board.BoardClickActivity
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity
@@ -24,8 +27,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.fragment_profile.*
+import java.util.*
 
 class ProfileFragment : Fragment() {
 
@@ -33,11 +40,18 @@ class ProfileFragment : Fragment() {
     private lateinit var auth : FirebaseAuth
     val datas = mutableListOf<BoardData>()
     val TAG = "ProfileFragment"
+    private val PICK_IMAGE_REQUEST = 71
+    private var filePath: Uri? = null
+    private var firebaseStore: FirebaseStorage? = null
+    private var storageReference: StorageReference? = null
+    var fileNameProfile : String? =null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         val v =  inflater.inflate(R.layout.fragment_profile, container, false)
+        firebaseStore = FirebaseStorage.getInstance()
+        storageReference = FirebaseStorage.getInstance().reference
         pressBookmarkButton(v)
         changingProfile(v)
         initImageViewProfile(v)
@@ -47,6 +61,7 @@ class ProfileFragment : Fragment() {
 
     private fun initImageViewProfile(view: View) {
         val circle_img : CircleImageView = view!!.findViewById(R.id.circle_img)
+
 
         circle_img.setOnClickListener {
             when {
@@ -115,10 +130,30 @@ class ProfileFragment : Fragment() {
             2000 -> {
                 val selectedImageUri: Uri? = data?.data
                 if (selectedImageUri != null) {
-                    circle_img.setImageURI(selectedImageUri)
+                    val ref = storageReference?.child("myProfile/${auth.currentUser!!.uid}")
+                    val uploadTask = ref?.putFile(selectedImageUri!!)
+
+                    val urlTask = uploadTask?.continueWithTask(Continuation<UploadTask.TaskSnapshot, Task<Uri>> { task ->
+                        if (!task.isSuccessful) {
+                            task.exception?.let {
+                                throw it
+                            }
+                        }
+                        return@Continuation ref.downloadUrl
+                    })?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val downloadUri = task.result
+                        } else {
+                            // Handle failures
+                        }
+                    }?.addOnFailureListener {
+
+                    }
                 } else {
-                    Toast.makeText(requireContext(), "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Please Upload an Image", Toast.LENGTH_SHORT).show()
                 }
+                circle_img.setImageURI(selectedImageUri)
+
             }
             else -> {
                 Toast.makeText(requireContext(), "사진을 가져오지 못했습니다.", Toast.LENGTH_SHORT).show()
@@ -200,6 +235,17 @@ class ProfileFragment : Fragment() {
             }.addOnFailureListener { error ->
                 Log.e(TAG, "initRecyclerData: " + error)
             }
+
+            //프로필 사진 불러오기
+//            val pathReference = storageReference!!.child("gs://sceneform-android1.appspot.com/myProfile/${currentUser.uid}")
+            val pathReference = storageReference!!.child("myProfile/${currentUser.uid}")
+            println("currentUser = ${currentUser.uid}")
+            println("fileNameProfile = ${fileNameProfile}")
+            pathReference.downloadUrl.addOnSuccessListener { uri ->
+//                circle_img.setImageURI(uri)
+                Glide.with(requireContext()).load(uri).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
+            }
+
         }
     }
 
