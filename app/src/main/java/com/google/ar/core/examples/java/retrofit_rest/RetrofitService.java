@@ -7,7 +7,7 @@ import retrofit2.http.Query;
 public interface RetrofitService {
 
     @POST("/tmap/routes/pedestrian")
-    Call<RouteDTO> getPosts(
+    Call<Object> getPosts(
             @Query("version") int version,
             @Query("callback") String callback,
             @Query("appkey") String appKey,

@@ -130,21 +130,28 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 .build();
 
         RetrofitService retrofitService = retrofit.create(RetrofitService.class);
-        retrofitService.getPosts(1, "result", API_Key, Double.parseDouble(positions[0]),
-                Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5])
-                .enqueue(new Callback<RouteDTO>() {
-                    @Override
-                    public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
-                        if(response.isSuccessful()) {
-                            RouteDTO data = response.body();
-                            Log.e(TAG, "onResponse: " + data.getFeatures().get(0).getGeometry());
-                        }
-                    }
-                    @Override
-                    public void onFailure(Call<RouteDTO> call, Throwable t) {
-                        Log.e(TAG, "onFailure: " + t);
-                    }
-                });
+        Call<Object> result = retrofitService.getPosts(1, "result", API_Key, Double.parseDouble(positions[0]),
+                Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5]);
+        try {
+            Log.e(TAG, "" + result.execute().body());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        retrofitService.getPosts(1, "result", API_Key, Double.parseDouble(positions[0]),
+//                Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5])
+//                .enqueue(new Callback<RouteDTO>() {
+//                    @Override
+//                    public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
+//                        if(response.isSuccessful()) {
+//                            RouteDTO data = response.body();
+//                            Log.e(TAG, "onResponse: " + data.getFeatures().get(0).getGeometry());
+//                        }
+//                    }
+//                    @Override
+//                    public void onFailure(Call<RouteDTO> call, Throwable t) {
+//                        Log.e(TAG, "onFailure: " + t);
+//                    }
+//                });
         return mapPoints;
     }
 }
