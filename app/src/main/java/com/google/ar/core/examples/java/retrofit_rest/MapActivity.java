@@ -19,6 +19,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -135,6 +137,21 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+//        retrofitService.getPosts(1, "result", API_Key, Double.parseDouble(positions[0]),
+//                Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5])
+//                .enqueue(new Callback<RouteDTO>() {
+//                    @Override
+//                    public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
+//                        if(response.isSuccessful()) {
+//                            RouteDTO data = response.body();
+//                            Log.e(TAG, "onResponse: " + data.getFeatures().get(0).getGeometry());
+//                        }
+//                    }
+//                    @Override
+//                    public void onFailure(Call<RouteDTO> call, Throwable t) {
+//                        Log.e(TAG, "onFailure: " + t);
+//                    }
+//                });
         return mapPoints;
     }
 }
