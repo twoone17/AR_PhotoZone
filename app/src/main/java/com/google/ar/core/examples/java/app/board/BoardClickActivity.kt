@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.core.content.ContentProviderCompat.requireContext
 import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.comment.CommentActivity
+import com.google.ar.core.examples.java.geospatial.GeospatialActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.CollectionReference
@@ -18,6 +19,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import kotlinx.android.synthetic.main.activity_board_click.*
 import kotlinx.android.synthetic.main.fragment_profile.*
+import kotlin.math.log
 
 class BoardClickActivity : AppCompatActivity() {
 
@@ -234,6 +236,22 @@ class BoardClickActivity : AppCompatActivity() {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.run { startActivity(this) }
         }
+    }
+
+    //camera helper 버튼 클릭시
+    private fun pressCameraButton(boardData: BoardData) {
+        if(currentUser != null) {
+            val uid = currentUser.uid
+            camera_helper2.setOnClickListener{
+                 println("camera click")
+                 Intent(this,GeospatialActivity::class.java).apply {
+                     putExtra("post_document_Id", boardData.documentId)
+                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                 }.run { startActivity(this) }
+
+             }
+            }
+
     }
 
 }

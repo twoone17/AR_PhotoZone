@@ -53,6 +53,7 @@ class CommentActivity : AppCompatActivity() {
 
     private fun initCommentEditText(inputMethodManager: InputMethodManager) {
         add_comment.setOnClickListener {
+            println("initCommentEditText 들어감 = ${inputMethodManager}")
             inputMethodManager.showSoftInput(add_comment, 0)
             inputMethodManager.showSoftInput(add_comment, InputMethodManager.SHOW_IMPLICIT)
         }

@@ -5,6 +5,20 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <ImageView
+        android:id="@+id/camera_helper"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="100dp"
+        android:src="@drawable/camera" />
+
+    <Button
+        android:id="@+id/camera_helper2"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        />
+
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -92,6 +106,7 @@
                     android:layout_height="30dp"
                     android:layout_alignParentEnd="true"
                     android:src="@drawable/ic_savee_black" />
+
 
             </RelativeLayout>
 
