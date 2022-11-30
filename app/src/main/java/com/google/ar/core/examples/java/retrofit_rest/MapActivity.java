@@ -1,5 +1,7 @@
 package com.google.ar.core.examples.java.retrofit_rest;
 
+import android.app.Application;
+import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,11 +14,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.ar.core.examples.java.geospatial.R;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -72,6 +79,10 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     private ArrayList<LatLng> mapPoints;
 
+    FirebaseAuth auth = FirebaseAuth.getInstance();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
+
 //
 //    int totalDistance;
 //
@@ -115,7 +126,11 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         Call<Object> result = retrofitService.getPosts(1, "result", positions[6], Double.parseDouble(positions[0]),
                 Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5]);
         try {
-            Log.e(TAG, "" + result.execute().body());
+            String resultString = result.execute().body().toString();
+            Log.e(TAG, "doInBackground: " + resultString );
+            Map insertData = new HashMap<String, String>();
+            insertData.put("passes", resultString);
+            db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
         } catch (IOException e) {
             e.printStackTrace();
         }
