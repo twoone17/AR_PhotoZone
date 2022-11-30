@@ -27,8 +27,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "테스트용";
-    String API_Key = "l7xxa97487515286485e98d6fafe222d88c7";
-
+    String API_Key;
 
 
     @Override
@@ -36,23 +35,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-
-//        // T Map View
-//        tMapView = new TMapView(this);
-//
-//        // API Key
-//        tMapView.setSKTMapApiKey(API_Key);
-//
-//        // Initial Setting
-//        tMapView.setZoomLevel(17);
-//        tMapView.setIconVisibility(true);
-//        tMapView.setMapType(TMapView.MAPTYPE_STANDARD);
-//        tMapView.setLanguage(TMapView.LANGUAGE_KOREAN);
-//
-//        // T Map View Using Linear Layout
-//        LinearLayout linearLayoutTmap = (LinearLayout)findViewById(R.id.linearLayoutTmap);
-//        linearLayoutTmap.addView(tMapView);
-
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -63,11 +45,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 //        RoadTracker rt = new RoadTracker(googleMap);
         LatLng start = new LatLng(37.449522, 127.126941);
         LatLng end = new LatLng(37.4119623, 127.1284907);
+        API_Key = getResources().getString(R.string.tMapAPIKey);
 //        ArrayList<LatLng> jsonData = rt.getJsonData(start, end);
         try {
             new RoadTracker().execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
                     String.valueOf(end.longitude), String.valueOf(end.latitude),
-                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"));
+                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
+                    API_Key);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -122,15 +106,13 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     @Override
     protected ArrayList<LatLng> doInBackground(String... positions) {
-        String API_Key = "l7xxa97487515286485e98d6fafe222d88c7";
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://apis.openapi.sk.com")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         RetrofitService retrofitService = retrofit.create(RetrofitService.class);
-        Call<Object> result = retrofitService.getPosts(1, "result", API_Key, Double.parseDouble(positions[0]),
+        Call<Object> result = retrofitService.getPosts(1, "result", positions[6], Double.parseDouble(positions[0]),
                 Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5]);
         try {
             Log.e(TAG, "" + result.execute().body());
