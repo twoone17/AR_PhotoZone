@@ -69,6 +69,8 @@ class BoardClickActivity : AppCompatActivity() {
             pressSaveButton(boardData)
             // 댓글 버튼들 (더보기, 댓글 아이콘) 클릭에 대해 처리하는 함수
             pressCommentButtons(boardData)
+            // 사진 도우미 버튼
+            pressCameraButton(boardData)
         }
     }
 
@@ -242,10 +244,10 @@ class BoardClickActivity : AppCompatActivity() {
     private fun pressCameraButton(boardData: BoardData) {
         if(currentUser != null) {
             val uid = currentUser.uid
-            camera_helper2.setOnClickListener{
+            camera_helper.setOnClickListener{
                  println("camera click")
                  Intent(this,GeospatialActivity::class.java).apply {
-                     putExtra("post_document_Id", boardData.documentId)
+                     putExtra("boardData", boardData)
                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                  }.run { startActivity(this) }
 

@@ -16,16 +16,26 @@
 
 package com.google.ar.core.examples.java.geospatial;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
@@ -39,6 +49,7 @@ import com.google.ar.core.Frame;
 import com.google.ar.core.GeospatialPose;
 import com.google.ar.core.Session;
 import com.google.ar.core.TrackingState;
+import com.google.ar.core.examples.java.app.board.BoardData;
 import com.google.ar.core.examples.java.common.helpers.CameraPermissionHelper;
 import com.google.ar.core.examples.java.common.helpers.DisplayRotationHelper;
 import com.google.ar.core.examples.java.common.helpers.FullScreenHelper;
@@ -72,6 +83,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -93,773 +105,833 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class GeospatialActivity extends AppCompatActivity
-    implements SampleRender.Renderer, NoticeDialogListener {
+        implements SampleRender.Renderer, NoticeDialogListener {
 
-  private static final String TAG = GeospatialActivity.class.getSimpleName();
+    private static final String TAG = GeospatialActivity.class.getSimpleName();
 
-  private static final String SHARED_PREFERENCES_SAVED_ANCHORS = "SHARED_PREFERENCES_SAVED_ANCHORS";
-  private static final String ALLOW_GEOSPATIAL_ACCESS_KEY = "ALLOW_GEOSPATIAL_ACCESS";
+    private static final String SHARED_PREFERENCES_SAVED_ANCHORS = "SHARED_PREFERENCES_SAVED_ANCHORS";
+    private static final String ALLOW_GEOSPATIAL_ACCESS_KEY = "ALLOW_GEOSPATIAL_ACCESS";
 
-  private static final float Z_NEAR = 0.1f;
-  private static final float Z_FAR = 1000f;
+    private static final float Z_NEAR = 0.1f;
+    private static final float Z_FAR = 1000f;
 
-  // The thresholds that are required for horizontal and heading accuracies before entering into the
-  // LOCALIZED state. Once the accuracies are equal or less than these values, the app will
-  // allow the user to place anchors.
-  private static final double LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS = 10;
-  private static final double LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES = 15;
-  private DatabaseReference mDatabase;
+    // The thresholds that are required for horizontal and heading accuracies before entering into the
+    // LOCALIZED state. Once the accuracies are equal or less than these values, the app will
+    // allow the user to place anchors.
+    private static final double LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS = 10;
+    private static final double LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES = 15;
+    private DatabaseReference mDatabase;
 
-  // Once in the LOCALIZED state, if either accuracies degrade beyond these amounts, the app will
-  // revert back to the LOCALIZING state.
-  private static final double LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS = 10;
-  private static final double LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES = 10;
+    // Once in the LOCALIZED state, if either accuracies degrade beyond these amounts, the app will
+    // revert back to the LOCALIZING state.
+    private static final double LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS = 10;
+    private static final double LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES = 10;
 
-  private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
-  private static final int MAXIMUM_ANCHORS = 10;
+    private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
+    private static final int MAXIMUM_ANCHORS = 10;
 
-  // Rendering. The Renderers are created here, and initialized when the GL surface is created.
-  private GLSurfaceView surfaceView;
+    // Rendering. The Renderers are created here, and initialized when the GL surface is created.
+    private GLSurfaceView surfaceView;
 
-  private boolean installRequested;
-  private Integer clearedAnchorsAmount = null;
+    private boolean installRequested;
+    private Integer clearedAnchorsAmount = null;
 
-  /** Timer to keep track of how much time has passed since localizing has started. */
-  private long localizingStartTimestamp;
-
-  enum State {
-    /** The Geospatial API has not yet been initialized. */
-    UNINITIALIZED,
-    /** The Geospatial API is not supported. */
-    UNSUPPORTED,
-    /** The Geospatial API has encountered an unrecoverable error. */
-    EARTH_STATE_ERROR,
-    /** The Session has started, but {@link Earth} isn't {@link TrackingState.TRACKING} yet. */
-    PRETRACKING,
     /**
-     * {@link Earth} is {@link TrackingState.TRACKING}, but the desired positioning confidence
-     * hasn't been reached yet.
+     * Timer to keep track of how much time has passed since localizing has started.
      */
-    LOCALIZING,
-    /** The desired positioning confidence wasn't reached in time. */
-    LOCALIZING_FAILED,
-    /**
-     * {@link Earth} is {@link TrackingState.TRACKING} and the desired positioning confidence has
-     * been reached.
-     */
-    LOCALIZED
-  }
+    private long localizingStartTimestamp;
 
-  private State state = State.UNINITIALIZED;
-  private StoredGeolocation storedGeolocation;
-  private Session session;
-  private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
-  private DisplayRotationHelper displayRotationHelper;
-  private final TrackingStateHelper trackingStateHelper = new TrackingStateHelper(this);
-  private SampleRender render;
-  private SharedPreferences sharedPreferences;
+    enum State {
+        /**
+         * The Geospatial API has not yet been initialized.
+         */
+        UNINITIALIZED,
+        /**
+         * The Geospatial API is not supported.
+         */
+        UNSUPPORTED,
+        /**
+         * The Geospatial API has encountered an unrecoverable error.
+         */
+        EARTH_STATE_ERROR,
+        /**
+         * The Session has started, but {@link Earth} isn't {@link TrackingState.TRACKING} yet.
+         */
+        PRETRACKING,
+        /**
+         * {@link Earth} is {@link TrackingState.TRACKING}, but the desired positioning confidence
+         * hasn't been reached yet.
+         */
+        LOCALIZING,
+        /**
+         * The desired positioning confidence wasn't reached in time.
+         */
+        LOCALIZING_FAILED,
+        /**
+         * {@link Earth} is {@link TrackingState.TRACKING} and the desired positioning confidence has
+         * been reached.
+         */
+        LOCALIZED
+    }
 
-  private String lastStatusText;
-  private TextView geospatialPoseTextView;
-  private TextView statusTextView;
-  private Button setAnchorButton;
-  private Button clearAnchorsButton;
-  //추가
-  private Button setLocationButton;
-  private TextView stroedLocationTextView;
-  private double location;
+    private State state = State.UNINITIALIZED;
+    private StoredGeolocation storedGeolocation;
+    private Session session;
+    private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
+    private DisplayRotationHelper displayRotationHelper;
+    private final TrackingStateHelper trackingStateHelper = new TrackingStateHelper(this);
+    private SampleRender render;
+    private SharedPreferences sharedPreferences;
 
-  private BackgroundRenderer backgroundRenderer;
-  private Framebuffer virtualSceneFramebuffer;
-  private boolean hasSetTextureNames = false;
+    private String lastStatusText;
+    private TextView geospatialPoseTextView;
+    private TextView statusTextView;
+    private Button setAnchorButton;
+    private Button clearAnchorsButton;
+    //추가
+    private Button setLocationButton;
+    private TextView stroedLocationTextView;
+    private Button cameraGeospatial;
+    private double location;
 
-  // Virtual object (ARCore geospatial)
-  private Mesh virtualObjectMesh;
-  private Shader virtualObjectShader;
+    private File file;
 
-  private final List<Anchor> anchors = new ArrayList<>();
+    private BackgroundRenderer backgroundRenderer;
+    private Framebuffer virtualSceneFramebuffer;
+    private boolean hasSetTextureNames = false;
 
-  // Temporary matrix allocated here to reduce number of allocations for each frame.
-  private final float[] modelMatrix = new float[16];
-  private final float[] viewMatrix = new float[16];
-  private final float[] projectionMatrix = new float[16];
-  private final float[] modelViewMatrix = new float[16]; // view x model
-  private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
+    // Virtual object (ARCore geospatial)
+    private Mesh virtualObjectMesh;
+    private Shader virtualObjectShader;
 
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+    private final List<Anchor> anchors = new ArrayList<>();
 
-    setContentView(R.layout.activity_main);
-    surfaceView = findViewById(R.id.surfaceview);
-    geospatialPoseTextView = findViewById(R.id.geospatial_pose_view);
-    statusTextView = findViewById(R.id.status_text_view);
-    setAnchorButton = findViewById(R.id.set_anchor_button);
-    clearAnchorsButton = findViewById(R.id.clear_anchors_button);
-    //눌렀을때 위치 저장
+    // Temporary matrix allocated here to reduce number of allocations for each frame.
+    private final float[] modelMatrix = new float[16];
+    private final float[] viewMatrix = new float[16];
+    private final float[] projectionMatrix = new float[16];
+    private final float[] modelViewMatrix = new float[16]; // view x model
+    private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        sharedPreferences = getPreferences(Context.MODE_PRIVATE);
+
+        Intent intent = getIntent();
+        BoardData boardData = (BoardData) intent.getSerializableExtra("boardData");
+        setContentView(R.layout.activity_main);
+        surfaceView = findViewById(R.id.surfaceview);
+        geospatialPoseTextView = findViewById(R.id.geospatial_pose_view);
+        statusTextView = findViewById(R.id.status_text_view);
+        setAnchorButton = findViewById(R.id.set_anchor_button);
+        clearAnchorsButton = findViewById(R.id.clear_anchors_button);
+        cameraGeospatial = findViewById(R.id.camera_geospatial);
+        //눌렀을때 위치 저장
 //    setLocationButton = findViewById(R.id.set_location);
 
-    setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
-    clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
+        setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
+        clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
 
-    displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
+        displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
-    // Set up renderer.
-    render = new SampleRender(surfaceView, this, getAssets());
+        // Set up renderer.
+        render = new SampleRender(surfaceView, this, getAssets());
 
-    installRequested = false;
-    clearedAnchorsAmount = null;
-  }
+        installRequested = false;
+        clearedAnchorsAmount = null;
 
-  @Override
-  protected void onDestroy() {
-    if (session != null) {
-      // Explicitly close ARCore Session to release native resources.
-      // Review the API reference for important considerations before calling close() in apps with
-      // more complicated lifecycle requirements:
-      // https://developers.google.com/ar/reference/java/arcore/reference/com/google/ar/core/Session#close()
-      session.close();
-      session = null;
+        System.out.println("boardData = " + boardData);
     }
 
-    super.onDestroy();
-  }
-
-  @Override
-  protected void onResume() {
-    super.onResume();
-
-    if (sharedPreferences.getBoolean(ALLOW_GEOSPATIAL_ACCESS_KEY, /*defValue=*/ false)) {
-      createSession();
-    } else {
-      showPrivacyNoticeDialog();
-    }
-
-    surfaceView.onResume();
-    displayRotationHelper.onResume();
-  }
-
-  private void showPrivacyNoticeDialog() {
-    DialogFragment dialog = PrivacyNoticeDialogFragment.createDialog();
-    dialog.show(getSupportFragmentManager(), PrivacyNoticeDialogFragment.class.getName());
-  }
-
-  private void createSession() {
-    Exception exception = null;
-    String message = null;
-    if (session == null) {
-
-      try {
-        switch (ArCoreApk.getInstance().requestInstall(this, !installRequested)) {
-          case INSTALL_REQUESTED:
-            installRequested = true;
-            return;
-          case INSTALLED:
-            break;
+    @Override
+    protected void onDestroy() {
+        if (session != null) {
+            // Explicitly close ARCore Session to release native resources.
+            // Review the API reference for important considerations before calling close() in apps with
+            // more complicated lifecycle requirements:
+            // https://developers.google.com/ar/reference/java/arcore/reference/com/google/ar/core/Session#close()
+            session.close();
+            session = null;
         }
 
-        // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-        // permission on Android M and above, now is a good time to ask the user for it.
-        if (!CameraPermissionHelper.hasCameraPermission(this)) {
-          CameraPermissionHelper.requestCameraPermission(this);
-          return;
-        }
-        if (!LocationPermissionHelper.hasFineLocationPermission(this)) {
-          LocationPermissionHelper.requestFineLocationPermission(this);
-          return;
-        }
-
-        // Create the session.
-        session = new Session(/* context= */ this);
-      } catch (UnavailableArcoreNotInstalledException
-          | UnavailableUserDeclinedInstallationException e) {
-        message = "Please install ARCore";
-        exception = e;
-      } catch (UnavailableApkTooOldException e) {
-        message = "Please update ARCore";
-        exception = e;
-      } catch (UnavailableSdkTooOldException e) {
-        message = "Please update this app";
-        exception = e;
-      } catch (UnavailableDeviceNotCompatibleException e) {
-        message = "This device does not support AR";
-        exception = e;
-      } catch (Exception e) {
-        message = "Failed to create AR session";
-        exception = e;
-      }
-
-      if (message != null) {
-        messageSnackbarHelper.showError(this, message);
-        Log.e(TAG, "Exception creating session", exception);
-        return;
-      }
+        super.onDestroy();
     }
 
-    // Note that order matters - see the note in onPause(), the reverse applies here.
-    try {
-      configureSession();
-      // To record a live camera session for later playback, call
-      // `session.startRecording(recordingConfig)` at anytime. To playback a previously recorded AR
-      // session instead of using the live camera feed, call
-      // `session.setPlaybackDatasetUri(Uri)` before calling `session.resume()`. To
-      // learn more about recording and playback, see:
-      // https://developers.google.com/ar/develop/java/recording-and-playback
-      session.resume();
-    } catch (CameraNotAvailableException e) {
-      message = "Camera not available. Try restarting the app.";
-      exception = e;
-    } catch (GooglePlayServicesLocationLibraryNotLinkedException e) {
-      message = "Google Play Services location library not linked or obfuscated with Proguard.";
-      exception = e;
-    } catch (FineLocationPermissionNotGrantedException e) {
-      message = "The Android permission ACCESS_FINE_LOCATION was not granted.";
-      exception = e;
-    } catch (UnsupportedConfigurationException e) {
-      message = "This device does not support GeospatialMode.ENABLED.";
-      exception = e;
-    } catch (SecurityException e) {
-      message = "Camera failure or the internet permission has not been granted.";
-      exception = e;
-    }
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-    if (message != null) {
-      session = null;
-      messageSnackbarHelper.showError(this, message);
-      Log.e(TAG, "Exception configuring and resuming the session", exception);
-      return;
-    }
-  }
-
-  @Override
-  public void onPause() {
-    super.onPause();
-    if (session != null) {
-      // Note that the order matters - GLSurfaceView is paused first so that it does not try
-      // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
-      // still call session.update() and get a SessionPausedException.
-      displayRotationHelper.onPause();
-      surfaceView.onPause();
-      session.pause();
-    }
-  }
-
-  @Override
-  public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
-    super.onRequestPermissionsResult(requestCode, permissions, results);
-    if (!CameraPermissionHelper.hasCameraPermission(this)) {
-      // Use toast instead of snackbar here since the activity will exit.
-      Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
-          .show();
-      if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-        // Permission denied with checking "Do not ask again".
-        CameraPermissionHelper.launchPermissionSettings(this);
-      }
-      finish();
-    }
-    // Check if this result pertains to the location permission.
-    if (LocationPermissionHelper.hasFineLocationPermissionsResponseInResult(permissions)
-        && !LocationPermissionHelper.hasFineLocationPermission(this)) {
-      // Use toast instead of snackbar here since the activity will exit.
-      Toast.makeText(
-              this,
-              "Precise location permission is needed to run this application",
-              Toast.LENGTH_LONG)
-          .show();
-      if (!LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-        // Permission denied with checking "Do not ask again".
-        LocationPermissionHelper.launchPermissionSettings(this);
-      }
-      finish();
-    }
-  }
-
-  @Override
-  public void onWindowFocusChanged(boolean hasFocus) {
-    super.onWindowFocusChanged(hasFocus);
-    FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus);
-  }
-
-  @Override
-  public void onSurfaceCreated(SampleRender render) {
-    // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
-    // an IOException.
-    try {
-      backgroundRenderer = new BackgroundRenderer(render);
-      virtualSceneFramebuffer = new Framebuffer(render, /*width=*/ 1, /*height=*/ 1);
-
-      // Virtual object to render (ARCore geospatial)
-      Texture virtualObjectTexture =
-          Texture.createFromAsset(
-              render,
-              "models/spatial_marker_baked.png",
-              Texture.WrapMode.CLAMP_TO_EDGE,
-              Texture.ColorFormat.SRGB);
-
-      virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
-      virtualObjectShader =
-          Shader.createFromAssets(
-                  render,
-                  "shaders/ar_unlit_object.vert",
-                  "shaders/ar_unlit_object.frag",
-                  /*defines=*/ null)
-              .setTexture("u_Texture", virtualObjectTexture);
-
-      backgroundRenderer.setUseDepthVisualization(render, false);
-      backgroundRenderer.setUseOcclusion(render, false);
-    } catch (IOException e) {
-      Log.e(TAG, "Failed to read a required asset file", e);
-      messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
-    }
-  }
-
-  @Override
-  public void onSurfaceChanged(SampleRender render, int width, int height) {
-    displayRotationHelper.onSurfaceChanged(width, height);
-    virtualSceneFramebuffer.resize(width, height);
-  }
-
-  @Override
-  public void onDrawFrame(SampleRender render) {
-    if (session == null) {
-      return;
-    }
-
-    // Texture names should only be set once on a GL thread unless they change. This is done during
-    // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
-    // initialized during the execution of onSurfaceCreated.
-    if (!hasSetTextureNames) {
-      session.setCameraTextureNames(
-          new int[] {backgroundRenderer.getCameraColorTexture().getTextureId()});
-      hasSetTextureNames = true;
-    }
-
-    // -- Update per-frame state
-
-    // Notify ARCore session that the view size changed so that the perspective matrix and
-    // the video background can be properly adjusted.
-    displayRotationHelper.updateSessionIfNeeded(session);
-
-    // Obtain the current frame from ARSession. When the configuration is set to
-    // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-    // camera framerate.
-    Frame frame;
-    try {
-      frame = session.update();
-    } catch (CameraNotAvailableException e) {
-      Log.e(TAG, "Camera not available during onDrawFrame", e);
-      messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
-      return;
-    }
-
-    Camera camera = frame.getCamera();
-
-    // BackgroundRenderer.updateDisplayGeometry must be called every frame to update the coordinates
-    // used to draw the background camera image.
-    backgroundRenderer.updateDisplayGeometry(frame);
-
-    // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
-    trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
-
-    Earth earth = session.getEarth();
-    if (earth != null) {
-      updateGeospatialState(earth);
-    }
-    setLocationButton = findViewById(R.id.set_location);
-    stroedLocationTextView = findViewById(R.id.stored_location);
-    GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-
-    //TODO: 여기선 버튼이지만 추후에 촬영시 저장되는 형식으로 변경
-
-    setLocationButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-         storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
-                 geospatialPose.getLongitude(),
-                 geospatialPose.getHorizontalAccuracy(),
-                 geospatialPose.getAltitude(),
-                 geospatialPose.getVerticalAccuracy(),
-                 geospatialPose.getHeading(),
-                 geospatialPose.getHeadingAccuracy());
-
-        stroedLocationTextView.setText("저장되었습니다 ! ");
-        handleSetAnchorButton();
-
-        //기존 저장한 앵커를 파이어베이스에서 불러온다
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collectionGroup("anchor").get().
-                addOnCompleteListener(task -> {
-                  if(task.isSuccessful()) {
-
-                    for(QueryDocumentSnapshot document : task.getResult()) {
-                      AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
-                      Anchor anchor =
-                              earth.createAnchor(
-                                      anchorFirebase.getLatitude(),
-                                      anchorFirebase.getLongitude(),
-                                      anchorFirebase.getAltitude(),
-                                      0.0f,
-                                      (float) Math.sin(anchorFirebase.getAngleRadians()/ 2),
-                                      0.0f,
-                                      (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
-                      anchors.add(anchor);
-                    }
-
-                  }
-
-
-                });
-
-
-
-      }
-    });
-
-  // Write a message to the database
-  //
-    FirebaseDatabase database = FirebaseDatabase.getInstance();
-    DatabaseReference myRef = database.getReference("message");
-
-    myRef.setValue("Hello, World!");
-
-    // Show a message based on whether tracking has failed, if planes are detected, and if the user
-    // has placed any objects.
-    String message = null;
-    switch (state) {
-      case UNINITIALIZED:
-        break;
-      case UNSUPPORTED:
-        message = getResources().getString(R.string.status_unsupported);
-        break;
-      case PRETRACKING:
-        message = getResources().getString(R.string.status_pretracking);
-        break;
-      case EARTH_STATE_ERROR:
-        message = getResources().getString(R.string.status_earth_state_error);
-        break;
-      case LOCALIZING:
-        message = getResources().getString(R.string.status_localize_hint);
-        break;
-      case LOCALIZING_FAILED:
-        message = getResources().getString(R.string.status_localize_timeout);
-        break;
-      case LOCALIZED:
-        if (anchors.size() > 0) {
-          message =
-              getResources()
-                  .getQuantityString(R.plurals.status_anchors_set, anchors.size(), anchors.size());
-
-        } else if (clearedAnchorsAmount != null) {
-          message =
-              getResources()
-                  .getQuantityString(
-                      R.plurals.status_anchors_cleared, clearedAnchorsAmount, clearedAnchorsAmount);
+        if (sharedPreferences.getBoolean(ALLOW_GEOSPATIAL_ACCESS_KEY, /*defValue=*/ false)) {
+            createSession();
         } else {
-          message = getResources().getString(R.string.status_localize_complete);
+            showPrivacyNoticeDialog();
         }
-        break;
-    }
-    if (message == null) {
-      lastStatusText = null;
-      runOnUiThread(() -> statusTextView.setVisibility(View.INVISIBLE));
-    } else if (lastStatusText != message) {
-      lastStatusText = message;
-      runOnUiThread(
-          () -> {
-            statusTextView.setVisibility(View.VISIBLE);
-            statusTextView.setText(lastStatusText);
-          });
+
+        surfaceView.onResume();
+        displayRotationHelper.onResume();
     }
 
-    // -- Draw background
-    /**
-     * 보여지는 것
-     */
-
-    if (frame.getTimestamp() != 0) {
-      // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
-      // drawing possible leftover data from previous sessions if the texture is reused.
-      backgroundRenderer.drawBackground(render);
+    private void showPrivacyNoticeDialog() {
+        DialogFragment dialog = PrivacyNoticeDialogFragment.createDialog();
+        dialog.show(getSupportFragmentManager(), PrivacyNoticeDialogFragment.class.getName());
     }
 
-    // If not tracking, don't draw 3D objects.
+    private void createSession() {
+        Exception exception = null;
+        String message = null;
+        if (session == null) {
+
+            try {
+                switch (ArCoreApk.getInstance().requestInstall(this, !installRequested)) {
+                    case INSTALL_REQUESTED:
+                        installRequested = true;
+                        return;
+                    case INSTALLED:
+                        break;
+                }
+
+                // ARCore requires camera permissions to operate. If we did not yet obtain runtime
+                // permission on Android M and above, now is a good time to ask the user for it.
+                if (!CameraPermissionHelper.hasCameraPermission(this)) {
+                    CameraPermissionHelper.requestCameraPermission(this);
+                    return;
+                }
+                if (!LocationPermissionHelper.hasFineLocationPermission(this)) {
+                    LocationPermissionHelper.requestFineLocationPermission(this);
+                    return;
+                }
+
+                // Create the session.
+                session = new Session(/* context= */ this);
+            } catch (UnavailableArcoreNotInstalledException
+                    | UnavailableUserDeclinedInstallationException e) {
+                message = "Please install ARCore";
+                exception = e;
+            } catch (UnavailableApkTooOldException e) {
+                message = "Please update ARCore";
+                exception = e;
+            } catch (UnavailableSdkTooOldException e) {
+                message = "Please update this app";
+                exception = e;
+            } catch (UnavailableDeviceNotCompatibleException e) {
+                message = "This device does not support AR";
+                exception = e;
+            } catch (Exception e) {
+                message = "Failed to create AR session";
+                exception = e;
+            }
+
+            if (message != null) {
+                messageSnackbarHelper.showError(this, message);
+                Log.e(TAG, "Exception creating session", exception);
+                return;
+            }
+        }
+
+        // Note that order matters - see the note in onPause(), the reverse applies here.
+        try {
+            configureSession();
+            // To record a live camera session for later playback, call
+            // `session.startRecording(recordingConfig)` at anytime. To playback a previously recorded AR
+            // session instead of using the live camera feed, call
+            // `session.setPlaybackDatasetUri(Uri)` before calling `session.resume()`. To
+            // learn more about recording and playback, see:
+            // https://developers.google.com/ar/develop/java/recording-and-playback
+            session.resume();
+        } catch (CameraNotAvailableException e) {
+            message = "Camera not available. Try restarting the app.";
+            exception = e;
+        } catch (GooglePlayServicesLocationLibraryNotLinkedException e) {
+            message = "Google Play Services location library not linked or obfuscated with Proguard.";
+            exception = e;
+        } catch (FineLocationPermissionNotGrantedException e) {
+            message = "The Android permission ACCESS_FINE_LOCATION was not granted.";
+            exception = e;
+        } catch (UnsupportedConfigurationException e) {
+            message = "This device does not support GeospatialMode.ENABLED.";
+            exception = e;
+        } catch (SecurityException e) {
+            message = "Camera failure or the internet permission has not been granted.";
+            exception = e;
+        }
+
+        if (message != null) {
+            session = null;
+            messageSnackbarHelper.showError(this, message);
+            Log.e(TAG, "Exception configuring and resuming the session", exception);
+            return;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (session != null) {
+            // Note that the order matters - GLSurfaceView is paused first so that it does not try
+            // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
+            // still call session.update() and get a SessionPausedException.
+            displayRotationHelper.onPause();
+            surfaceView.onPause();
+            session.pause();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        super.onRequestPermissionsResult(requestCode, permissions, results);
+        if (!CameraPermissionHelper.hasCameraPermission(this)) {
+            // Use toast instead of snackbar here since the activity will exit.
+            Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
+                    .show();
+            if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                // Permission denied with checking "Do not ask again".
+                CameraPermissionHelper.launchPermissionSettings(this);
+            }
+            finish();
+        }
+        // Check if this result pertains to the location permission.
+        if (LocationPermissionHelper.hasFineLocationPermissionsResponseInResult(permissions)
+                && !LocationPermissionHelper.hasFineLocationPermission(this)) {
+            // Use toast instead of snackbar here since the activity will exit.
+            Toast.makeText(
+                            this,
+                            "Precise location permission is needed to run this application",
+                            Toast.LENGTH_LONG)
+                    .show();
+            if (!LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
+                // Permission denied with checking "Do not ask again".
+                LocationPermissionHelper.launchPermissionSettings(this);
+            }
+            finish();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus);
+    }
+
+    @Override
+    public void onSurfaceCreated(SampleRender render) {
+        // Prepare the rendering objects. This involves reading shaders and 3D model files, so may throw
+        // an IOException.
+        try {
+            backgroundRenderer = new BackgroundRenderer(render);
+            virtualSceneFramebuffer = new Framebuffer(render, /*width=*/ 1, /*height=*/ 1);
+
+            // Virtual object to render (ARCore geospatial)
+            Texture virtualObjectTexture =
+                    Texture.createFromAsset(
+                            render,
+                            "models/spatial_marker_baked.png",
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
+
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
+            virtualObjectShader =
+                    Shader.createFromAssets(
+                                    render,
+                                    "shaders/ar_unlit_object.vert",
+                                    "shaders/ar_unlit_object.frag",
+                                    /*defines=*/ null)
+                            .setTexture("u_Texture", virtualObjectTexture);
+
+            backgroundRenderer.setUseDepthVisualization(render, false);
+            backgroundRenderer.setUseOcclusion(render, false);
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to read a required asset file", e);
+            messageSnackbarHelper.showError(this, "Failed to read a required asset file: " + e);
+        }
+    }
+
+    @Override
+    public void onSurfaceChanged(SampleRender render, int width, int height) {
+        displayRotationHelper.onSurfaceChanged(width, height);
+        virtualSceneFramebuffer.resize(width, height);
+    }
+
+    @Override
+    public void onDrawFrame(SampleRender render) {
+        if (session == null) {
+            return;
+        }
+
+        // Texture names should only be set once on a GL thread unless they change. This is done during
+        // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
+        // initialized during the execution of onSurfaceCreated.
+        if (!hasSetTextureNames) {
+            session.setCameraTextureNames(
+                    new int[]{backgroundRenderer.getCameraColorTexture().getTextureId()});
+            hasSetTextureNames = true;
+        }
+
+        // -- Update per-frame state
+
+        // Notify ARCore session that the view size changed so that the perspective matrix and
+        // the video background can be properly adjusted.
+        displayRotationHelper.updateSessionIfNeeded(session);
+
+        // Obtain the current frame from ARSession. When the configuration is set to
+        // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
+        // camera framerate.
+        Frame frame;
+        try {
+            frame = session.update();
+        } catch (CameraNotAvailableException e) {
+            Log.e(TAG, "Camera not available during onDrawFrame", e);
+            messageSnackbarHelper.showError(this, "Camera not available. Try restarting the app.");
+            return;
+        }
+
+        Camera camera = frame.getCamera();
+
+        // BackgroundRenderer.updateDisplayGeometry must be called every frame to update the coordinates
+        // used to draw the background camera image.
+        backgroundRenderer.updateDisplayGeometry(frame);
+
+        // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
+        trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
+
+        Earth earth = session.getEarth();
+        if (earth != null) {
+            updateGeospatialState(earth);
+        }
+        setLocationButton = findViewById(R.id.set_location);
+        stroedLocationTextView = findViewById(R.id.stored_location);
+        cameraGeospatial = findViewById(R.id.camera_geospatial);
+
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+
+        //TODO: 여기선 버튼이지만 추후에 촬영시 저장되는 형식으로 변경
+
+        setLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
+                        geospatialPose.getLongitude(),
+                        geospatialPose.getHorizontalAccuracy(),
+                        geospatialPose.getAltitude(),
+                        geospatialPose.getVerticalAccuracy(),
+                        geospatialPose.getHeading(),
+                        geospatialPose.getHeadingAccuracy());
+
+                stroedLocationTextView.setText("저장되었습니다 ! ");
+                handleSetAnchorButton();
+
+                //기존 저장한 앵커를 파이어베이스에서 불러온다
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                db.collectionGroup("anchor").get().
+                        addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
+                                    Anchor anchor =
+                                            earth.createAnchor(
+                                                    anchorFirebase.getLatitude(),
+                                                    anchorFirebase.getLongitude(),
+                                                    anchorFirebase.getAltitude(),
+                                                    0.0f,
+                                                    (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
+                                                    0.0f,
+                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
+                                    anchors.add(anchor);
+                                }
+
+                            }
+
+
+                        });
+
+
+            }
+        });
+
+        startCameraGeospatial();
+
+        // Write a message to the database
+        //
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("message");
+
+        myRef.setValue("Hello, World!");
+
+        // Show a message based on whether tracking has failed, if planes are detected, and if the user
+        // has placed any objects.
+        String message = null;
+        switch (state) {
+            case UNINITIALIZED:
+                break;
+            case UNSUPPORTED:
+                message = getResources().getString(R.string.status_unsupported);
+                break;
+            case PRETRACKING:
+                message = getResources().getString(R.string.status_pretracking);
+                break;
+            case EARTH_STATE_ERROR:
+                message = getResources().getString(R.string.status_earth_state_error);
+                break;
+            case LOCALIZING:
+                message = getResources().getString(R.string.status_localize_hint);
+                break;
+            case LOCALIZING_FAILED:
+                message = getResources().getString(R.string.status_localize_timeout);
+                break;
+            case LOCALIZED:
+                if (anchors.size() > 0) {
+                    message =
+                            getResources()
+                                    .getQuantityString(R.plurals.status_anchors_set, anchors.size(), anchors.size());
+
+                } else if (clearedAnchorsAmount != null) {
+                    message =
+                            getResources()
+                                    .getQuantityString(
+                                            R.plurals.status_anchors_cleared, clearedAnchorsAmount, clearedAnchorsAmount);
+                } else {
+                    message = getResources().getString(R.string.status_localize_complete);
+                }
+                break;
+        }
+        if (message == null) {
+            lastStatusText = null;
+            runOnUiThread(() -> statusTextView.setVisibility(View.INVISIBLE));
+        } else if (lastStatusText != message) {
+            lastStatusText = message;
+            runOnUiThread(
+                    () -> {
+                        statusTextView.setVisibility(View.VISIBLE);
+                        statusTextView.setText(lastStatusText);
+                    });
+        }
+
+        // -- Draw background
+        /**
+         * 보여지는 것
+         */
+
+        if (frame.getTimestamp() != 0) {
+            // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
+            // drawing possible leftover data from previous sessions if the texture is reused.
+            backgroundRenderer.drawBackground(render);
+        }
+
+        // If not tracking, don't draw 3D objects.
 //    if (camera.getTrackingState() != TrackingState.TRACKING || state != State.LOCALIZED) {
 //      return;
 //    }
 
-    // -- Draw virtual objects
+        // -- Draw virtual objects
 
-    // Get projection matrix.
-    camera.getProjectionMatrix(projectionMatrix, 0, Z_NEAR, Z_FAR);
+        // Get projection matrix.
+        camera.getProjectionMatrix(projectionMatrix, 0, Z_NEAR, Z_FAR);
 
-    // Get camera matrix and draw.
-    camera.getViewMatrix(viewMatrix, 0);
+        // Get camera matrix and draw.
+        camera.getViewMatrix(viewMatrix, 0);
 
-    // Visualize anchors created by touch.
-    render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
+        // Visualize anchors created by touch.
+        render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-    Iterator<Anchor> iterator = anchors.iterator();
-    System.out.println("anchors.size() = " + anchors.size());
-    for (Anchor anchor : anchors){
+        Iterator<Anchor> iterator = anchors.iterator();
+        System.out.println("anchors.size() = " + anchors.size());
+        for (Anchor anchor : anchors) {
 //    while(iterator.hasNext()){
 //      Anchor anchor = iterator.next();
-      // Get the current pose of an Anchor in world space. The Anchor pose is updated
-      // during calls to session.update() as ARCore refines its estimate of the world.
-      anchor.getPose().toMatrix(modelMatrix, 0);
+            // Get the current pose of an Anchor in world space. The Anchor pose is updated
+            // during calls to session.update() as ARCore refines its estimate of the world.
+            anchor.getPose().toMatrix(modelMatrix, 0);
 
-      // Calculate model/view/projection matrices
-        Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-      Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+            // Calculate model/view/projection matrices
+            Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-      // Update shader properties and draw
-      virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+            // Update shader properties and draw
+            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
-      render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+            render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+        }
+
+        // Compose the virtual scene with the background.
+        backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
     }
 
-    // Compose the virtual scene with the background.
-    backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
-  }
+    //camera가 나옴
+    private void startCameraGeospatial() {
 
-  /** Configures the session with feature settings. */
-  private void configureSession() {
-    // Earth mode may not be supported on this device due to insufficient sensor quality.
-    if (!session.isGeospatialModeSupported(Config.GeospatialMode.ENABLED)) {
-      state = State.UNSUPPORTED;
-      return;
-    }
+        cameraGeospatial = findViewById(R.id.camera_geospatial);
 
-    Config config = session.getConfig();
-    config.setGeospatialMode(Config.GeospatialMode.ENABLED);
-    session.configure(config);
-    state = State.PRETRACKING;
-    localizingStartTimestamp = System.currentTimeMillis();
-  }
-
-  /** Change behavior depending on the current {@link State} of the application. */
-  private void updateGeospatialState(Earth earth) {
-    if (state == State.PRETRACKING) {
-      updatePretrackingState(earth);
-    } else if (state == State.LOCALIZING) {
-      updateLocalizingState(earth);
-    } else if (state == State.LOCALIZED) {
-      updateLocalizedState(earth);
-    }
-  }
-
-  /**
-   * Handles the updating for {@link State.PRETRACKING}. In this state, wait for {@link Earth} to
-   * have {@link TrackingState.TRACKING}. If it hasn't been enabled by now, then we've encountered
-   * an unrecoverable {@link State.EARTH_STATE_ERROR}.
-   */
-  private void updatePretrackingState(Earth earth) {
-    if (earth.getTrackingState() == TrackingState.TRACKING) {
-      state = State.LOCALIZING;
-      return;
-    }
-
-    if (earth.getEarthState() != Earth.EarthState.ENABLED) {
-      state = State.EARTH_STATE_ERROR;
-      return;
-    }
-
-    runOnUiThread(() -> geospatialPoseTextView.setText(R.string.geospatial_pose_not_tracking));
-  }
-
-  /**
-   * Handles the updating for {@link State.LOCALIZING}. In this state, wait for the horizontal and
-   * heading threshold to improve until it reaches your threshold.
-   *
-   * <p>If it takes too long for the threshold to be reached, this could mean that GPS data isn't
-   * accurate enough, or that the user is in an area that can't be localized with StreetView.
-   */
-  private void updateLocalizingState(Earth earth) {
-    GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-    if (geospatialPose.getHorizontalAccuracy() <= LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS
-        && geospatialPose.getHeadingAccuracy() <= LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES) {
-      state = State.LOCALIZED;
-      if (anchors.isEmpty()) {
-        createAnchorFromSharedPreferences(earth);
-      }
-      runOnUiThread(
-          () -> {
-            setAnchorButton.setVisibility(View.VISIBLE);
-          });
-      return;
-    }
-
-    if (TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - localizingStartTimestamp)
-        > LOCALIZING_TIMEOUT_SECONDS) {
-      state = State.LOCALIZING_FAILED;
-      return;
-    }
-
-    updateGeospatialPoseText(geospatialPose);
-  }
-//
-  /**
-   * Handles the updating for {@link State.LOCALIZED}. In this state, check the accuracy for
-   * degradation and return to {@link State.LOCALIZING} if the position accuracies have dropped too
-   * low.
-   */
-  private void updateLocalizedState(Earth earth) {
-    GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-    // Check if either accuracy has degraded to the point we should enter back into the LOCALIZING
-    // state.
-    if (geospatialPose.getHorizontalAccuracy()
-            > LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS
-                + LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS
-        || geospatialPose.getHeadingAccuracy()
-            > LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES
-                + LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES) {
-      // Accuracies have degenerated, return to the localizing state.
-      state = State.LOCALIZING;
-      localizingStartTimestamp = System.currentTimeMillis();
-      runOnUiThread(
-          () -> {
-            setAnchorButton.setVisibility(View.INVISIBLE);
-            clearAnchorsButton.setVisibility(View.INVISIBLE);
-          });
-      return;
-    }
-
-    updateGeospatialPoseText(geospatialPose);
-  }
-
-  private void updateGeospatialPoseText(GeospatialPose geospatialPose) {
-    String poseText =
-        getResources()
-            .getString(
-                R.string.geospatial_pose,
-                geospatialPose.getLatitude(),
-                geospatialPose.getLongitude(),
-                geospatialPose.getHorizontalAccuracy(),
-                geospatialPose.getAltitude(),
-                geospatialPose.getVerticalAccuracy(),
-                geospatialPose.getHeading(),
-                geospatialPose.getHeadingAccuracy());
-    runOnUiThread(
-        () -> {
-          geospatialPoseTextView.setText(poseText);
+        cameraGeospatial.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(intent, 101);
+                //TODO: 현재 카메라까지만 구현, 투명도 높은 사진을 storage에서 가져와서 띄워야함
+            }
         });
-  }
 
-  /**
-   * Handles the button that creates an anchor.
-   *
-   * <p>Ensure Earth is in the proper state, then create the anchor. Persist the parameters used to
-   * create the anchors so that the anchors will be loaded next time the app is launched.
-   */
-  private void handleSetAnchorButton() {
-    Earth earth = session.getEarth();
-    if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
-      return;
     }
 
-    GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-    double latitude = geospatialPose.getLatitude();
-    double longitude = geospatialPose.getLongitude();
-    double altitude = geospatialPose.getAltitude();
-    double headingDegrees = geospatialPose.getHeading();
-    createAnchor(earth, latitude, longitude, altitude, headingDegrees);
-    storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
-    runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
-    if (clearedAnchorsAmount != null) {
-      clearedAnchorsAmount = null;
-    }
-    //firebase에 올리기
-  }
-
-  private void handleClearAnchorsButton() {
-    clearedAnchorsAmount = anchors.size();
-    anchors.clear();
-    clearAnchorsFromSharedPreferences();
-    clearAnchorsButton.setVisibility(View.INVISIBLE);
-  }
-
-  /** Create an anchor at a specific geodetic location using a heading. */
-  private void createAnchor(
-      Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
-    // Convert a heading to a EUS quaternion:
-    double angleRadians = Math.toRadians(180.0f - headingDegrees);
-    LocalDateTime now = LocalDateTime.now();
-    String AnchorDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
-    //현재 위치의 앵커를 파이어베이스에 저장한다
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    AnchorFirebase anchorFirebase = new AnchorFirebase(latitude,longitude,altitude,angleRadians);
-    db.collection("anchor").document(AnchorDate).set(anchorFirebase);
-
-    Anchor anchor =
-        earth.createAnchor(
-            latitude,
-            longitude,
-            altitude,
-            0.0f,
-            (float) Math.sin(angleRadians / 2),
-            0.0f,
-            (float) Math.cos(angleRadians / 2));
-    anchors.add(anchor);
-
-
-    if (anchors.size() > MAXIMUM_ANCHORS) {
-      anchors.remove(0);
-    }
-  }
-
-  /**
-   * Helper function to store the parameters used in anchor creation in {@link SharedPreferences}.
-   */
-  private void storeAnchorParameters(
-      double latitude, double longitude, double altitude, double headingDegrees) {
-    Set<String> anchorParameterSet =
-        sharedPreferences.getStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, new HashSet<>());
-    HashSet<String> newAnchorParameterSet = new HashSet<>(anchorParameterSet);
-
-    SharedPreferences.Editor editor = sharedPreferences.edit();
-    newAnchorParameterSet.add(
-        String.format("%.6f,%.6f,%.6f,%.6f", latitude, longitude, altitude, headingDegrees));
-    editor.putStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, newAnchorParameterSet);
-    editor.commit();
-  }
-
-  private void clearAnchorsFromSharedPreferences() {
-    SharedPreferences.Editor editor = sharedPreferences.edit();
-    editor.putStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, null);
-    editor.commit();
-  }
-
-  /** Creates all anchors that were stored in the {@link SharedPreferences}. */
-  private void createAnchorFromSharedPreferences(Earth earth) {
-    Set<String> anchorParameterSet =
-        sharedPreferences.getStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, null);
-    if (anchorParameterSet == null) {
-      return;
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // Match the request 'pic id with requestCode
+        if (requestCode == 101) {
+            // BitMap is data structure of image file which store the image in memory
+            Bitmap photo = (Bitmap) data.getExtras().get("data");
+            // Set the image in imageview for display
+            System.out.println("photo = " + photo);
+            //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
+        }
     }
 
-    for (String anchorParameters : anchorParameterSet) {
-      String[] parameters = anchorParameters.split(",");
-      if (parameters.length != 4) {
-        Log.d(
-            TAG, "Invalid number of anchor parameters. Expected four, found " + parameters.length);
-        return;
-      }
-      double latitude = Double.parseDouble(parameters[0]);
-      double longitude = Double.parseDouble(parameters[1]);
-      double altitude = Double.parseDouble(parameters[2]);
-      double heading = Double.parseDouble(parameters[3]);
-      createAnchor(earth, latitude, longitude, altitude, heading);
+    /**
+     * Configures the session with feature settings.
+     */
+    private void configureSession() {
+        // Earth mode may not be supported on this device due to insufficient sensor quality.
+        if (!session.isGeospatialModeSupported(Config.GeospatialMode.ENABLED)) {
+            state = State.UNSUPPORTED;
+            return;
+        }
+
+        Config config = session.getConfig();
+        config.setGeospatialMode(Config.GeospatialMode.ENABLED);
+        session.configure(config);
+        state = State.PRETRACKING;
+        localizingStartTimestamp = System.currentTimeMillis();
     }
 
-    runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
-  }
-
-  @Override
-  public void onDialogPositiveClick(DialogFragment dialog) {
-    if (!sharedPreferences.edit().putBoolean(ALLOW_GEOSPATIAL_ACCESS_KEY, true).commit()) {
-      throw new AssertionError("Could not save the user preference to SharedPreferences!");
+    /**
+     * Change behavior depending on the current {@link State} of the application.
+     */
+    private void updateGeospatialState(Earth earth) {
+        if (state == State.PRETRACKING) {
+            updatePretrackingState(earth);
+        } else if (state == State.LOCALIZING) {
+            updateLocalizingState(earth);
+        } else if (state == State.LOCALIZED) {
+            updateLocalizedState(earth);
+        }
     }
-    createSession();
-  }
+
+    /**
+     * Handles the updating for {@link State.PRETRACKING}. In this state, wait for {@link Earth} to
+     * have {@link TrackingState.TRACKING}. If it hasn't been enabled by now, then we've encountered
+     * an unrecoverable {@link State.EARTH_STATE_ERROR}.
+     */
+    private void updatePretrackingState(Earth earth) {
+        if (earth.getTrackingState() == TrackingState.TRACKING) {
+            state = State.LOCALIZING;
+            return;
+        }
+
+        if (earth.getEarthState() != Earth.EarthState.ENABLED) {
+            state = State.EARTH_STATE_ERROR;
+            return;
+        }
+
+        runOnUiThread(() -> geospatialPoseTextView.setText(R.string.geospatial_pose_not_tracking));
+    }
+
+    /**
+     * Handles the updating for {@link State.LOCALIZING}. In this state, wait for the horizontal and
+     * heading threshold to improve until it reaches your threshold.
+     *
+     * <p>If it takes too long for the threshold to be reached, this could mean that GPS data isn't
+     * accurate enough, or that the user is in an area that can't be localized with StreetView.
+     */
+    private void updateLocalizingState(Earth earth) {
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+        if (geospatialPose.getHorizontalAccuracy() <= LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS
+                && geospatialPose.getHeadingAccuracy() <= LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES) {
+            state = State.LOCALIZED;
+            if (anchors.isEmpty()) {
+                createAnchorFromSharedPreferences(earth);
+            }
+            runOnUiThread(
+                    () -> {
+                        setAnchorButton.setVisibility(View.VISIBLE);
+                    });
+            return;
+        }
+
+        if (TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - localizingStartTimestamp)
+                > LOCALIZING_TIMEOUT_SECONDS) {
+            state = State.LOCALIZING_FAILED;
+            return;
+        }
+
+        updateGeospatialPoseText(geospatialPose);
+    }
+//
+
+    /**
+     * Handles the updating for {@link State.LOCALIZED}. In this state, check the accuracy for
+     * degradation and return to {@link State.LOCALIZING} if the position accuracies have dropped too
+     * low.
+     */
+    private void updateLocalizedState(Earth earth) {
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+        // Check if either accuracy has degraded to the point we should enter back into the LOCALIZING
+        // state.
+        if (geospatialPose.getHorizontalAccuracy()
+                > LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS
+                + LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS
+                || geospatialPose.getHeadingAccuracy()
+                > LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES
+                + LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES) {
+            // Accuracies have degenerated, return to the localizing state.
+            state = State.LOCALIZING;
+            localizingStartTimestamp = System.currentTimeMillis();
+            runOnUiThread(
+                    () -> {
+                        setAnchorButton.setVisibility(View.INVISIBLE);
+                        clearAnchorsButton.setVisibility(View.INVISIBLE);
+                    });
+            return;
+        }
+
+        updateGeospatialPoseText(geospatialPose);
+    }
+
+    private void updateGeospatialPoseText(GeospatialPose geospatialPose) {
+        String poseText =
+                getResources()
+                        .getString(
+                                R.string.geospatial_pose,
+                                geospatialPose.getLatitude(),
+                                geospatialPose.getLongitude(),
+                                geospatialPose.getHorizontalAccuracy(),
+                                geospatialPose.getAltitude(),
+                                geospatialPose.getVerticalAccuracy(),
+                                geospatialPose.getHeading(),
+                                geospatialPose.getHeadingAccuracy());
+        runOnUiThread(
+                () -> {
+                    geospatialPoseTextView.setText(poseText);
+                });
+    }
+
+    /**
+     * Handles the button that creates an anchor.
+     *
+     * <p>Ensure Earth is in the proper state, then create the anchor. Persist the parameters used to
+     * create the anchors so that the anchors will be loaded next time the app is launched.
+     */
+    private void handleSetAnchorButton() {
+        Earth earth = session.getEarth();
+        if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
+            return;
+        }
+
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+        double latitude = geospatialPose.getLatitude();
+        double longitude = geospatialPose.getLongitude();
+        double altitude = geospatialPose.getAltitude();
+        double headingDegrees = geospatialPose.getHeading();
+        createAnchor(earth, latitude, longitude, altitude, headingDegrees);
+        storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
+        runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
+        if (clearedAnchorsAmount != null) {
+            clearedAnchorsAmount = null;
+        }
+        //firebase에 올리기
+    }
+
+    private void handleClearAnchorsButton() {
+        clearedAnchorsAmount = anchors.size();
+        anchors.clear();
+        clearAnchorsFromSharedPreferences();
+        clearAnchorsButton.setVisibility(View.INVISIBLE);
+    }
+
+    /**
+     * Create an anchor at a specific geodetic location using a heading.
+     */
+    private void createAnchor(
+            Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
+        // Convert a heading to a EUS quaternion:
+        double angleRadians = Math.toRadians(180.0f - headingDegrees);
+        LocalDateTime now = LocalDateTime.now();
+        String AnchorDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
+        //현재 위치의 앵커를 파이어베이스에 저장한다
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
+        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
+
+        Anchor anchor =
+                earth.createAnchor(
+                        latitude,
+                        longitude,
+                        altitude,
+                        0.0f,
+                        (float) Math.sin(angleRadians / 2),
+                        0.0f,
+                        (float) Math.cos(angleRadians / 2));
+        anchors.add(anchor);
+
+
+        if (anchors.size() > MAXIMUM_ANCHORS) {
+            anchors.remove(0);
+        }
+    }
+
+    /**
+     * Helper function to store the parameters used in anchor creation in {@link SharedPreferences}.
+     */
+    private void storeAnchorParameters(
+            double latitude, double longitude, double altitude, double headingDegrees) {
+        Set<String> anchorParameterSet =
+                sharedPreferences.getStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, new HashSet<>());
+        HashSet<String> newAnchorParameterSet = new HashSet<>(anchorParameterSet);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        newAnchorParameterSet.add(
+                String.format("%.6f,%.6f,%.6f,%.6f", latitude, longitude, altitude, headingDegrees));
+        editor.putStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, newAnchorParameterSet);
+        editor.commit();
+    }
+
+    private void clearAnchorsFromSharedPreferences() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, null);
+        editor.commit();
+    }
+
+    /**
+     * Creates all anchors that were stored in the {@link SharedPreferences}.
+     */
+    private void createAnchorFromSharedPreferences(Earth earth) {
+        Set<String> anchorParameterSet =
+                sharedPreferences.getStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, null);
+        if (anchorParameterSet == null) {
+            return;
+        }
+
+        for (String anchorParameters : anchorParameterSet) {
+            String[] parameters = anchorParameters.split(",");
+            if (parameters.length != 4) {
+                Log.d(
+                        TAG, "Invalid number of anchor parameters. Expected four, found " + parameters.length);
+                return;
+            }
+            double latitude = Double.parseDouble(parameters[0]);
+            double longitude = Double.parseDouble(parameters[1]);
+            double altitude = Double.parseDouble(parameters[2]);
+            double heading = Double.parseDouble(parameters[3]);
+            createAnchor(earth, latitude, longitude, altitude, heading);
+        }
+
+        runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        if (!sharedPreferences.edit().putBoolean(ALLOW_GEOSPATIAL_ACCESS_KEY, true).commit()) {
+            throw new AssertionError("Could not save the user preference to SharedPreferences!");
+        }
+        createSession();
+    }
 }
