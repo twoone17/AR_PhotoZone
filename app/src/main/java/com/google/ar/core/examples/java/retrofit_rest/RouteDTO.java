@@ -33,7 +33,7 @@ public class RouteDTO implements Serializable {
         this.type = type;
     }
 
-    public static class Features {
+    public static class Features implements Serializable{
         @Expose
         @SerializedName("properties")
         private Properties properties;
@@ -72,7 +72,7 @@ public class RouteDTO implements Serializable {
         }
     }
 
-    public static class Properties {
+    public static class Properties implements Serializable{
         @Expose
         @SerializedName("pointType")
         private String pointtype;
@@ -243,10 +243,10 @@ public class RouteDTO implements Serializable {
         }
     }
 
-    public static class Geometry {
+    public static class Geometry implements Serializable{
         @Expose
         @SerializedName("coordinates")
-        private List<Double> coordinates;
+        private Object coordinates;
         @Expose
         @SerializedName("type")
         private String type;
@@ -254,11 +254,11 @@ public class RouteDTO implements Serializable {
         public Geometry() {
         }
 
-        public List<Double> getCoordinates() {
+        public Object getCoordinates() {
             return coordinates;
         }
 
-        public void setCoordinates(List<Double> coordinates) {
+        public void setCoordinates(Object coordinates) {
             this.coordinates = coordinates;
         }
 

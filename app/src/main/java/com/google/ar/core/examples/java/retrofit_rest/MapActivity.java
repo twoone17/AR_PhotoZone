@@ -123,13 +123,28 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 .build();
 
         RetrofitService retrofitService = retrofit.create(RetrofitService.class);
-        Call<Object> result = retrofitService.getPosts(1, "result", positions[6], Double.parseDouble(positions[0]),
+        Call<RouteDTO> result = retrofitService.getPosts(1, "result", positions[6], Double.parseDouble(positions[0]),
                 Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5]);
         try {
-            String resultString = result.execute().body().toString();
-            Log.e(TAG, "doInBackground: " + resultString );
+//            String resultString = result.execute().body().toString();
+            RouteDTO body = result.execute().body();
+//            for(int i = 0; i<body.getFeatures().size(); i++) {
+//                Log.e(TAG, "doInBackground: " + body.getFeatures().get(i).getGeometry().getCoordinates().toString());
+//                String base = body.getFeatures().get(i).getGeometry().getCoordinates().toString();
+//                if(base.charAt(1) == '[') {
+//                    Log.e(TAG, "doInBackground: " + i );
+//                }
+//            }
+            // 좌표쌍이 1개 이상인 데이터에 대해
+            // 앞 괄호와 뒤 괄호를 떼어내는 작업
+            String base = body.getFeatures().get(1).getGeometry().getCoordinates().toString();
+            base = base.substring(1);
+            base = base.substring(0, base.length() - 1);
+            Log.e(TAG, "doInBackground: " +  base);
+
+//            String coords = body.getFeatures().get(1).getGeometry().getCoordinates().toString();
             Map insertData = new HashMap<String, String>();
-            insertData.put("passes", resultString);
+//            insertData.put("passes", coords);
             db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
         } catch (IOException e) {
             e.printStackTrace();
