@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import retrofit2.Call;
@@ -177,8 +178,9 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 }
             }
             Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
-            Map insertData = new HashMap<String, String>();
-//            insertData.put("passes", coords);
+            Map insertData = new HashMap<String, List<Double>>();
+            insertData.put("latitudes", latitudes);
+            insertData.put("longitudes", longitudes);
             db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
         } catch (IOException e) {
             e.printStackTrace();
