@@ -41,6 +41,11 @@ class UploadActivity : AppCompatActivity() {
         println("uploaddata = ${uploaddata}")
 
 
+
+
+        // 키보드 보이기 시, showSoftInput() 호출하기 전 requestFocus() 호출
+        editText.requestFocus();
+
         //TODO: 아니 왜 editText 키보드 안올라오냐
         editText.setOnClickListener{
             fun onClick(v: View?) {

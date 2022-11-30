@@ -49,6 +49,14 @@
       android:id="@+id/set_location"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
+      android:text="위치 저장" />
+
+  <Button
+      android:id="@+id/camera_geospatial"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_toEndOf="@id/set_location"
+      android:layout_marginStart="10dp"
       android:text="사진 촬영" />
 
   <TextView

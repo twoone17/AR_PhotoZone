@@ -13,6 +13,7 @@
  Limits app visibility in the Google Play Store to ARCore supported devices
        (https://developers.google.com/ar/devices).
     -->
+
     <uses-feature
         android:name="android.hardware.camera.ar"
         android:required="true" />
@@ -58,6 +59,7 @@
             android:exported="true"
             android:screenOrientation="locked"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+
         <activity
             android:name="com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity"
             android:exported="true"
