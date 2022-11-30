@@ -137,28 +137,46 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 //                    Log.e(TAG, "doInBackground: " + i );
 //                }
 //            }
-            // 좌표쌍이 1개 이상인 데이터에 대해
-            // 앞 괄호와 뒤 괄호를 떼어내는 작업
-            String base = body.getFeatures().get(1).getGeometry().getCoordinates().toString();
-            base = base.substring(1);
-            base = base.substring(0, base.length() - 1);
-//            Log.e(TAG, "doInBackground: " +  base);
-            String[] _split = base.split("\\[");
-            for(int i = 0; i < _split.length; i++) {
-                String[] _splitDepth = _split[i].split(",");
-                for(int k = 0; k < _splitDepth.length; k++) {
-                    if(i != 0 && !_splitDepth[k].equals(" ")) {
-                        if(k == 0) {
-                            Double tempLnd = Double.parseDouble(_splitDepth[k]);
-                            longitudes.add(tempLnd);
-                        } else {
-                            Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
-                            latitudes.add(tempLat);
+            // 파싱 클래스에서 오류가 발생해 Object로 받아온 좌표에 대해서만 직접 파싱
+            for(int v = 0; v < body.getFeatures().size(); v++) {
+                String base = body.getFeatures().get(v).getGeometry().getCoordinates().toString();
+                if(base.charAt(1) == '[') {
+                    base = base.substring(1);
+                    base = base.substring(0, base.length() - 1);
+                    String[] _split = base.split("\\[");
+                    for (int i = 1; i < _split.length; i++) {
+                        String[] _splitDepth = _split[i].split(",");
+                        for (int k = 0; k < _splitDepth.length; k++) {
+                            if (!_splitDepth[k].equals(" ")) {
+                                if (k == 0) {
+                                    Double tempLnd = Double.parseDouble(_splitDepth[k]);
+                                    longitudes.add(tempLnd);
+                                } else {
+                                    Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
+                                    latitudes.add(tempLat);
+                                }
+                            }
+                        }
+                    }
+                } else if(base.charAt(0) == '[') {
+                    String[] _split = base.split("\\[");
+                    for(int j = 0; j < _split.length; j++) {
+                        String[] _splitDepth = _split[j].split(",");
+                        for(int l = 0; l < _splitDepth.length; l++) {
+                            if(!_splitDepth[l].equals(" ") && _splitDepth[l].length() > 0) {
+                                if (l == 0) {
+                                    Double tempLnd = Double.parseDouble(_splitDepth[l]);
+                                    longitudes.add(tempLnd);
+                                } else {
+                                    Double tempLat = Double.parseDouble(_splitDepth[l].substring(0, _splitDepth[l].length() - 1));
+                                    latitudes.add(tempLat);
+                                }
+                            }
                         }
                     }
                 }
-                Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size() );
             }
+            Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
             Map insertData = new HashMap<String, String>();
 //            insertData.put("passes", coords);
             db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
