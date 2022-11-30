@@ -79,6 +79,9 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     private ArrayList<LatLng> mapPoints;
 
+    private ArrayList<Double> longitudes = new ArrayList<>();
+    private ArrayList<Double> latitudes = new ArrayList<>();
+
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
@@ -126,7 +129,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         Call<RouteDTO> result = retrofitService.getPosts(1, "result", positions[6], Double.parseDouble(positions[0]),
                 Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5]);
         try {
-//            String resultString = result.execute().body().toString();
             RouteDTO body = result.execute().body();
 //            for(int i = 0; i<body.getFeatures().size(); i++) {
 //                Log.e(TAG, "doInBackground: " + body.getFeatures().get(i).getGeometry().getCoordinates().toString());
@@ -140,9 +142,23 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
             String base = body.getFeatures().get(1).getGeometry().getCoordinates().toString();
             base = base.substring(1);
             base = base.substring(0, base.length() - 1);
-            Log.e(TAG, "doInBackground: " +  base);
-
-//            String coords = body.getFeatures().get(1).getGeometry().getCoordinates().toString();
+//            Log.e(TAG, "doInBackground: " +  base);
+            String[] _split = base.split("\\[");
+            for(int i = 0; i < _split.length; i++) {
+                String[] _splitDepth = _split[i].split(",");
+                for(int k = 0; k < _splitDepth.length; k++) {
+                    if(i != 0 && !_splitDepth[k].equals(" ")) {
+                        if(k == 0) {
+                            Double tempLnd = Double.parseDouble(_splitDepth[k]);
+                            longitudes.add(tempLnd);
+                        } else {
+                            Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
+                            latitudes.add(tempLat);
+                        }
+                    }
+                }
+                Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size() );
+            }
             Map insertData = new HashMap<String, String>();
 //            insertData.put("passes", coords);
             db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
