@@ -11,12 +11,14 @@ import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.BoardAdapter
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.geospatial.R
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
 class CommentAdapter(private val context: Context) : RecyclerView.Adapter<CommentAdapter.ViewHolder>() {
     private var firebaseStore: FirebaseStorage? = null
     private var storageReference: StorageReference? = null
+    private var firebaseFirestore : FirebaseFirestore = FirebaseFirestore.getInstance()
 
     interface OnItemClickListener{
         fun onItemClick(view: View, commentData: CommentData, position : Int)
@@ -69,7 +71,12 @@ class CommentAdapter(private val context: Context) : RecyclerView.Adapter<Commen
 
                 }
             comment.setText(item.comment)
-            username.setText("추후 서버로부터 받아올 예정")
+
+            val userNameReference = firebaseFirestore.collection("users").document(item.uid).get()
+            userNameReference.addOnSuccessListener { result ->
+                username.setText(result.get("username").toString())
+            }
+
             val pos = adapterPosition
             if(pos != RecyclerView.NO_POSITION) {
                 itemView.setOnClickListener {
