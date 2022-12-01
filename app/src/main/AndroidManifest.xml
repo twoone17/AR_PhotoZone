@@ -9,6 +9,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <permission android:protectionLevel="signature"
+        android:name="com.example.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.example.permission.C2D_MESSAGE" />
+
     <!--
  Limits app visibility in the Google Play Store to ARCore supported devices
        (https://developers.google.com/ar/devices).
