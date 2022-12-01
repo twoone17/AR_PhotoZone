@@ -548,6 +548,8 @@ public class GeospatialActivity extends AppCompatActivity
                 //기존 저장한 앵커를 파이어베이스에서 불러온다
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+
+
                 db.collectionGroup("anchor").get().
                         addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
@@ -787,11 +789,6 @@ public class GeospatialActivity extends AppCompatActivity
                             String DownloadUrl = downloadUri.toString();
                             LocalDateTime now = LocalDateTime.now();
                             String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
-                            //해쉬 맵에 저장해서 컬렉션에 넣기
-//                                Map<String, Object> data = new HashMap<>();
-
-//                            DataFormat dataFormat = new DataFormat(DownloadUrl, firebaseUser.getUid(),
-//                                    description.getText().toString(), list, userid);
 
                             UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading());
 //
@@ -817,20 +814,6 @@ public class GeospatialActivity extends AppCompatActivity
                 });
             }
 
-
-                //storage
-            FirebaseStorage storage = FirebaseStorage.getInstance();
-            //user id -
-//            String filename_GetUid = firebaseUser.getUid();
-            //TODO: 이걸 위에있는 userid로 수정해야함
-            String filename_GetUid = auth.getCurrentUser().toString();
-
-//            new UploadFirebaseData(firebaseAuth.getCurrentUser().,)
-
-
-//            AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
-//            new UploadFirebaseData()
-//            db.collection("anchor").document(AnchorDate).set(anchorFirebase);
 
 
         }
