@@ -16,10 +16,9 @@ public class UploadFirebaseData {
     private double longitude;
     private double altitude;
 
-    public UploadFirebaseData(String userId, String imgURL, String referBoardDocId, double latitude, double longitude, double altitude, double heading) {
+    public UploadFirebaseData(String userId, String imgURL, double latitude, double longitude, double altitude, double heading) {
         this.userId = userId;
         this.imgURL = imgURL;
-        this.referBoardDocId = referBoardDocId;
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
@@ -32,10 +31,6 @@ public class UploadFirebaseData {
 
     public String getImgURL() {
         return imgURL;
-    }
-
-    public String getReferBoardDocId() {
-        return referBoardDocId;
     }
 
     public double getLatitude() {

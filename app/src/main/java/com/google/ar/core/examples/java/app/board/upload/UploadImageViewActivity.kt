@@ -59,7 +59,7 @@ class UploadImageViewActivity : AppCompatActivity(){
                 datas.apply {
                     add(BoardData(imgURL = links.data["imgURL"].toString(),
                             description = links.data["description"].toString(),
-                            likes = links.data["likes"] as Long,
+                            likes = 0,
                             publisher = links.data["publisher"].toString(),
                             userId = links.data["userId"].toString(),
                             links.id))
