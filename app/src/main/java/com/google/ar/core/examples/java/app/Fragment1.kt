@@ -12,7 +12,10 @@ import android.widget.Button
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.ar.core.examples.java.app.board.UploadActivity
 import com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity
+import com.google.ar.core.examples.java.geospatial.ArNav
+import com.google.ar.core.examples.java.geospatial.GeospatialActivity
 import com.google.ar.core.examples.java.geospatial.R
+import kotlinx.android.synthetic.main.activity_board_click.*
 import kotlinx.android.synthetic.main.fragment_first.*
 
 class Fragment1 : Fragment() {
@@ -22,12 +25,21 @@ class Fragment1 : Fragment() {
 
         val v =  inflater.inflate(R.layout.fragment_first, container, false)
         val uploadButton:Button = v.findViewById(R.id.uploadButton)
+        val navButton:Button = v.findViewById(R.id.navButton)
 
         uploadButton.setOnClickListener{
             val nextIntent = Intent(requireContext(), UploadUsingPicaActivity::class.java)
             startActivity(nextIntent)
         }
         // Inflate the layout for this fragment
+
+        navButton.setOnClickListener{
+            println("camera click")
+            Intent(context, ArNav::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.run { startActivity(this) }
+        }
+
         return v
     }
 
