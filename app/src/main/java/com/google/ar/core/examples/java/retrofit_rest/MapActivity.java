@@ -51,7 +51,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
 //        RoadTracker rt = new RoadTracker(googleMap);
-        LatLng start = new LatLng(37.449522, 127.126941);
+        LatLng start = new LatLng(37.413003, 127.125923);
         LatLng end = new LatLng(37.4119623, 127.1284907);
         API_Key = getResources().getString(R.string.tMapAPIKey);
 //        ArrayList<LatLng> jsonData = rt.getJsonData(start, end);
@@ -87,37 +87,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
 
-//
-//    int totalDistance;
-//
-//
-//    public RoadTracker(GoogleMap map) {
-//        mMap = map;
-//    }
-
-//    public ArrayList<LatLng> getJsonData(final LatLng startPoint, final LatLng endPoint) {
-//
-//        String API_Key = "l7xxa97487515286485e98d6fafe222d88c7";
-//
-////
-//        Retrofit retrofit = new Retrofit.Builder()
-//                .baseUrl("https://apis.openapi.sk.com")
-//                .addConverterFactory(GsonConverterFactory.create())
-//                .build();
-//
-//        RetrofitService retrofitService = retrofit.create(RetrofitService.class);
-//        Call<Object> result = retrofitService.getPosts(API_Key, startPoint.longitude, startPoint.latitude,
-//                endPoint.longitude, endPoint.latitude);
-//        try {
-//            System.out.println(result.execute().body());
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        return mapPoints;
-////        return mapPoints;
-//
-//    }
 
     @Override
     protected ArrayList<LatLng> doInBackground(String... positions) {
@@ -131,14 +100,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5]);
         try {
             RouteDTO body = result.execute().body();
-//            for(int i = 0; i<body.getFeatures().size(); i++) {
-//                Log.e(TAG, "doInBackground: " + body.getFeatures().get(i).getGeometry().getCoordinates().toString());
-//                String base = body.getFeatures().get(i).getGeometry().getCoordinates().toString();
-//                if(base.charAt(1) == '[') {
-//                    Log.e(TAG, "doInBackground: " + i );
-//                }
-//            }
-            // 파싱 클래스에서 오류가 발생해 Object로 받아온 좌표에 대해서만 직접 파싱
             for(int v = 0; v < body.getFeatures().size(); v++) {
                 String base = body.getFeatures().get(v).getGeometry().getCoordinates().toString();
                 if(base.charAt(1) == '[') {
@@ -185,21 +146,7 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        retrofitService.getPosts(1, "result", API_Key, Double.parseDouble(positions[0]),
-//                Double.parseDouble(positions[1]), Double.parseDouble(positions[2]), Double.parseDouble(positions[3]), positions[4], positions[5])
-//                .enqueue(new Callback<RouteDTO>() {
-//                    @Override
-//                    public void onResponse(Call<RouteDTO> call, Response<RouteDTO> response) {
-//                        if(response.isSuccessful()) {
-//                            RouteDTO data = response.body();
-//                            Log.e(TAG, "onResponse: " + data.getFeatures().get(0).getGeometry());
-//                        }
-//                    }
-//                    @Override
-//                    public void onFailure(Call<RouteDTO> call, Throwable t) {
-//                        Log.e(TAG, "onFailure: " + t);
-//                    }
-//                });
+
         return mapPoints;
     }
 }
