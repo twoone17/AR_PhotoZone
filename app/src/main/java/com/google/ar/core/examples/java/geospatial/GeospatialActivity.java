@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -35,11 +36,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
@@ -72,6 +78,8 @@ import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException;
 import com.google.ar.core.exceptions.UnavailableSdkTooOldException;
 import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException;
 import com.google.ar.core.exceptions.UnsupportedConfigurationException;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -82,7 +90,13 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.ktx.Firebase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -189,10 +203,21 @@ public class GeospatialActivity extends AppCompatActivity
     private Button setAnchorButton;
     private Button clearAnchorsButton;
     //추가
+    private String imgURL;
+    private StorageTask uploadTask;
+    StorageReference storageRef;
+
+
+
+    private StoredGeolocation storedGeolocation_Photo;
     private Button setLocationButton;
     private TextView stroedLocationTextView;
     private Button cameraGeospatial;
     private double location;
+
+    FirebaseAuth firebaseAuth;
+    FirebaseUser firebaseUser;
+    final FirebaseAuth auth = FirebaseAuth.getInstance();
 
     private File file;
 
@@ -229,7 +254,6 @@ public class GeospatialActivity extends AppCompatActivity
         cameraGeospatial = findViewById(R.id.camera_geospatial);
         //눌렀을때 위치 저장
 //    setLocationButton = findViewById(R.id.set_location);
-
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
 
@@ -242,6 +266,10 @@ public class GeospatialActivity extends AppCompatActivity
         clearedAnchorsAmount = null;
 
         System.out.println("boardData = " + boardData);
+
+        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
+
+
     }
 
     @Override
@@ -511,17 +539,16 @@ public class GeospatialActivity extends AppCompatActivity
             public void onClick(View v) {
                 storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
                         geospatialPose.getLongitude(),
-                        geospatialPose.getHorizontalAccuracy(),
                         geospatialPose.getAltitude(),
-                        geospatialPose.getVerticalAccuracy(),
-                        geospatialPose.getHeading(),
-                        geospatialPose.getHeadingAccuracy());
+                        geospatialPose.getHeading());
 
                 stroedLocationTextView.setText("저장되었습니다 ! ");
                 handleSetAnchorButton();
 
                 //기존 저장한 앵커를 파이어베이스에서 불러온다
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+
 
                 db.collectionGroup("anchor").get().
                         addOnCompleteListener(task -> {
@@ -662,10 +689,25 @@ public class GeospatialActivity extends AppCompatActivity
     private void startCameraGeospatial() {
 
         cameraGeospatial = findViewById(R.id.camera_geospatial);
+        Earth earth = session.getEarth();
+        if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
+            return;
+        }
+
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+        double latitude = geospatialPose.getLatitude();
+        double longitude = geospatialPose.getLongitude();
+        double altitude = geospatialPose.getAltitude();
+        double headingDegrees = geospatialPose.getHeading();
+
+        storedGeolocation_Photo = new StoredGeolocation(latitude, longitude, altitude, headingDegrees);
 
         cameraGeospatial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString() );
+
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, 101);
                 //TODO: 현재 카메라까지만 구현, 투명도 높은 사진을 storage에서 가져와서 띄워야함
@@ -677,13 +719,111 @@ public class GeospatialActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Match the request 'pic id with requestCode
+
         if (requestCode == 101) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.e(TAG, "onActivityResult: 권한접근" );
+                // Should we show an explanation?
+                if (shouldShowRequestPermissionRationale(
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    // Explain to the user why we need to read the contacts
+                    Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale" );
+                }
+
+                requestPermissions(
+                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                        1000);
+
+                // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
+                // app-defined int constant that should be quite unique
+                Log.e(TAG, "onActivityResult: return" );
+                return;
+            }
+            Log.e(TAG, "onActivityResult: 권한성공" );
             // BitMap is data structure of image file which store the image in memory
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             // Set the image in imageview for display
             System.out.println("photo = " + photo);
+
+            Uri imgURL = getImageUri(this,photo);
+//            imgURL = uri.toString();
+            Log.e(TAG, "onActivityResult: imgURL" + imgURL );
+            Log.e(TAG, "onActivityResult: storedGeolocation_Photo"+storedGeolocation_Photo );
             //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
+            Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" +  auth.getCurrentUser());
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+            //storage에 파일 저장하는 코드
+            /**
+             * 파이어베이스에 저장할 데이터
+             * 위치 : users - uid - posts - postID - {document}
+             *
+             * -anchorFirebase : latitude, longitude, altitude, angleRadians
+             * -imgURL : 촬영한 사진 이미지
+             * -userID
+             * -활용한 게시글
+             */
+            if (imgURL != null) {
+//                String GetUid = firebaseUser.getUid();
+                //TODO: 로그인구현 이후 수정
+                String getUid = auth.getCurrentUser().getUid();
+                StorageReference storageRef = FirebaseStorage.getInstance().getReference("Gallery/" + getUid); //storgae의 저장경로
+                final StorageReference ref = storageRef.child(System.currentTimeMillis() + ".jpg"); //이미지의 파일이름
+                uploadTask = ref.putFile(imgURL); //storage에 file을 업로드, uri를 통해서
+                uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if (!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+
+                        // Continue with the task to get the download URL
+                        return ref.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) { //task가 성공하면
+                            Uri downloadUri = task.getResult(); //위의 return값을 받아 downloadUri에 저장
+                            String DownloadUrl = downloadUri.toString();
+                            LocalDateTime now = LocalDateTime.now();
+                            String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
+
+                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading());
+//
+                            db.collection("users").document(getUid).collection("posts").document(postdocument_bydate).set(uploadFirebaseData)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.e("temp", "onSuccess: DB Insertion success");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e("temp", "onFailure: DB Insertion failed");
+                                        }
+                                    });
+                            finish();
+
+                        } else {
+                            Toast.makeText(GeospatialActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+
+
+
         }
+    }
+
+    private Uri getImageUri(Context context, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
     /**
@@ -832,6 +972,7 @@ public class GeospatialActivity extends AppCompatActivity
         double altitude = geospatialPose.getAltitude();
         double headingDegrees = geospatialPose.getHeading();
         createAnchor(earth, latitude, longitude, altitude, headingDegrees);
+        //TODO: firebase에 저장하는 코드는 이곳에서 parameter로 지리정보를 받아야함
         storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
         runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
         if (clearedAnchorsAmount != null) {

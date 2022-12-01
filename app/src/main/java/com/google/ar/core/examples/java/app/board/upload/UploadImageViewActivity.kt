@@ -20,7 +20,7 @@ import kotlinx.android.synthetic.main.upload_main_recycler.*
  * firebase storage에 저장된 사진은 Photozone Helper기능을 활용하여 촬영한 사진이다
  */
 
-class UploadImageViewActivity : AppCompatActivity(){
+class UploadImageViewActivity : AppCompatActivity() {
 
     lateinit var uploadAdapter: UploadAdapter
     val datas = mutableListOf<BoardData>()
@@ -29,7 +29,6 @@ class UploadImageViewActivity : AppCompatActivity(){
     val StringDownloadUrl = storageRef.reference.child("Gallery/userid/picID1.PNG").downloadUrl
     private var auth = Firebase.auth
     private val currentUser = auth.currentUser
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,28 +48,35 @@ class UploadImageViewActivity : AppCompatActivity(){
             }
         })
     }
+
     private fun initRecycler() {
         uploadAdapter = UploadAdapter(this)
         upload_main_recycler.adapter = uploadAdapter
 
         db.collection("users").document(auth.currentUser!!.uid).collection("posts").get()
-                .addOnSuccessListener { result ->
-            for(links in result) {
-                datas.apply {
-                    add(BoardData(imgURL = links.data["imgURL"].toString(),
-                            description = links.data["description"].toString(),
-                            likes = links.data["likes"] as Long,
-                            publisher = links.data["publisher"].toString(),
-                            userId = links.data["userId"].toString(),
-                            links.id))
+            .addOnSuccessListener { result ->
+                for (links in result) {
+                    datas.apply {
+                        add(
+                            BoardData(
+                                imgURL = links.data["imgURL"].toString(),
+                                publisher = links.data["publisher"].toString(),
+                                userId = links.data["userId"].toString(),
+                                latitude = links.data["latitude"] as Number?,
+                                longitude = links.data["longitude"] as Number?,
+                                altitude = links.data["altitude"] as Number?,
+                                heading = links.data["heading"] as Number?,
+                                )
+                        )
+                    }
+
+                    uploadAdapter.datas = datas
+                    uploadAdapter.notifyDataSetChanged()
+
+                }
+
+                val intent = Intent(this, UploadActivity::class.java)
+
             }
-
-            uploadAdapter.datas = datas
-            uploadAdapter.notifyDataSetChanged()
-
-        }
-
-        val intent = Intent(this, UploadActivity::class.java)
-
-    }}
+    }
 }
