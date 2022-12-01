@@ -66,6 +66,14 @@
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
         <activity
+            android:name=".ArNav"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="locked"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+
+
+        <activity
             android:name="com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
