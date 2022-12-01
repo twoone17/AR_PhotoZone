@@ -189,6 +189,7 @@ public class GeospatialActivity extends AppCompatActivity
     private Button setAnchorButton;
     private Button clearAnchorsButton;
     //추가
+    private StoredGeolocation storedGeolocation_Photo;
     private Button setLocationButton;
     private TextView stroedLocationTextView;
     private Button cameraGeospatial;
@@ -511,11 +512,8 @@ public class GeospatialActivity extends AppCompatActivity
             public void onClick(View v) {
                 storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
                         geospatialPose.getLongitude(),
-                        geospatialPose.getHorizontalAccuracy(),
                         geospatialPose.getAltitude(),
-                        geospatialPose.getVerticalAccuracy(),
-                        geospatialPose.getHeading(),
-                        geospatialPose.getHeadingAccuracy());
+                        geospatialPose.getHeading());
 
                 stroedLocationTextView.setText("저장되었습니다 ! ");
                 handleSetAnchorButton();
@@ -662,10 +660,25 @@ public class GeospatialActivity extends AppCompatActivity
     private void startCameraGeospatial() {
 
         cameraGeospatial = findViewById(R.id.camera_geospatial);
+        Earth earth = session.getEarth();
+        if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
+            return;
+        }
+
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+        double latitude = geospatialPose.getLatitude();
+        double longitude = geospatialPose.getLongitude();
+        double altitude = geospatialPose.getAltitude();
+        double headingDegrees = geospatialPose.getHeading();
+
+        storedGeolocation_Photo = new StoredGeolocation(latitude, longitude, altitude, headingDegrees);
 
         cameraGeospatial.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString() );
+
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, 101);
                 //TODO: 현재 카메라까지만 구현, 투명도 높은 사진을 storage에서 가져와서 띄워야함
@@ -682,7 +695,23 @@ public class GeospatialActivity extends AppCompatActivity
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             // Set the image in imageview for display
             System.out.println("photo = " + photo);
+            Log.e(TAG, "onActivityResult: storedGeolocation_Photo"+storedGeolocation_Photo );
             //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
+            db.collection("anchor").document(AnchorDate).set(anchorFirebase);
+
+
+            /**
+             * 파이어베이스에 저장할 데이터
+             * 위치 : users - uid - posts - postID - {document}
+             *
+             * -anchorFirebase : latitude, longitude, altitude, angleRadians
+             * -imgURL : 촬영한 사진 이미지
+             * -userID
+             * -활용한 게시글
+             */
         }
     }
 
@@ -832,6 +861,7 @@ public class GeospatialActivity extends AppCompatActivity
         double altitude = geospatialPose.getAltitude();
         double headingDegrees = geospatialPose.getHeading();
         createAnchor(earth, latitude, longitude, altitude, headingDegrees);
+        //TODO: firebase에 저장하는 코드는 이곳에서 parameter로 지리정보를 받아야함
         storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
         runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
         if (clearedAnchorsAmount != null) {
