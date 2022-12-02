@@ -745,6 +745,7 @@ public class ArNav extends AppCompatActivity
         if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
             return;
         }
+        
         String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
         DocumentReference coordsRef = db.collection("users").document(tempUID).collection("nav").document(tempUID);
         coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -757,6 +758,7 @@ public class ArNav extends AppCompatActivity
                         List<Double> longitudes = (List<Double>) ds.get("longitudes");
                         Log.e(TAG, " " + "데이터 로드 완료");
                         for(int i=0; i<latitudes.size(); i++) {
+                            // heading degrees는 어느 정도 수정 가능할 듯 함
                             createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
                             storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
@@ -790,6 +792,8 @@ public class ArNav extends AppCompatActivity
             Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
         // Convert a heading to a EUS quaternion:
         double angleRadians = Math.toRadians(180.0f - headingDegrees);
+
+
 
         Anchor anchor =
                 earth.createAnchor(

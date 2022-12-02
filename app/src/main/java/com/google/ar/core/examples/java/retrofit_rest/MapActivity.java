@@ -112,10 +112,12 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                             if (!_splitDepth[k].equals(" ")) {
                                 if (k == 0) {
                                     Double tempLnd = Double.parseDouble(_splitDepth[k]);
-                                    longitudes.add(tempLnd);
+                                    if(!longitudes.contains(tempLnd))
+                                        longitudes.add(tempLnd);
                                 } else {
                                     Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
-                                    latitudes.add(tempLat);
+                                    if(!latitudes.contains(tempLat))
+                                        latitudes.add(tempLat);
                                 }
                             }
                         }
