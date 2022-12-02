@@ -758,6 +758,7 @@ public class ArNav extends AppCompatActivity
                         List<Double> longitudes = (List<Double>) ds.get("longitudes");
                         Log.e(TAG, " " + "데이터 로드 완료");
                         for(int i=0; i<latitudes.size(); i++) {
+                            // heading degrees는 어느 정도 수정 가능할 듯 함
                             createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
                             storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
