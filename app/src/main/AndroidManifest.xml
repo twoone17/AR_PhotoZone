@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <permission
         android:name="com.example.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -20,6 +19,19 @@
  Limits app visibility in the Google Play Store to ARCore supported devices
        (https://developers.google.com/ar/devices).
     -->
+
+    <!--지도 관련 권한들 - 철웅 추가, 추후에 충돌이 생길 수 있음-->
+
+    <permission android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature"/>
+
+    <uses-permission android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="READ_GSERVICES"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+
     <uses-feature
         android:name="android.hardware.camera.ar"
         android:required="true" />
