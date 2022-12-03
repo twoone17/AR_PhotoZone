@@ -11,8 +11,7 @@ import com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity
 import com.google.ar.core.examples.java.app.map.MapLocationActivity
 import com.google.ar.core.examples.java.geospatial.ArNav
 import com.google.ar.core.examples.java.geospatial.R
-import kotlinx.android.synthetic.main.activity_board_click.*
-import kotlinx.android.synthetic.main.fragment_first.*
+import com.google.ar.core.examples.java.retrofit_rest.MapActivity
 
 class Fragment1 : Fragment() {
     val TAG = "Fragment1"
@@ -22,6 +21,7 @@ class Fragment1 : Fragment() {
         val v =  inflater.inflate(R.layout.fragment_first, container, false)
         val uploadButton:Button = v.findViewById(R.id.uploadButton)
         val navButton:Button = v.findViewById(R.id.navButton)
+        val maplocationButton:Button = v.findViewById(R.id.maplcationButton)
         val retrofitTester:Button = v.findViewById(R.id.retrofitTester)
         uploadButton.setOnClickListener{
             val nextIntent = Intent(requireContext(), UploadUsingPicaActivity::class.java)
@@ -35,12 +35,17 @@ class Fragment1 : Fragment() {
             }.run { startActivity(this) }
         }
 
-        retrofitTester.setOnClickListener{
+        maplocationButton.setOnClickListener{
             Intent(context, MapLocationActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.run { startActivity(this) }
         }
 
+        retrofitTester.setOnClickListener{
+            Intent(context, MapActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }.run { startActivity(this) }
+        }
 
         return v
     }

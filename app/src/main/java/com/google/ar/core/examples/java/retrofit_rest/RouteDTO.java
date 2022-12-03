@@ -119,6 +119,10 @@ public class RouteDTO implements Serializable {
         @SerializedName("totalDistance")
         private int totaldistance;
 
+        @Expose
+        @SerializedName("distance")
+        private int distance;
+
         public Properties() {
         }
 
@@ -240,6 +244,14 @@ public class RouteDTO implements Serializable {
 
         public void setTotaldistance(int totaldistance) {
             this.totaldistance = totaldistance;
+        }
+
+        public int getDistance() {
+            return distance;
+        }
+
+        public void setTodistance(int distance) {
+            this.distance = distance;
         }
     }
 

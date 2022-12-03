@@ -120,7 +120,7 @@ public class ArNav extends AppCompatActivity
     private static final double LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES = 10;
 
     private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
-    private static final int MAXIMUM_ANCHORS = 100;
+    private static final int MAXIMUM_ANCHORS = 1000;
 
     private boolean CONCURRENT_PREVENT_FLAG = false;
 
@@ -758,7 +758,6 @@ public class ArNav extends AppCompatActivity
                         List<Double> longitudes = (List<Double>) ds.get("longitudes");
                         Log.e(TAG, " " + "데이터 로드 완료");
                         for(int i=0; i<latitudes.size(); i++) {
-                            // heading degrees는 어느 정도 수정 가능할 듯 함
                             createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
                             storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
