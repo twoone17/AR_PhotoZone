@@ -63,11 +63,12 @@ class Boardfragment : Fragment() {
         db.collection("app_board").get().addOnSuccessListener { result ->
             for (links in result) {
                 datas.apply {
-                    add(BoardData(img = links.data["imgURL"].toString(),
-                        "테스트용 게시글입니다.",
-                        2,
-                        "2BXzuCaFIYXf7Dp06sHMCrTNSH43",
-                        "Iron_Woong"))
+                    add(BoardData(imgURL = links.data["imgURL"].toString(),
+                        description = links.data["description"].toString(),
+                        likes = links.data["likes"] as Long,
+                        publisher = links.data["publisher"].toString(),
+                        userId = links.data["userId"].toString(),
+                        links.id))
                     boardAdapter.datas = datas
                     boardAdapter.notifyDataSetChanged()
                 }

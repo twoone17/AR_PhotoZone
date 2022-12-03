@@ -13,10 +13,10 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView_BoardItem"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"/>
+        android:scrollbars="vertical"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager" />
 
 
 <!--    테마 변경하면 오류 뜰 수도 있다. 찾아보니 parent의 Material 문제라고 한다.-->
