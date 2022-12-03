@@ -58,7 +58,7 @@ dependencies {
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
     implementation 'com.google.firebase:firebase-auth-ktx:21.0.5'
-
+    implementation 'com.android.databinding:viewbinding:4.0.1'
     // 철웅 추가 - REST 통신을 위한 retrofit2와 구글맵, 티맵
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
