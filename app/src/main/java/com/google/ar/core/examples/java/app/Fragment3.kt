@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.activity
 
+import android.Manifest
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -266,12 +267,12 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     private fun getUserLocation(){
         Log.d("curLoc","getUserLocation func start")
         //permission check -> 나중에 home fragment 실행으로 변경 필요 : permission check 후 바로 위치 정보 받는 게 안됨
-        if(ActivityCompat.checkSelfPermission(activity!!.baseContext, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if(ActivityCompat.checkSelfPermission(activity!!.baseContext, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(activity!!.baseContext, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            ActivityCompat.checkSelfPermission(activity!!.baseContext, Manifest.permission.ACCESS_COARSE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ){
-            ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQEST_CODE)
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQEST_CODE)
             //ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION), REQEST_CODE)
 
             //return
@@ -307,13 +308,13 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         locationRequest.interval = 10 // ms단위 , set as 1min
 
 
-        if(ActivityCompat.checkSelfPermission(activity!!.baseContext, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if(ActivityCompat.checkSelfPermission(activity!!.baseContext, Manifest.permission.ACCESS_FINE_LOCATION)
             != PackageManager.PERMISSION_GRANTED &&
-            ActivityCompat.checkSelfPermission(activity!!.baseContext, android.Manifest.permission.ACCESS_COARSE_LOCATION)
+            ActivityCompat.checkSelfPermission(activity!!.baseContext, Manifest.permission.ACCESS_COARSE_LOCATION)
             != PackageManager.PERMISSION_GRANTED
         ){
-            ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION), REQEST_CODE)
-            ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION), REQEST_CODE)
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQEST_CODE)
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), REQEST_CODE)
         }
 
 

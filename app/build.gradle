@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'//for data-binding error
 android {
     compileSdkVersion 33
     defaultConfig {
@@ -23,6 +24,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    //for data-binding error
+    dataBinding {
+        enabled = true
+    }
+    viewBinding{
+        enabled = true
     }
 }
 
@@ -51,6 +59,26 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.google.firebase:firebase-common-ktx:20.2.0'
     implementation 'de.hdodenhof:circleimageview:3.1.0'
+
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.4.1'
+    implementation 'com.google.maps.android:android-maps-utils:2.4.0'
+    implementation 'com.google.firebase:firebase-auth-ktx:21.1.0'
+    implementation 'com.google.firebase:firebase-storage-ktx:20.1.0'
+    kapt 'com.android.databinding:compiler:3.1.4'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.squareup.retrofit2:converter-jaxb:2.9.0'
+    implementation "com.squareup.retrofit2:converter-gson:2.8.1"
+
+    //김부경 추가 (fragment 3)
+    implementation 'com.google.android.gms:play-services-maps:18.1.0'
+    implementation 'com.google.maps.android:android-maps-utils:2.4.0'
+    implementation 'com.google.maps.android:android-maps-utils:2.4.0'
+
+}
+//for data-binding error
+kapt {
+    generateStubs = true
 }
 repositories {
     mavenCentral()
