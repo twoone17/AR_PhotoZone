@@ -5,6 +5,7 @@ import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.ar.core.examples.java.activity.Fragment3
 import com.google.ar.core.examples.java.app.board.Boardfragment
 import com.google.ar.core.examples.java.geospatial.R
 

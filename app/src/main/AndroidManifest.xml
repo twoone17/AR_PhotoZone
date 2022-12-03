@@ -55,6 +55,11 @@
         <meta-data
             android:name="com.google.android.ar.API_KEY"
             android:value="AIzaSyB1CL1sEiRBxo9ul2COQXRzQvMgh2x2ywg" />
+
+        <!--김부경 추가-->
+        <meta-data
+            android:name = "com.google.android.geo.API_KEY"
+            android:value = "AIzaSyCETkW7K8iZYFvFQU_bUQVeMikBI5dJz48"/>
     </application>
 
 </manifest>
