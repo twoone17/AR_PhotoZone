@@ -3,20 +3,15 @@ public class StoredGeolocation {
 
     private double latitude;
     private double longitude;
-    private double horizontalAccuracy;
     private double altitude;
-    private double verticalAccuracy;
     private double heading;
-    private double headingAccuracy;
 
 
-    public StoredGeolocation(double latitude, double longitude,double horizontalAccuracy, double altitude, double verticalAccuracy, double heading, double headingAccuracy) {
+    public StoredGeolocation(double latitude, double longitude, double altitude, double heading) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
-        this.verticalAccuracy = verticalAccuracy;
         this.heading = heading;
-        this.headingAccuracy = headingAccuracy;
     }
 
     public double getLatitude() {
@@ -43,14 +38,6 @@ public class StoredGeolocation {
         this.altitude = altitude;
     }
 
-    public double getVerticalAccuracy() {
-        return verticalAccuracy;
-    }
-
-    public void setVerticalAccuracy(double verticalAccuracy) {
-        this.verticalAccuracy = verticalAccuracy;
-    }
-
     public double getHeading() {
         return heading;
     }
@@ -59,24 +46,14 @@ public class StoredGeolocation {
         this.heading = heading;
     }
 
-    public double getHeadingAccuracy() {
-        return headingAccuracy;
-    }
-
-    public void setHeadingAccuracy(double headingAccuracy) {
-        this.headingAccuracy = headingAccuracy;
-    }
 
     @Override
     public String toString() {
         return "StoredGeolocation{" +
                 "latitude=" + latitude +
                 ", longitude=" + longitude +
-                ", horizontalAccuracy=" + horizontalAccuracy +
                 ", altitude=" + altitude +
-                ", verticalAccuracy=" + verticalAccuracy +
                 ", heading=" + heading +
-                ", headingAccuracy=" + headingAccuracy +
                 '}';
     }
 }

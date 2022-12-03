@@ -15,6 +15,8 @@
 -->
 <resources>
     <string name="app_name" translatable="false">Pic-AR</string>
+    <string name="googleAPIKey" translatable="false">AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU</string>
+    <string name="tMapAPIKey" translatable="false">l7xxa97487515286485e98d6fafe222d88c7</string>
     <string name="button_text_set_anchor" translatable="false">SET ANCHOR</string>
     <string name="button_text_clear_anchors" translatable="false">CLEAR ALL ANCHORS</string>
     <string name="status_unsupported" translatable="false">This device is not supported.</string>

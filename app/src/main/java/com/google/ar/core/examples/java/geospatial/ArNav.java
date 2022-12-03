@@ -1,20 +1,5 @@
-/*
- * Copyright 2022 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.google.ar.core.examples.java.geospatial;
+
 
 import android.app.Activity;
 import android.content.Context;
@@ -118,7 +103,7 @@ import java.util.concurrent.TimeUnit;
  * and will be recreated once localized.
  */
 
-public class GeospatialActivity extends AppCompatActivity
+public class ArNav extends AppCompatActivity
         implements SampleRender.Renderer, NoticeDialogListener {
 
     private static final String TAG = GeospatialActivity.class.getSimpleName();
@@ -128,63 +113,32 @@ public class GeospatialActivity extends AppCompatActivity
 
     private static final float Z_NEAR = 0.1f;
     private static final float Z_FAR = 1000f;
-
-    // The thresholds that are required for horizontal and heading accuracies before entering into the
-    // LOCALIZED state. Once the accuracies are equal or less than these values, the app will
-    // allow the user to place anchors.
     private static final double LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS = 10;
     private static final double LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES = 15;
-    private DatabaseReference mDatabase;
 
-    // Once in the LOCALIZED state, if either accuracies degrade beyond these amounts, the app will
-    // revert back to the LOCALIZING state.
     private static final double LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS = 10;
     private static final double LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES = 10;
 
     private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
-    private static final int MAXIMUM_ANCHORS = 10;
+    private static final int MAXIMUM_ANCHORS = 100;
 
-    // Rendering. The Renderers are created here, and initialized when the GL surface is created.
+    private boolean CONCURRENT_PREVENT_FLAG = false;
+
     private GLSurfaceView surfaceView;
 
     private boolean installRequested;
     private Integer clearedAnchorsAmount = null;
-
-    /**
-     * Timer to keep track of how much time has passed since localizing has started.
-     */
     private long localizingStartTimestamp;
 
+    private FirebaseFirestore db;
+
     enum State {
-        /**
-         * The Geospatial API has not yet been initialized.
-         */
         UNINITIALIZED,
-        /**
-         * The Geospatial API is not supported.
-         */
         UNSUPPORTED,
-        /**
-         * The Geospatial API has encountered an unrecoverable error.
-         */
         EARTH_STATE_ERROR,
-        /**
-         * The Session has started, but {@link Earth} isn't {@link TrackingState.TRACKING} yet.
-         */
         PRETRACKING,
-        /**
-         * {@link Earth} is {@link TrackingState.TRACKING}, but the desired positioning confidence
-         * hasn't been reached yet.
-         */
         LOCALIZING,
-        /**
-         * The desired positioning confidence wasn't reached in time.
-         */
         LOCALIZING_FAILED,
-        /**
-         * {@link Earth} is {@link TrackingState.TRACKING} and the desired positioning confidence has
-         * been reached.
-         */
         LOCALIZED
     }
 
@@ -202,10 +156,7 @@ public class GeospatialActivity extends AppCompatActivity
     private TextView statusTextView;
     private Button setAnchorButton;
     private Button clearAnchorsButton;
-    //추가
-    private String imgURL;
-    private StorageTask uploadTask;
-    StorageReference storageRef;
+
 
 
 
@@ -243,8 +194,8 @@ public class GeospatialActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
-        Intent intent = getIntent();
-        BoardData boardData = (BoardData) intent.getSerializableExtra("boardData");
+        db = FirebaseFirestore.getInstance();
+
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
         geospatialPoseTextView = findViewById(R.id.geospatial_pose_view);
@@ -265,7 +216,10 @@ public class GeospatialActivity extends AppCompatActivity
         installRequested = false;
         clearedAnchorsAmount = null;
 
-        System.out.println("boardData = " + boardData);
+//        runOnUiThread(
+//                () -> {
+//                    setAnchorButton.setVisibility(View.VISIBLE);
+//                });
 
         auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
 
@@ -423,9 +377,9 @@ public class GeospatialActivity extends AppCompatActivity
                 && !LocationPermissionHelper.hasFineLocationPermission(this)) {
             // Use toast instead of snackbar here since the activity will exit.
             Toast.makeText(
-                            this,
-                            "Precise location permission is needed to run this application",
-                            Toast.LENGTH_LONG)
+                    this,
+                    "Precise location permission is needed to run this application",
+                    Toast.LENGTH_LONG)
                     .show();
             if (!LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
                 // Permission denied with checking "Do not ask again".
@@ -460,10 +414,10 @@ public class GeospatialActivity extends AppCompatActivity
             virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
-                                    render,
-                                    "shaders/ar_unlit_object.vert",
-                                    "shaders/ar_unlit_object.frag",
-                                    /*defines=*/ null)
+                            render,
+                            "shaders/ar_unlit_object.vert",
+                            "shaders/ar_unlit_object.frag",
+                            /*defines=*/ null)
                             .setTexture("u_Texture", virtualObjectTexture);
 
             backgroundRenderer.setUseDepthVisualization(render, false);
@@ -534,57 +488,47 @@ public class GeospatialActivity extends AppCompatActivity
 
         //TODO: 여기선 버튼이지만 추후에 촬영시 저장되는 형식으로 변경
 
-        setLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
-                        geospatialPose.getLongitude(),
-                        geospatialPose.getAltitude(),
-                        geospatialPose.getHeading());
+//        setLocationButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
+//                        geospatialPose.getLongitude(),
+//                        geospatialPose.getAltitude(),
+//                        geospatialPose.getHeading());
+//
+//                stroedLocationTextView.setText("저장되었습니다 ! ");
+//                handleSetAnchorButton();
+//
+//                //기존 저장한 앵커를 파이어베이스에서 불러온다
+//                FirebaseFirestore db = FirebaseFirestore.getInstance();
+//
+//
+//
+//                db.collectionGroup("anchor").get().
+//                        addOnCompleteListener(task -> {
+//                            if (task.isSuccessful()) {
+//
+//                                for (QueryDocumentSnapshot document : task.getResult()) {
+//                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
+//                                    Anchor anchor =
+//                                            earth.createAnchor(
+//                                                    anchorFirebase.getLatitude(),
+//                                                    anchorFirebase.getLongitude(),
+//                                                    anchorFirebase.getAltitude(),
+//                                                    0.0f,
+//                                                    (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
+//                                                    0.0f,
+//                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
+//                                    anchors.add(anchor);
+//                                }
+//
+//                            }
+//
+//
+//                        });
+//            }
+//        });
 
-                stroedLocationTextView.setText("저장되었습니다 ! ");
-                handleSetAnchorButton();
-
-                //기존 저장한 앵커를 파이어베이스에서 불러온다
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-
-
-                db.collectionGroup("anchor").get().
-                        addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
-                                    Anchor anchor =
-                                            earth.createAnchor(
-                                                    anchorFirebase.getLatitude(),
-                                                    anchorFirebase.getLongitude(),
-                                                    anchorFirebase.getAltitude(),
-                                                    0.0f,
-                                                    (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
-                                                    0.0f,
-                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
-                                    anchors.add(anchor);
-                                }
-
-                            }
-
-
-                        });
-
-
-            }
-        });
-
-        startCameraGeospatial();
-
-        // Write a message to the database
-        //
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-
-        myRef.setValue("Hello, World!");
 
         // Show a message based on whether tracking has failed, if planes are detected, and if the user
         // has placed any objects.
@@ -662,169 +606,31 @@ public class GeospatialActivity extends AppCompatActivity
         // Visualize anchors created by touch.
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-        Iterator<Anchor> iterator = anchors.iterator();
-        System.out.println("anchors.size() = " + anchors.size());
-        for (Anchor anchor : anchors) {
+//        Iterator<Anchor> iterator = anchors.iterator();
+        Log.e(TAG, "onDrawFrame: " + anchors.size());
+        if (CONCURRENT_PREVENT_FLAG) {
+
+            for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
 //    while(iterator.hasNext()){
 //      Anchor anchor = iterator.next();
-            // Get the current pose of an Anchor in world space. The Anchor pose is updated
-            // during calls to session.update() as ARCore refines its estimate of the world.
-            anchor.getPose().toMatrix(modelMatrix, 0);
+                // Get the current pose of an Anchor in world space. The Anchor pose is updated
+                // during calls to session.update() as ARCore refines its estimate of the world.
+                iterator.next().getPose().toMatrix(modelMatrix, 0);
 
-            // Calculate model/view/projection matrices
-            Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                // Calculate model/view/projection matrices
+                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-            // Update shader properties and draw
-            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                // Update shader properties and draw
+                virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
-            render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+                render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+            }
         }
-
         // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
     }
 
-    //camera가 나옴
-    private void startCameraGeospatial() {
-
-        cameraGeospatial = findViewById(R.id.camera_geospatial);
-        Earth earth = session.getEarth();
-        if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
-            return;
-        }
-
-        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-        double latitude = geospatialPose.getLatitude();
-        double longitude = geospatialPose.getLongitude();
-        double altitude = geospatialPose.getAltitude();
-        double headingDegrees = geospatialPose.getHeading();
-
-        storedGeolocation_Photo = new StoredGeolocation(latitude, longitude, altitude, headingDegrees);
-
-        cameraGeospatial.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString() );
-
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(intent, 101);
-                //TODO: 현재 카메라까지만 구현, 투명도 높은 사진을 storage에서 가져와서 띄워야함
-            }
-        });
-
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        // Match the request 'pic id with requestCode
-
-        if (requestCode == 101) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "onActivityResult: 권한접근" );
-                // Should we show an explanation?
-                if (shouldShowRequestPermissionRationale(
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    // Explain to the user why we need to read the contacts
-                    Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale" );
-                }
-
-                requestPermissions(
-                        new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                        1000);
-
-                // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
-                // app-defined int constant that should be quite unique
-                Log.e(TAG, "onActivityResult: return" );
-                return;
-            }
-            Log.e(TAG, "onActivityResult: 권한성공" );
-            // BitMap is data structure of image file which store the image in memory
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            // Set the image in imageview for display
-            System.out.println("photo = " + photo);
-
-            Uri imgURL = getImageUri(this,photo);
-//            imgURL = uri.toString();
-            Log.e(TAG, "onActivityResult: imgURL" + imgURL );
-            Log.e(TAG, "onActivityResult: storedGeolocation_Photo"+storedGeolocation_Photo );
-            //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
-            Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" +  auth.getCurrentUser());
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-            //storage에 파일 저장하는 코드
-            /**
-             * 파이어베이스에 저장할 데이터
-             * 위치 : users - uid - posts - postID - {document}
-             *
-             * -anchorFirebase : latitude, longitude, altitude, angleRadians
-             * -imgURL : 촬영한 사진 이미지
-             * -userID
-             * -활용한 게시글
-             */
-            if (imgURL != null) {
-//                String GetUid = firebaseUser.getUid();
-                //TODO: 로그인구현 이후 수정
-                String getUid = auth.getCurrentUser().getUid();
-                StorageReference storageRef = FirebaseStorage.getInstance().getReference("Gallery/" + getUid); //storgae의 저장경로
-                final StorageReference ref = storageRef.child(System.currentTimeMillis() + ".jpg"); //이미지의 파일이름
-                uploadTask = ref.putFile(imgURL); //storage에 file을 업로드, uri를 통해서
-                uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                    @Override
-                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                        if (!task.isSuccessful()) {
-                            throw task.getException();
-                        }
-
-                        // Continue with the task to get the download URL
-                        return ref.getDownloadUrl();
-                    }
-                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Uri> task) {
-                        if (task.isSuccessful()) { //task가 성공하면
-                            Uri downloadUri = task.getResult(); //위의 return값을 받아 downloadUri에 저장
-                            String DownloadUrl = downloadUri.toString();
-                            LocalDateTime now = LocalDateTime.now();
-                            String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
-
-                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading());
-//
-                            db.collection("users").document(getUid).collection("posts").document(postdocument_bydate).set(uploadFirebaseData)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Log.e("temp", "onSuccess: DB Insertion success");
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.e("temp", "onFailure: DB Insertion failed");
-                                        }
-                                    });
-                            finish();
-
-                        } else {
-                            Toast.makeText(GeospatialActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-
-
-
-        }
-    }
-
-    private Uri getImageUri(Context context, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
-    }
 
     /**
      * Configures the session with feature settings.
@@ -856,11 +662,6 @@ public class GeospatialActivity extends AppCompatActivity
         }
     }
 
-    /**
-     * Handles the updating for {@link State.PRETRACKING}. In this state, wait for {@link Earth} to
-     * have {@link TrackingState.TRACKING}. If it hasn't been enabled by now, then we've encountered
-     * an unrecoverable {@link State.EARTH_STATE_ERROR}.
-     */
     private void updatePretrackingState(Earth earth) {
         if (earth.getTrackingState() == TrackingState.TRACKING) {
             state = State.LOCALIZING;
@@ -875,13 +676,6 @@ public class GeospatialActivity extends AppCompatActivity
         runOnUiThread(() -> geospatialPoseTextView.setText(R.string.geospatial_pose_not_tracking));
     }
 
-    /**
-     * Handles the updating for {@link State.LOCALIZING}. In this state, wait for the horizontal and
-     * heading threshold to improve until it reaches your threshold.
-     *
-     * <p>If it takes too long for the threshold to be reached, this could mean that GPS data isn't
-     * accurate enough, or that the user is in an area that can't be localized with StreetView.
-     */
     private void updateLocalizingState(Earth earth) {
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
         if (geospatialPose.getHorizontalAccuracy() <= LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS
@@ -905,17 +699,9 @@ public class GeospatialActivity extends AppCompatActivity
 
         updateGeospatialPoseText(geospatialPose);
     }
-//
 
-    /**
-     * Handles the updating for {@link State.LOCALIZED}. In this state, check the accuracy for
-     * degradation and return to {@link State.LOCALIZING} if the position accuracies have dropped too
-     * low.
-     */
     private void updateLocalizedState(Earth earth) {
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-        // Check if either accuracy has degraded to the point we should enter back into the LOCALIZING
-        // state.
         if (geospatialPose.getHorizontalAccuracy()
                 > LOCALIZING_HORIZONTAL_ACCURACY_THRESHOLD_METERS
                 + LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS
@@ -954,31 +740,42 @@ public class GeospatialActivity extends AppCompatActivity
                 });
     }
 
-    /**
-     * Handles the button that creates an anchor.
-     *
-     * <p>Ensure Earth is in the proper state, then create the anchor. Persist the parameters used to
-     * create the anchors so that the anchors will be loaded next time the app is launched.
-     */
     private void handleSetAnchorButton() {
         Earth earth = session.getEarth();
         if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
             return;
         }
-
-        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-        double latitude = geospatialPose.getLatitude();
-        double longitude = geospatialPose.getLongitude();
-        double altitude = geospatialPose.getAltitude();
-        double headingDegrees = geospatialPose.getHeading();
-        createAnchor(earth, latitude, longitude, altitude, headingDegrees);
-        //TODO: firebase에 저장하는 코드는 이곳에서 parameter로 지리정보를 받아야함
-        storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
+        
+        String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
+        DocumentReference coordsRef = db.collection("users").document(tempUID).collection("nav").document(tempUID);
+        coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful()) {
+                    DocumentSnapshot ds = task.getResult();
+                    if(ds.exists()) {
+                        List<Double> latitudes = (List<Double>) ds.get("latitudes");
+                        List<Double> longitudes = (List<Double>) ds.get("longitudes");
+                        Log.e(TAG, " " + "데이터 로드 완료");
+                        for(int i=0; i<latitudes.size(); i++) {
+                            // heading degrees는 어느 정도 수정 가능할 듯 함
+                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
+                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
+                        }
+                        CONCURRENT_PREVENT_FLAG = true;
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "onFailure: " + e);
+            }
+        });
         runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
         if (clearedAnchorsAmount != null) {
             clearedAnchorsAmount = null;
         }
-        //firebase에 올리기
     }
 
     private void handleClearAnchorsButton() {
@@ -995,12 +792,8 @@ public class GeospatialActivity extends AppCompatActivity
             Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
         // Convert a heading to a EUS quaternion:
         double angleRadians = Math.toRadians(180.0f - headingDegrees);
-        LocalDateTime now = LocalDateTime.now();
-        String AnchorDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
-        //현재 위치의 앵커를 파이어베이스에 저장한다
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
-        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
+
+
 
         Anchor anchor =
                 earth.createAnchor(
@@ -1034,6 +827,7 @@ public class GeospatialActivity extends AppCompatActivity
         editor.putStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, newAnchorParameterSet);
         editor.commit();
     }
+
 
     private void clearAnchorsFromSharedPreferences() {
         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -8,10 +8,30 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <permission
+        android:name="com.example.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.example.permission.C2D_MESSAGE" />
     <!--
  Limits app visibility in the Google Play Store to ARCore supported devices
        (https://developers.google.com/ar/devices).
     -->
+
+    <!--지도 관련 권한들 - 철웅 추가, 추후에 충돌이 생길 수 있음-->
+
+    <permission android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature"/>
+
+    <uses-permission android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="READ_GSERVICES"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+
     <uses-feature
         android:name="android.hardware.camera.ar"
         android:required="true" />
@@ -28,18 +48,49 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
+            android:name="com.google.ar.core.examples.java.app.map.MapLocationActivity"
+            android:exported="true" />
+        <!-- 구글맵 API 키 -->
+        <!-- API 키 노출때문에 string xml 안에 정의해두고 해당 파일은 커밋하지 않았습니다. 추후에 공유하도록 하겠습니다! -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/googleAPIKey" />
+
+        <activity
+            android:name="com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.google.ar.core.examples.java.app.board.comment.CommentActivity"
+            android:exported="true" />
+        <activity
             android:name="com.google.ar.core.examples.java.app.board.UploadActivity"
+            android:exported="true" />
+        <activity
+            android:name="com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity"
             android:exported="true" />
         <activity
             android:name="com.google.ar.core.examples.java.app.board.BoardClickActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
         <activity
+            android:name="com.google.ar.core.examples.java.retrofit_rest.MapActivity"
+            android:exported="true" />
+        <activity
             android:name=".GeospatialActivity"
             android:configChanges="orientation|screenSize"
             android:exported="true"
             android:screenOrientation="locked"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
+            android:name=".ArNav"
+            android:configChanges="orientation|screenSize"
+            android:exported="true"
+            android:screenOrientation="locked"
+            android:theme="@style/Theme.AppCompat.NoActionBar" />
+        <activity
+            android:name="com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
         <activity
             android:name="com.google.ar.core.examples.java.app.HelloActivity"
             android:exported="true"
