@@ -1,14 +1,20 @@
 package com.google.ar.core.examples.java.retrofit_rest;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.res.AssetManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -115,22 +121,16 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                             if (!_splitDepth[k].equals(" ")) {
                                 if (k == 0) {
                                     Double tempLnd = Double.parseDouble(_splitDepth[k]);
-                                    if(!longitudes.contains(tempLnd))
+                                    if(!longitudes.contains(tempLnd)) {
+//                                        Log.e(TAG, "" + body.getFeatures().get(v).getProperties().getDistance());
                                         longitudes.add(tempLnd);
-//                                    if(!longitudeCache.equals(_splitDepth[k])) {
-//                                        longitudeCache = _splitDepth[k];
-//                                        Double tempLnd = Double.parseDouble(_splitDepth[k]);
-//                                        longitudes.add(tempLnd);
-//                                    }
+                                    }
                                 } else {
                                     Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
-                                    if(!latitudes.contains(tempLat))
+                                    if(!latitudes.contains(tempLat)) {
+//                                        Log.e(TAG, "" + body.getFeatures().get(v).getProperties().getDistance());
                                         latitudes.add(tempLat);
-//                                    if(!latitudeCache.equals(_splitDepth[k].substring(0, _splitDepth[k].length() - 1))) {
-//                                        latitudeCache = _splitDepth[k].substring(0, _splitDepth[k].length() - 1);
-//                                        Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
-//                                        latitudes.add(tempLat);
-//                                    }
+                                    }
                                 }
                             }
                         }
@@ -143,18 +143,23 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                             if(!_splitDepth[l].equals(" ") && _splitDepth[l].length() > 0) {
                                 if (l == 0) {
                                     Double tempLnd = Double.parseDouble(_splitDepth[l]);
-                                    if(!longitudes.contains(tempLnd))
+                                    if(!longitudes.contains(tempLnd)) {
                                         longitudes.add(tempLnd);
+                                    }
                                 } else {
                                     Double tempLat = Double.parseDouble(_splitDepth[l].substring(0, _splitDepth[l].length() - 1));
-                                    if(!latitudes.contains(tempLat))
+                                    if(!latitudes.contains(tempLat)) {
                                         latitudes.add(tempLat);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+
+            coords_extend(latitudes, longitudes);
+
             Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
             Map insertData = new HashMap<String, List<Double>>();
             insertData.put("latitudes", latitudes);
@@ -165,6 +170,27 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         }
 
         return mapPoints;
+    }
+
+    private void coords_extend(ArrayList<Double> latitudes, ArrayList<Double> longitudes) {
+        for(int i=1; i<latitudes.size(); i++) {
+            Location locationA = new Location("first point");
+            locationA.setLatitude(latitudes.get(i-1));
+            locationA.setLongitude(longitudes.get(i-1));
+
+            Location locationB = new Location("second point");
+            locationB.setLatitude(latitudes.get(i));
+            locationB.setLongitude(longitudes.get(i));
+
+            float distance = locationA.distanceTo(locationB);
+            Log.e(TAG, "" + distance);
+
+            // 단위를 쪼개겠다.
+            // 10m, 50m, 100m
+            // 10m의 경우 3번만 좌표를 나누어주겠다.
+            // 50m의 경우 5번 좌표를 나누고,
+            // 100m이상의 경우는 시행착오를 통해 알아내도록 하겠다.
+        }
     }
 }
 
