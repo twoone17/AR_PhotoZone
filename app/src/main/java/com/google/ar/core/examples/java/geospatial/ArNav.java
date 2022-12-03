@@ -120,7 +120,7 @@ public class ArNav extends AppCompatActivity
     private static final double LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES = 10;
 
     private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
-    private static final int MAXIMUM_ANCHORS = 100;
+    private static final int MAXIMUM_ANCHORS = 1000;
 
     private boolean CONCURRENT_PREVENT_FLAG = false;
 

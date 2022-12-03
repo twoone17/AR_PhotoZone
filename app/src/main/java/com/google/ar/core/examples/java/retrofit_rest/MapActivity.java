@@ -160,11 +160,11 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
             coords_extend(latitudes, longitudes);
 
-            Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
-            Map insertData = new HashMap<String, List<Double>>();
-            insertData.put("latitudes", latitudes);
-            insertData.put("longitudes", longitudes);
-            db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
+//            Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
+//            Map insertData = new HashMap<String, List<Double>>();
+//            insertData.put("latitudes", latitudes);
+//            insertData.put("longitudes", longitudes);
+//            db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -173,6 +173,10 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
     }
 
     private void coords_extend(ArrayList<Double> latitudes, ArrayList<Double> longitudes) {
+
+        ArrayList<Double> extended_coords_lat = latitudes;
+        ArrayList<Double> extended_coords_lng = longitudes;
+
         for(int i=1; i<latitudes.size(); i++) {
             Location locationA = new Location("first point");
             locationA.setLatitude(latitudes.get(i-1));
@@ -183,14 +187,62 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
             locationB.setLongitude(longitudes.get(i));
 
             float distance = locationA.distanceTo(locationB);
-            Log.e(TAG, "" + distance);
-
             // 단위를 쪼개겠다.
             // 10m, 50m, 100m
             // 10m의 경우 3번만 좌표를 나누어주겠다.
             // 50m의 경우 5번 좌표를 나누고,
             // 100m이상의 경우는 시행착오를 통해 알아내도록 하겠다.
+
+            if(distance > 5 && distance < 10) {
+                double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
+                double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
+                extended_coords_lat.add(_middle_lat);
+                extended_coords_lng.add(_middle_lng);
+            } else if(distance > 10 && distance < 50) {
+                ////////////////////////////////////////////////////////////////////////////
+                // 정상적으로 동작한다면 추후에 재귀 등으로 코드 간소화 시킬 예정
+                // 1회 분할
+                double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
+                double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
+                extended_coords_lat.add(_middle_lat);
+                extended_coords_lng.add(_middle_lng);
+
+                // 2회 분할
+                double _first_middle_lat = (locationA.getLatitude() + _middle_lat) / 2;
+                double _first_middle_lng = (locationA.getLongitude() + _middle_lng) / 2;
+                double _last_middle_lat = (locationB.getLatitude() + _middle_lat) / 2;
+                double _last_middle_lng = (locationB.getLongitude() + _middle_lng) / 2;;
+                extended_coords_lat.add(_first_middle_lat);
+                extended_coords_lat.add(_last_middle_lat);
+                extended_coords_lng.add(_first_middle_lng);
+                extended_coords_lng.add(_last_middle_lng);
+
+                // 3회 분할
+                double _first_first_middle_lat = (locationA.getLatitude() + _first_middle_lat) / 2;
+                double _first_first_middle_lng = (locationA.getLongitude() + _first_middle_lng) / 2;
+                double _first_last_middle_lat = (locationA.getLatitude() + _last_middle_lat) / 2;
+                double _first_last_middle_lng = (locationA.getLongitude() + _last_middle_lng) / 2;
+                double _last_first_middle_lat = (locationB.getLatitude() + _first_middle_lat) / 2;
+                double _last_first_middle_lng = (locationB.getLatitude() + _first_middle_lng) / 2;
+                double _last_last_middle_lat = (locationB.getLatitude() + _last_middle_lat) / 2;
+                double _last_last_middle_lng = (locationB.getLatitude() + _last_middle_lng) / 2;
+                extended_coords_lat.add(_first_first_middle_lat);
+                extended_coords_lat.add(_first_last_middle_lat);
+                extended_coords_lat.add(_last_first_middle_lat);
+                extended_coords_lat.add(_last_last_middle_lat);
+                extended_coords_lng.add(_first_first_middle_lng);
+                extended_coords_lng.add(_first_last_middle_lng);
+                extended_coords_lng.add(_last_first_middle_lng);
+                extended_coords_lng.add(_last_last_middle_lng);
+
+            } else if(distance > 100) {
+                // 일단 보류
+            }
         }
+        Map insertData = new HashMap<String, List<Double>>();
+        insertData.put("latitudes", latitudes);
+        insertData.put("longitudes", longitudes);
+        db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
     }
 }
 
