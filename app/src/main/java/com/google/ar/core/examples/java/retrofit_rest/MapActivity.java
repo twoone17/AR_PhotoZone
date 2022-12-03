@@ -23,8 +23,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -83,6 +85,7 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
     private ArrayList<Double> longitudes = new ArrayList<>();
     private ArrayList<Double> latitudes = new ArrayList<>();
 
+
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
@@ -114,10 +117,20 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                                     Double tempLnd = Double.parseDouble(_splitDepth[k]);
                                     if(!longitudes.contains(tempLnd))
                                         longitudes.add(tempLnd);
+//                                    if(!longitudeCache.equals(_splitDepth[k])) {
+//                                        longitudeCache = _splitDepth[k];
+//                                        Double tempLnd = Double.parseDouble(_splitDepth[k]);
+//                                        longitudes.add(tempLnd);
+//                                    }
                                 } else {
                                     Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
                                     if(!latitudes.contains(tempLat))
                                         latitudes.add(tempLat);
+//                                    if(!latitudeCache.equals(_splitDepth[k].substring(0, _splitDepth[k].length() - 1))) {
+//                                        latitudeCache = _splitDepth[k].substring(0, _splitDepth[k].length() - 1);
+//                                        Double tempLat = Double.parseDouble(_splitDepth[k].substring(0, _splitDepth[k].length() - 1));
+//                                        latitudes.add(tempLat);
+//                                    }
                                 }
                             }
                         }
@@ -130,10 +143,12 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                             if(!_splitDepth[l].equals(" ") && _splitDepth[l].length() > 0) {
                                 if (l == 0) {
                                     Double tempLnd = Double.parseDouble(_splitDepth[l]);
-                                    longitudes.add(tempLnd);
+                                    if(!longitudes.contains(tempLnd))
+                                        longitudes.add(tempLnd);
                                 } else {
                                     Double tempLat = Double.parseDouble(_splitDepth[l].substring(0, _splitDepth[l].length() - 1));
-                                    latitudes.add(tempLat);
+                                    if(!latitudes.contains(tempLat))
+                                        latitudes.add(tempLat);
                                 }
                             }
                         }

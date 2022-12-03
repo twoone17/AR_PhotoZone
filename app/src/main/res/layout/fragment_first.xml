@@ -8,28 +8,49 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/uploadButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#80cbc4"
-            android:text="임시 업로드 버튼" />
-
-        <Button
-            android:id="@+id/navButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@color/fbutton_color_peter_river"
-            android:text="네비게이션" />
-
-        <Button
-            android:id="@+id/retrofitTester"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/fbutton_color_amethyst"
-            android:text="경로 계산" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/uploadButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="#80cbc4"
+                android:text="임시 업로드 버튼" />
+
+            <Button
+                android:id="@+id/navButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/fbutton_color_peter_river"
+                android:text="네비게이션" />
+
+            <Button
+                android:id="@+id/maplcationButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/fbutton_color_amethyst"
+                android:text="경로 계산" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/retrofitTester"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@color/fbutton_color_amethyst"
+                android:text="retrofit2" />
+
+        </LinearLayout>
     </LinearLayout>
 
 </FrameLayout>
