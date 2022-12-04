@@ -1,9 +1,12 @@
 package com.google.ar.core.examples.java.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.ar.core.examples.java.activity.Fragment3
@@ -21,7 +24,7 @@ import kotlinx.android.synthetic.main.activity_hello.*
 class HelloActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
-
+    private val REQEST_CODE = 101
 
     private val frame: RelativeLayout by lazy { // activity_main의 화면 부분
         findViewById(R.id.body_container)
@@ -39,8 +42,6 @@ class HelloActivity : AppCompatActivity() {
         // 뒤에서 인증 때문에 자꾸 구현이 막힌다
         auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@")
 //        auth.signInWithEmailAndPassword("euisung@naver.com", "2580as2580@")
-
-
 
         // 애플리케이션 실행 후 첫 화면 설정
         supportFragmentManager.beginTransaction().add(frame.id, Fragment1()).commit()
