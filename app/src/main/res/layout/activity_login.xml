@@ -36,6 +36,7 @@
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="10dp"
+        android:focusableInTouchMode="true"
         android:inputType="textEmailAddress" />
 
     <TextView
@@ -51,6 +52,7 @@
         android:layout_height="40dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
+        android:focusableInTouchMode="true"
         android:inputType="textPassword" />
 
     <androidx.appcompat.widget.AppCompatButton

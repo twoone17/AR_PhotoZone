@@ -41,10 +41,10 @@ class LoginActivity : AppCompatActivity() {
     }
 
     // 로그아웃하지 않을 시 자동 로그인 , 회원가입시 바로 로그인 됨
-    public override fun onStart() {
-        super.onStart()
-        moveMainPage(auth?.currentUser)
-    }
+//    public override fun onStart() {
+//        super.onStart()
+//        moveMainPage(auth?.currentUser)
+//    }
 
     // 로그인
     private fun signIn(email: String, password: String) {
