@@ -349,11 +349,11 @@ public class ArNav extends AppCompatActivity
             Texture virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/spatial_marker_baked.png",
+                            "models/example1_baked.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/example1_obj.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                             render,

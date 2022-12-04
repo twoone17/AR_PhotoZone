@@ -27,7 +27,7 @@
     <string name="status_localize_complete" translatable="false">지형 동기화 완료.</string>
     <plurals name="status_anchors_set">
         <item quantity="one">%d 개 앵커 배치됨</item>
-        <item quantity="other">%d 개 앵케들 배치됨</item>
+        <item quantity="other">%d 개 앵커들 배치됨</item>
     </plurals>
     <plurals name="status_anchors_cleared">
         <item quantity="one">%d 개 앵커 제거됨</item>
