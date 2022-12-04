@@ -63,7 +63,10 @@ public class MapLocationActivity extends AppCompatActivity {
             public void onMapReady(GoogleMap googleMap) {
                 Log.d(TAG, "onMapReady: ");
                 map = googleMap;
-//                map.setMyLocationEnabled(true);
+                if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return;
+                }
+                map.setMyLocationEnabled(true);
             }
         });
         MapsInitializer.initialize(this);
