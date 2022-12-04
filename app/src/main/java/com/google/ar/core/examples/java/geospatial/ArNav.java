@@ -114,7 +114,7 @@ public class ArNav extends AppCompatActivity
     private SharedPreferences sharedPreferences;
 
     private String lastStatusText;
-    private TextView geospatialPoseTextView;
+//    private TextView geospatialPoseTextView;
     private TextView statusTextView;
     private Button setAnchorButton;
     private Button clearAnchorsButton;
@@ -149,7 +149,6 @@ public class ArNav extends AppCompatActivity
 
         setContentView(R.layout.activity_geospatial_camera_view);
         surfaceView = findViewById(R.id.surfaceview);
-        geospatialPoseTextView = findViewById(R.id.geospatial_pose_view);
         statusTextView = findViewById(R.id.status_text_view);
         setAnchorButton = findViewById(R.id.set_anchor_button);
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
@@ -163,11 +162,6 @@ public class ArNav extends AppCompatActivity
 
         installRequested = false;
         clearedAnchorsAmount = null;
-
-//        runOnUiThread(
-//                () -> {
-//                    setAnchorButton.setVisibility(View.VISIBLE);
-//                });
 
         auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
 
@@ -429,8 +423,6 @@ public class ArNav extends AppCompatActivity
             updateGeospatialState(earth);
         }
 
-        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-        // TODO 여기다
 
         String message = null;
         switch (state) {
@@ -573,7 +565,7 @@ public class ArNav extends AppCompatActivity
             return;
         }
 
-        runOnUiThread(() -> geospatialPoseTextView.setText(R.string.geospatial_pose_not_tracking));
+//        runOnUiThread(() -> geospatialPoseTextView.setText(R.string.geospatial_pose_not_tracking));
     }
 
     private void updateLocalizingState(Earth earth) {
@@ -597,7 +589,7 @@ public class ArNav extends AppCompatActivity
             return;
         }
 
-        updateGeospatialPoseText(geospatialPose);
+//        updateGeospatialPoseText(geospatialPose);
     }
 
     private void updateLocalizedState(Earth earth) {
@@ -619,26 +611,26 @@ public class ArNav extends AppCompatActivity
             return;
         }
 
-        updateGeospatialPoseText(geospatialPose);
+//        updateGeospatialPoseText(geospatialPose);
     }
 
-    private void updateGeospatialPoseText(GeospatialPose geospatialPose) {
-        String poseText =
-                getResources()
-                        .getString(
-                                R.string.geospatial_pose,
-                                geospatialPose.getLatitude(),
-                                geospatialPose.getLongitude(),
-                                geospatialPose.getHorizontalAccuracy(),
-                                geospatialPose.getAltitude(),
-                                geospatialPose.getVerticalAccuracy(),
-                                geospatialPose.getHeading(),
-                                geospatialPose.getHeadingAccuracy());
-        runOnUiThread(
-                () -> {
-                    geospatialPoseTextView.setText(poseText);
-                });
-    }
+//    private void updateGeospatialPoseText(GeospatialPose geospatialPose) {
+//        String poseText =
+//                getResources()
+//                        .getString(
+//                                R.string.geospatial_pose,
+//                                geospatialPose.getLatitude(),
+//                                geospatialPose.getLongitude(),
+//                                geospatialPose.getHorizontalAccuracy(),
+//                                geospatialPose.getAltitude(),
+//                                geospatialPose.getVerticalAccuracy(),
+//                                geospatialPose.getHeading(),
+//                                geospatialPose.getHeadingAccuracy());
+//        runOnUiThread(
+//                () -> {
+//                    geospatialPoseTextView.setText(poseText);
+//                });
+//    }
 
     private void handleSetAnchorButton() {
         Earth earth = session.getEarth();

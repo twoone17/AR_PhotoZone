@@ -176,8 +176,16 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     private void coords_extend(ArrayList<Double> latitudes, ArrayList<Double> longitudes) {
 
-        ArrayList<Double> extended_coords_lat = latitudes;
-        ArrayList<Double> extended_coords_lng = longitudes;
+        Log.e(TAG, "size: " + latitudes.size() );
+
+        ArrayList<Double> extended_coords_lat = new ArrayList<>();
+        ArrayList<Double> extended_coords_lng = new ArrayList<>();
+
+        // deep copy
+        for(int k=0; k< latitudes.size(); k++) {
+            extended_coords_lat.add(latitudes.get(k));
+            extended_coords_lng.add(longitudes.get(k));
+        }
 
         for(int i=1; i<latitudes.size(); i++) {
             Location locationA = new Location("first point");
@@ -195,13 +203,12 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
             // 50m의 경우 5번 좌표를 나누고,
             // 100m이상의 경우는 시행착오를 통해 알아내도록 하겠다.
 
-//            if(distance > 5 && distance < 10) {
-//                double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
-//                double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
-//                extended_coords_lat.add(_middle_lat);
-//                extended_coords_lng.add(_middle_lng);
-//            } else
-            if(distance > 10 && distance < 50) {
+            if(distance > 5 && distance < 10) {
+                double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
+                double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
+                extended_coords_lat.add(_middle_lat);
+                extended_coords_lng.add(_middle_lng);
+            } else if(distance > 10 && distance < 50) {
                 double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
                 double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
                 extended_coords_lat.add(_middle_lat);
@@ -217,6 +224,9 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 extended_coords_lng.add(_first_middle_lng);
                 extended_coords_lng.add(_last_middle_lng);
             } else if(distance > 100) {
+
+                Log.e(TAG, "인덱스 : " + i + " 위치 : " + latitudes.get(i) + " " + longitudes.get(i));
+                Log.e(TAG, "거리 : " + distance );
                 ////////////////////////////////////////////////////////////////////////////
                 // 정상적으로 동작한다면 추후에 재귀 등으로 코드 간소화 시킬 예정
                 // 1회 분할
@@ -226,38 +236,38 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 extended_coords_lng.add(_middle_lng);
 
                 // 2회 분할
-//                double _first_middle_lat = (locationA.getLatitude() + _middle_lat) / 2;
-//                double _first_middle_lng = (locationA.getLongitude() + _middle_lng) / 2;
-//                double _last_middle_lat = (locationB.getLatitude() + _middle_lat) / 2;
-//                double _last_middle_lng = (locationB.getLongitude() + _middle_lng) / 2;;
-//                extended_coords_lat.add(_first_middle_lat);
-//                extended_coords_lat.add(_last_middle_lat);
-//                extended_coords_lng.add(_first_middle_lng);
-//                extended_coords_lng.add(_last_middle_lng);
-//
-//                // 3회 분할
-//                double _first_first_middle_lat = (locationA.getLatitude() + _first_middle_lat) / 2;
-//                double _first_first_middle_lng = (locationA.getLongitude() + _first_middle_lng) / 2;
-//                double _first_last_middle_lat = (locationA.getLatitude() + _last_middle_lat) / 2;
-//                double _first_last_middle_lng = (locationA.getLongitude() + _last_middle_lng) / 2;
-//                double _last_first_middle_lat = (locationB.getLatitude() + _first_middle_lat) / 2;
-//                double _last_first_middle_lng = (locationB.getLatitude() + _first_middle_lng) / 2;
-//                double _last_last_middle_lat = (locationB.getLatitude() + _last_middle_lat) / 2;
-//                double _last_last_middle_lng = (locationB.getLatitude() + _last_middle_lng) / 2;
-//                extended_coords_lat.add(_first_first_middle_lat);
-//                extended_coords_lat.add(_first_last_middle_lat);
-//                extended_coords_lat.add(_last_first_middle_lat);
-//                extended_coords_lat.add(_last_last_middle_lat);
-//                extended_coords_lng.add(_first_first_middle_lng);
-//                extended_coords_lng.add(_first_last_middle_lng);
-//                extended_coords_lng.add(_last_first_middle_lng);
-//                extended_coords_lng.add(_last_last_middle_lng);
+                double _first_middle_lat = (locationA.getLatitude() + _middle_lat) / 2;
+                double _first_middle_lng = (locationA.getLongitude() + _middle_lng) / 2;
+                double _last_middle_lat = (locationB.getLatitude() + _middle_lat) / 2;
+                double _last_middle_lng = (locationB.getLongitude() + _middle_lng) / 2;;
+                extended_coords_lat.add(_first_middle_lat);
+                extended_coords_lat.add(_last_middle_lat);
+                extended_coords_lng.add(_first_middle_lng);
+                extended_coords_lng.add(_last_middle_lng);
+
+                // 3회 분할
+                double _first_first_middle_lat = (locationA.getLatitude() + _first_middle_lat) / 2;
+                double _first_first_middle_lng = (locationA.getLongitude() + _first_middle_lng) / 2;
+                double _first_last_middle_lat = (locationA.getLatitude() + _last_middle_lat) / 2;
+                double _first_last_middle_lng = (locationA.getLongitude() + _last_middle_lng) / 2;
+                double _last_first_middle_lat = (locationB.getLatitude() + _first_middle_lat) / 2;
+                double _last_first_middle_lng = (locationB.getLatitude() + _first_middle_lng) / 2;
+                double _last_last_middle_lat = (locationB.getLatitude() + _last_middle_lat) / 2;
+                double _last_last_middle_lng = (locationB.getLatitude() + _last_middle_lng) / 2;
+                extended_coords_lat.add(_first_first_middle_lat);
+                extended_coords_lat.add(_first_last_middle_lat);
+                extended_coords_lat.add(_last_first_middle_lat);
+                extended_coords_lat.add(_last_last_middle_lat);
+                extended_coords_lng.add(_first_first_middle_lng);
+                extended_coords_lng.add(_first_last_middle_lng);
+                extended_coords_lng.add(_last_first_middle_lng);
+                extended_coords_lng.add(_last_last_middle_lng);
 
             }
         }
         Map insertData = new HashMap<String, List<Double>>();
-        insertData.put("latitudes", latitudes);
-        insertData.put("longitudes", longitudes);
+        insertData.put("latitudes", extended_coords_lat);
+        insertData.put("longitudes", extended_coords_lng);
         db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
     }
 }
