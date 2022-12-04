@@ -45,6 +45,10 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private static final String TAG = "테스트용";
     String API_Key;
 
+    private double start_lat = 37.413003;
+    private double start_lng = 127.125923;
+    private double end_lat = 37.4119623;
+    private double end_lng = 127.1284907;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +62,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-//        RoadTracker rt = new RoadTracker(googleMap);
-        LatLng start = new LatLng(37.413003, 127.125923);
-        LatLng end = new LatLng(37.4119623, 127.1284907);
+        LatLng start = new LatLng(start_lat, start_lng);
+        LatLng end = new LatLng(end_lat, end_lng);
         API_Key = getResources().getString(R.string.tMapAPIKey);
-//        ArrayList<LatLng> jsonData = rt.getJsonData(start, end);
         try {
             new RoadTracker().execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
                     String.valueOf(end.longitude), String.valueOf(end.latitude),

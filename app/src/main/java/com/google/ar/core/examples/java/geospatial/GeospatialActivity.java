@@ -16,28 +16,23 @@
 
 package com.google.ar.core.examples.java.geospatial;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
 
@@ -80,17 +75,10 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import com.google.ar.core.exceptions.UnsupportedConfigurationException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.ktx.Firebase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.StorageTask;
@@ -102,7 +90,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -110,13 +97,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Main activity for the Geospatial API example.
- *
- * <p>This example shows how to use the Geospatial APIs. Once the device is localized, anchors can
- * be created at the device's geospatial location. Anchor locations are persisted across sessions
- * and will be recreated once localized.
- */
 
 public class GeospatialActivity extends AppCompatActivity
         implements SampleRender.Renderer, NoticeDialogListener {
@@ -251,9 +231,8 @@ public class GeospatialActivity extends AppCompatActivity
         statusTextView = findViewById(R.id.status_text_view);
         setAnchorButton = findViewById(R.id.set_anchor_button);
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
-        cameraGeospatial = findViewById(R.id.camera_geospatial);
-        //눌렀을때 위치 저장
-//    setLocationButton = findViewById(R.id.set_location);
+
+
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
 
