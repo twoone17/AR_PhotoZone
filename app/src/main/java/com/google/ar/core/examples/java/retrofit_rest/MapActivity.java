@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.retrofit_rest;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,6 +20,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.ar.core.examples.java.geospatial.ArNav;
 import com.google.ar.core.examples.java.geospatial.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,6 +44,11 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/*TODO
+ * 현재 위치, 게시글에서 도착지 위치 얻어서 intent MapActivity 로 넘김
+ * MapActivity에서 좌표 넣어서 티맵 보내고 결과 파이어베이스에 저장 + ArNav 액티비티 호출
+ * 그러면 ArNav 액티비티에서 길안내 시작
+ */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "테스트용";
@@ -66,7 +75,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         LatLng end = new LatLng(end_lat, end_lng);
         API_Key = getResources().getString(R.string.tMapAPIKey);
         try {
-            new RoadTracker().execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
+            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
                     String.valueOf(end.longitude), String.valueOf(end.latitude),
                     URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
                     API_Key);
@@ -80,13 +89,7 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     private static final String TAG = "RoadTracker";
 
-//    private GeoApiContext mContext;
-
-    private ArrayList<LatLng> mCapturedLocations = new ArrayList<LatLng>();        //지나간 좌표 들을 저장하는 List
-
-    private static final int PAGINATION_OVERLAP = 5;
-
-    private static final int PAGE_SIZE_LIMIT = 100;
+    private final MapActivity intentFlow;
 
     private ArrayList<LatLng> mapPoints;
 
@@ -98,6 +101,9 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
 
+    public RoadTracker(MapActivity intentFlow) {
+        this.intentFlow = intentFlow;
+    }
 
     @Override
     protected ArrayList<LatLng> doInBackground(String... positions) {
@@ -162,11 +168,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
             coords_extend(latitudes, longitudes);
 
-//            Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
-//            Map insertData = new HashMap<String, List<Double>>();
-//            insertData.put("latitudes", latitudes);
-//            insertData.put("longitudes", longitudes);
-//            db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -268,7 +269,18 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         Map insertData = new HashMap<String, List<Double>>();
         insertData.put("latitudes", extended_coords_lat);
         insertData.put("longitudes", extended_coords_lng);
-        db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
+        db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData)
+        .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    // set이 완료되었으면 네비게이션 액티비티 시작
+                    // 서버에서 경로를 받아오므로 별도의 putExtra는 필요 없다
+                    Intent intent = new Intent(intentFlow.getApplicationContext(), ArNav.class);
+                    intentFlow.startActivity(intent);
+                }
+            }
+        });
     }
 }
 
