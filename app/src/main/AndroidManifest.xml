@@ -58,6 +58,19 @@
             android:value="@string/googleAPIKey" />
 
         <activity
+            android:name="com.google.ar.core.examples.java.app.login.LoginActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.google.ar.core.examples.java.app.login.SignupActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name="com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity"
             android:exported="true" />
         <activity
@@ -96,11 +109,6 @@
             android:name="com.google.ar.core.examples.java.app.HelloActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity> <!-- Indicates whether "Google Play Services for AR" (ARCore) is "required" or "optional". -->
         <meta-data
             android:name="com.google.ar.core"

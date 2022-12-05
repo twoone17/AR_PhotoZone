@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.activity
+package com.google.ar.core.examples.java.app
 
 import android.Manifest
 import android.content.Context

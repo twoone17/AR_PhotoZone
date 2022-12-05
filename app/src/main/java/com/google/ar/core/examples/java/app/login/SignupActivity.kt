@@ -1,19 +1,14 @@
-package com.google.ar.core.examples.java.login
+package com.google.ar.core.examples.java.app.login
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.ar.core.examples.java.geospatial.databinding.ActivitySignupBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.android.synthetic.main.activity_bookmark_list_element.*
-import kotlinx.android.synthetic.main.activity_map_location.view.*
 import kotlinx.android.synthetic.main.activity_signup.*
-import kotlinx.android.synthetic.main.activity_signup.view.*
-import java.util.*
 
 
 class SignupActivity : AppCompatActivity() {
