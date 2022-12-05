@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.retrofit_rest;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -19,6 +20,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.ar.core.examples.java.geospatial.ArNav;
 import com.google.ar.core.examples.java.geospatial.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,6 +44,11 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/*TODO
+ * 현재 위치, 게시글에서 도착지 위치 얻어서 intent MapActivity 로 넘김
+ * MapActivity에서 좌표 넣어서 티맵 보내고 결과 파이어베이스에 저장 + ArNav 액티비티 호출
+ * 그러면 ArNav 액티비티에서 길안내 시작
+ */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = "테스트용";
@@ -66,7 +75,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         LatLng end = new LatLng(end_lat, end_lng);
         API_Key = getResources().getString(R.string.tMapAPIKey);
         try {
-            new RoadTracker().execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
+            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
                     String.valueOf(end.longitude), String.valueOf(end.latitude),
                     URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
                     API_Key);
@@ -80,13 +89,7 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     private static final String TAG = "RoadTracker";
 
-//    private GeoApiContext mContext;
-
-    private ArrayList<LatLng> mCapturedLocations = new ArrayList<LatLng>();        //지나간 좌표 들을 저장하는 List
-
-    private static final int PAGINATION_OVERLAP = 5;
-
-    private static final int PAGE_SIZE_LIMIT = 100;
+    private final MapActivity intentFlow;
 
     private ArrayList<LatLng> mapPoints;
 
@@ -98,6 +101,9 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
 
+    public RoadTracker(MapActivity intentFlow) {
+        this.intentFlow = intentFlow;
+    }
 
     @Override
     protected ArrayList<LatLng> doInBackground(String... positions) {
@@ -162,11 +168,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
             coords_extend(latitudes, longitudes);
 
-//            Log.e(TAG, "doInBackground: " + longitudes.size() + " " + latitudes.size());
-//            Map insertData = new HashMap<String, List<Double>>();
-//            insertData.put("latitudes", latitudes);
-//            insertData.put("longitudes", longitudes);
-//            db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -176,8 +177,16 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     private void coords_extend(ArrayList<Double> latitudes, ArrayList<Double> longitudes) {
 
-        ArrayList<Double> extended_coords_lat = latitudes;
-        ArrayList<Double> extended_coords_lng = longitudes;
+        Log.e(TAG, "size: " + latitudes.size() );
+
+        ArrayList<Double> extended_coords_lat = new ArrayList<>();
+        ArrayList<Double> extended_coords_lng = new ArrayList<>();
+
+        // deep copy
+        for(int k=0; k< latitudes.size(); k++) {
+            extended_coords_lat.add(latitudes.get(k));
+            extended_coords_lng.add(longitudes.get(k));
+        }
 
         for(int i=1; i<latitudes.size(); i++) {
             Location locationA = new Location("first point");
@@ -195,13 +204,12 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
             // 50m의 경우 5번 좌표를 나누고,
             // 100m이상의 경우는 시행착오를 통해 알아내도록 하겠다.
 
-//            if(distance > 5 && distance < 10) {
-//                double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
-//                double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
-//                extended_coords_lat.add(_middle_lat);
-//                extended_coords_lng.add(_middle_lng);
-//            } else
-            if(distance > 10 && distance < 50) {
+            if(distance > 5 && distance < 10) {
+                double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
+                double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
+                extended_coords_lat.add(_middle_lat);
+                extended_coords_lng.add(_middle_lng);
+            } else if(distance > 10 && distance < 50) {
                 double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
                 double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
                 extended_coords_lat.add(_middle_lat);
@@ -217,6 +225,9 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 extended_coords_lng.add(_first_middle_lng);
                 extended_coords_lng.add(_last_middle_lng);
             } else if(distance > 100) {
+
+                Log.e(TAG, "인덱스 : " + i + " 위치 : " + latitudes.get(i) + " " + longitudes.get(i));
+                Log.e(TAG, "거리 : " + distance );
                 ////////////////////////////////////////////////////////////////////////////
                 // 정상적으로 동작한다면 추후에 재귀 등으로 코드 간소화 시킬 예정
                 // 1회 분할
@@ -226,39 +237,50 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 extended_coords_lng.add(_middle_lng);
 
                 // 2회 분할
-//                double _first_middle_lat = (locationA.getLatitude() + _middle_lat) / 2;
-//                double _first_middle_lng = (locationA.getLongitude() + _middle_lng) / 2;
-//                double _last_middle_lat = (locationB.getLatitude() + _middle_lat) / 2;
-//                double _last_middle_lng = (locationB.getLongitude() + _middle_lng) / 2;;
-//                extended_coords_lat.add(_first_middle_lat);
-//                extended_coords_lat.add(_last_middle_lat);
-//                extended_coords_lng.add(_first_middle_lng);
-//                extended_coords_lng.add(_last_middle_lng);
-//
-//                // 3회 분할
-//                double _first_first_middle_lat = (locationA.getLatitude() + _first_middle_lat) / 2;
-//                double _first_first_middle_lng = (locationA.getLongitude() + _first_middle_lng) / 2;
-//                double _first_last_middle_lat = (locationA.getLatitude() + _last_middle_lat) / 2;
-//                double _first_last_middle_lng = (locationA.getLongitude() + _last_middle_lng) / 2;
-//                double _last_first_middle_lat = (locationB.getLatitude() + _first_middle_lat) / 2;
-//                double _last_first_middle_lng = (locationB.getLatitude() + _first_middle_lng) / 2;
-//                double _last_last_middle_lat = (locationB.getLatitude() + _last_middle_lat) / 2;
-//                double _last_last_middle_lng = (locationB.getLatitude() + _last_middle_lng) / 2;
-//                extended_coords_lat.add(_first_first_middle_lat);
-//                extended_coords_lat.add(_first_last_middle_lat);
-//                extended_coords_lat.add(_last_first_middle_lat);
-//                extended_coords_lat.add(_last_last_middle_lat);
-//                extended_coords_lng.add(_first_first_middle_lng);
-//                extended_coords_lng.add(_first_last_middle_lng);
-//                extended_coords_lng.add(_last_first_middle_lng);
-//                extended_coords_lng.add(_last_last_middle_lng);
+                double _first_middle_lat = (locationA.getLatitude() + _middle_lat) / 2;
+                double _first_middle_lng = (locationA.getLongitude() + _middle_lng) / 2;
+                double _last_middle_lat = (locationB.getLatitude() + _middle_lat) / 2;
+                double _last_middle_lng = (locationB.getLongitude() + _middle_lng) / 2;;
+                extended_coords_lat.add(_first_middle_lat);
+                extended_coords_lat.add(_last_middle_lat);
+                extended_coords_lng.add(_first_middle_lng);
+                extended_coords_lng.add(_last_middle_lng);
+
+                // 3회 분할
+                double _first_first_middle_lat = (locationA.getLatitude() + _first_middle_lat) / 2;
+                double _first_first_middle_lng = (locationA.getLongitude() + _first_middle_lng) / 2;
+                double _first_last_middle_lat = (locationA.getLatitude() + _last_middle_lat) / 2;
+                double _first_last_middle_lng = (locationA.getLongitude() + _last_middle_lng) / 2;
+                double _last_first_middle_lat = (locationB.getLatitude() + _first_middle_lat) / 2;
+                double _last_first_middle_lng = (locationB.getLatitude() + _first_middle_lng) / 2;
+                double _last_last_middle_lat = (locationB.getLatitude() + _last_middle_lat) / 2;
+                double _last_last_middle_lng = (locationB.getLatitude() + _last_middle_lng) / 2;
+                extended_coords_lat.add(_first_first_middle_lat);
+                extended_coords_lat.add(_first_last_middle_lat);
+                extended_coords_lat.add(_last_first_middle_lat);
+                extended_coords_lat.add(_last_last_middle_lat);
+                extended_coords_lng.add(_first_first_middle_lng);
+                extended_coords_lng.add(_first_last_middle_lng);
+                extended_coords_lng.add(_last_first_middle_lng);
+                extended_coords_lng.add(_last_last_middle_lng);
 
             }
         }
         Map insertData = new HashMap<String, List<Double>>();
-        insertData.put("latitudes", latitudes);
-        insertData.put("longitudes", longitudes);
-        db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData);
+        insertData.put("latitudes", extended_coords_lat);
+        insertData.put("longitudes", extended_coords_lng);
+        db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData)
+        .addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    // set이 완료되었으면 네비게이션 액티비티 시작
+                    // 서버에서 경로를 받아오므로 별도의 putExtra는 필요 없다
+                    Intent intent = new Intent(intentFlow.getApplicationContext(), ArNav.class);
+                    intentFlow.startActivity(intent);
+                }
+            }
+        });
     }
 }
 
