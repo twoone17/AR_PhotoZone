@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.activity
 
 import android.Manifest
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -151,9 +152,15 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
         //val marker = LatLng(37.39989, 126.9555049)
         //googleMap.addMarker(MarkerOptions().position(marker).title("initial_marker"))
+        Log.e(TAG, "onMapReady: ", )
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
         mGMap = googleMap
+
+
+//        mGMap.addMarker(
+//            MarkerOptions().icon(BitmapFactory.bmp).position(LatLng(37.3991309, 126.9376358))
+//        )
 
         /*
         db.collection("app_board")
@@ -189,9 +196,9 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
                 //Log.d("bmp_main",a.toString())
 
-                /*mGMap.addMarker(
+                mGMap.addMarker(
                     MarkerOptions().icon(BitmapFactory.bmp).position(LatLng(37.3991309, 126.9376358))
-                )*/
+                )
 
                 //for(document in result){
                 //Log.d("link", document.data["imgURL"].toString())
