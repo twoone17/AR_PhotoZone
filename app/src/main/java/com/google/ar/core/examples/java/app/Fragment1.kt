@@ -33,6 +33,7 @@ class Fragment1 : Fragment() {
             Intent(context, ArNav::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.run { startActivity(this) }
+
         }
 
         maplocationButton.setOnClickListener{

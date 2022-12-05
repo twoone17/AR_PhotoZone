@@ -1,9 +1,9 @@
 package com.google.ar.core.examples.java.retrofit_rest;
 
-import android.app.Application;
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,33 +14,36 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.ar.core.examples.java.geospatial.ArNav;
 import com.google.ar.core.examples.java.geospatial.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -50,6 +53,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * 그러면 ArNav 액티비티에서 길안내 시작
  */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private CancellationToken token;
 
     private static final String TAG = "테스트용";
     String API_Key;
@@ -64,6 +70,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        tokenInit();
+//        checkDangerousPermissions();
+
+        // 액티비티에 진입하면 현재 위치부터 받아오도록 한다.
+        setCurrentLocation();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -83,6 +96,88 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
     }
+
+    private void tokenInit() {
+        token = new CancellationToken() {
+            @NonNull
+            @Override
+            public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                return null;
+            }
+
+            @Override
+            public boolean isCancellationRequested() {
+                return false;
+            }
+        };
+    }
+
+    private void setCurrentLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, token)
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location != null) {
+                    start_lat = location.getLatitude();
+                    start_lng = location.getLongitude();
+                    Log.e(TAG, "현재 위치 설정 완료" + start_lat + " " + start_lng);
+                }
+            }
+        });
+    }
+
+//    private void setCurrentLocation() {
+//        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        try {
+//            long minTime = 1000;    //갱신 시간
+//            float minDistance = 0;  //갱신에 필요한 최소 거리
+//
+//            // 현재 위치를 시작점으로 설정해준다.
+//            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, new LocationListener() {
+//                @Override
+//                public void onLocationChanged(Location location) {
+//                    start_lat = location.getLatitude();
+//                    start_lng = location.getLongitude();
+//                    Log.e(TAG, "" + start_lat + " " + start_lng );
+//                }
+//            });
+//        } catch (SecurityException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    //------------------권한 설정 시작------------------------
+    private void checkDangerousPermissions() {
+        String[] permissions = {
+                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_WIFI_STATE
+        };
+
+        int permissionCheck = PackageManager.PERMISSION_GRANTED;
+        for (int i = 0; i < permissions.length; i++) {
+            permissionCheck = ContextCompat.checkSelfPermission(this, permissions[i]);
+            if (permissionCheck == PackageManager.PERMISSION_DENIED) {
+                break;
+            }
+        }
+
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "권한 있음", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "권한 없음", Toast.LENGTH_LONG).show();
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                Toast.makeText(this, "권한 설명 필요함.", Toast.LENGTH_LONG).show();
+            } else {
+                ActivityCompat.requestPermissions(this, permissions, 1);
+            }
+        }
+    }
+
 }
 
 class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
