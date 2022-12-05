@@ -369,8 +369,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
-                    // set이 완료되었으면 네비게이션 액티비티 시작
-                    // 서버에서 경로를 받아오므로 별도의 putExtra는 필요 없다
                     Intent intent = new Intent(intentFlow.getApplicationContext(), ArNav.class);
                     intentFlow.startActivity(intent);
                 }
