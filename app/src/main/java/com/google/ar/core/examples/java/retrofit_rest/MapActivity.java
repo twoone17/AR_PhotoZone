@@ -17,12 +17,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.OnTokenCanceledListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 import com.google.ar.core.examples.java.geospatial.ArNav;
 import com.google.ar.core.examples.java.geospatial.R;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,6 +54,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private CancellationToken token;
+
     private static final String TAG = "테스트용";
     String API_Key;
 
@@ -61,8 +71,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
-
-        checkDangerousPermissions();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        tokenInit();
+//        checkDangerousPermissions();
 
         // 액티비티에 진입하면 현재 위치부터 받아오도록 한다.
         setCurrentLocation();
@@ -86,26 +97,57 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         }
     }
 
+    private void tokenInit() {
+        token = new CancellationToken() {
+            @NonNull
+            @Override
+            public CancellationToken onCanceledRequested(@NonNull OnTokenCanceledListener onTokenCanceledListener) {
+                return null;
+            }
+
+            @Override
+            public boolean isCancellationRequested() {
+                return false;
+            }
+        };
+    }
 
     private void setCurrentLocation() {
-        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        try {
-            long minTime = 1000;    //갱신 시간
-            float minDistance = 0;  //갱신에 필요한 최소 거리
-
-            // 현재 위치를 시작점으로 설정해준다.
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, new LocationListener() {
-                @Override
-                public void onLocationChanged(Location location) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, token)
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location != null) {
                     start_lat = location.getLatitude();
                     start_lng = location.getLongitude();
-                    Log.e(TAG, "" + start_lat + " " + start_lng );
+                    Log.e(TAG, "현재 위치 설정 완료" + start_lat + " " + start_lng);
                 }
-            });
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
+            }
+        });
     }
+
+//    private void setCurrentLocation() {
+//        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+//        try {
+//            long minTime = 1000;    //갱신 시간
+//            float minDistance = 0;  //갱신에 필요한 최소 거리
+//
+//            // 현재 위치를 시작점으로 설정해준다.
+//            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, new LocationListener() {
+//                @Override
+//                public void onLocationChanged(Location location) {
+//                    start_lat = location.getLatitude();
+//                    start_lng = location.getLongitude();
+//                    Log.e(TAG, "" + start_lat + " " + start_lng );
+//                }
+//            });
+//        } catch (SecurityException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     //------------------권한 설정 시작------------------------
     private void checkDangerousPermissions() {

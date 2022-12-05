@@ -515,7 +515,6 @@ public class ArNav extends AppCompatActivity
 
                 // Update shader properties and draw
                 virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-
                 render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
             }
         }

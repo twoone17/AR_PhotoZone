@@ -141,6 +141,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         mLocationManager = activity!!.baseContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager?
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(activity!!)
 
+        checkPermission();
+
         return rootView
     }
 
@@ -155,51 +157,51 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
         mGMap = googleMap
 
-        /*
-        db.collection("app_board")
-            .get()
-            .addOnSuccessListener { result->
-
-                var str_url:String = result.documents[0].data?.get("imgURL")?.toString()!!
-                val url = URL(str_url)
-
-                val exceptionHandler = CoroutineExceptionHandler{_, exception ->
-                    when(exception){
-                        is IllegalAccessException -> println("More Argument Needed To PRocess Job")
-                        is InterruptedException -> println("Job Interrupted")
-                    }
-                }
-
-                val deferred = CoroutineScope(Dispatchers.IO).async {
-                    throw IllegalArgumentException()
-                    BitmapFactory.decodeStream(url.openConnection().getInputStream())
-                }
-
-                CoroutineScope(Dispatchers.IO).launch(exceptionHandler){
-                    deferred.await()
-                    Log.d("bmp_exception_handler",deferred.toString())
-                }
-                Log.d("bmp_main",deferred.toString())
-
-                /*val a = GlobalScope.launch (Dispatchers.IO){
-                    val bmp = async {  BitmapFactory.decodeStream(url.openConnection().getInputStream()) }
-                    Log.d("bmp_scope",bmp.await().toString())
-                    bmp
-                }*/
-
-                //Log.d("bmp_main",a.toString())
-
-                /*mGMap.addMarker(
-                    MarkerOptions().icon(BitmapFactory.bmp).position(LatLng(37.3991309, 126.9376358))
-                )*/
-
-                //for(document in result){
-                //Log.d("link", document.data["imgURL"].toString())
-                //var link = document.data["imgURL"].concat(".png")
-                //var url: URL = URL(document.data["imgURL"] as String?)
-                //val image = BitmapFactory.decodeStream(url.openConnection().getInputStream())
-                //}
-            }*/
+//
+//        db.collection("app_board")
+//            .get()
+//            .addOnSuccessListener { result->
+//
+//                var str_url:String = result.documents[0].data?.get("imgURL")?.toString()!!
+//                val url = URL(str_url)
+//
+//                val exceptionHandler = CoroutineExceptionHandler{_, exception ->
+//                    when(exception){
+//                        is IllegalAccessException -> println("More Argument Needed To PRocess Job")
+//                        is InterruptedException -> println("Job Interrupted")
+//                    }
+//                }
+//
+//                val deferred = CoroutineScope(Dispatchers.IO).async {
+//                    throw IllegalArgumentException()
+//                    BitmapFactory.decodeStream(url.openConnection().getInputStream())
+//                }
+//
+//                CoroutineScope(Dispatchers.IO).launch(exceptionHandler){
+//                    deferred.await()
+//                    Log.d("bmp_exception_handler",deferred.toString())
+//                }
+//                Log.d("bmp_main",deferred.toString())
+//
+//                val a = GlobalScope.launch (Dispatchers.IO){
+//                    val bmp = async {  BitmapFactory.decodeStream(url.openConnection().getInputStream()) }
+//                    Log.d("bmp_scope",bmp.await().toString())
+//                    bmp
+//                }
+//
+//                //Log.d("bmp_main",a.toString())
+//
+//                mGMap.addMarker(
+//                    MarkerOptions().icon(BitmapFactory.bmp).position(LatLng(37.3991309, 126.9376358))
+//                )
+//
+//                for(document in result){
+//                Log.d("link", document.data["imgURL"].toString())
+//                var link = document.data["imgURL"].concat(".png")
+//                var url: URL = URL(document.data["imgURL"] as String?)
+//                val image = BitmapFactory.decodeStream(url.openConnection().getInputStream())
+//                }
+//            }
         //setUpClusterer()
     }
 
@@ -274,7 +276,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         ){
             ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQEST_CODE)
             //ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION), REQEST_CODE)
-
             //return
         }
 
@@ -300,6 +301,18 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
             }
         //fusedLocationProviderClient?.lastLocation은 실패
+    }
+
+    private fun checkPermission() {
+        if(ActivityCompat.checkSelfPermission(activity!!.baseContext, Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(activity!!.baseContext, Manifest.permission.ACCESS_COARSE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED
+        ){
+            ActivityCompat.requestPermissions(activity!!, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQEST_CODE)
+            //ActivityCompat.requestPermissions(activity!!, arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION), REQEST_CODE)
+            //return
+        }
     }
 
     private fun updateUserLocation() {
