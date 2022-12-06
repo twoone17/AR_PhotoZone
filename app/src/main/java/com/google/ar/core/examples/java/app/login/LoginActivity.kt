@@ -3,6 +3,7 @@ package com.google.ar.core.examples.java.app.login
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -16,7 +17,7 @@ import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
     private var auth : FirebaseAuth? = null
-
+    private val TAG = "LoginActivity"
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -36,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
         // 로그인 버튼
         loginButton.setOnClickListener {
             signIn(idEditText.text.toString(),pwEditText.text.toString())
+            Log.e(TAG, "onCreate: " + pwEditText.text.toString())
         }
     }
 
@@ -58,6 +60,8 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         Toast.makeText(baseContext, "login fail", Toast.LENGTH_SHORT).show()
                     }
+                }?.addOnFailureListener { error ->
+                    Log.e(TAG, "signIn: " + error )
                 }
         }
     }
