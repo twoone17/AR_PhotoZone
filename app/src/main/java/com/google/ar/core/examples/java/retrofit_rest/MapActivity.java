@@ -62,11 +62,11 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private double start_lat = 37.413003;
     private double start_lng = 127.125923;
-//    private double end_lat = 37.4119623;
-//    private double end_lng = 127.1284907;
+    private double end_lat = 37.4119623;
+    private double end_lng = 127.1284907;
     // 학교용 테스트 좌표
-    private double end_lat = 37.4567571;
-    private double end_lng = 127.1269726;
+//    private double end_lat = 37.4535884;
+//    private double end_lng = 127.1276175;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,17 +87,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        LatLng start = new LatLng(start_lat, start_lng);
-        LatLng end = new LatLng(end_lat, end_lng);
-        API_Key = getResources().getString(R.string.tMapAPIKey);
-        try {
-            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
-                    String.valueOf(end.longitude), String.valueOf(end.latitude),
-                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
-                    API_Key);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        LatLng start = new LatLng(start_lat, start_lng);
+//        LatLng end = new LatLng(end_lat, end_lng);
+//        API_Key = getResources().getString(R.string.tMapAPIKey);
+//        try {
+//            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
+//                    String.valueOf(end.longitude), String.valueOf(end.latitude),
+//                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
+//                    API_Key);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+        Log.e(TAG, "onMapReady: " + "지도 준비됨" );
     }
 
     private void tokenInit() {
@@ -127,6 +128,16 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     start_lat = location.getLatitude();
                     start_lng = location.getLongitude();
                     Log.e(TAG, "현재 위치 설정 완료" + start_lat + " " + start_lng);
+
+                    API_Key = getResources().getString(R.string.tMapAPIKey);
+                    try {
+                        new RoadTracker(MapActivity.this).execute(String.valueOf(start_lng), String.valueOf(start_lat),
+                                String.valueOf(end_lng), String.valueOf(end_lat),
+                                URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
+                                API_Key);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
@@ -259,7 +270,8 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
                 extended_coords_lat.add(_middle_lat);
                 extended_coords_lng.add(_middle_lng);
-            } else if(distance > 10 && distance < 50) {
+            } else
+                if(distance > 10 && distance < 50) {
                 double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
                 double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
                 extended_coords_lat.add(_middle_lat);

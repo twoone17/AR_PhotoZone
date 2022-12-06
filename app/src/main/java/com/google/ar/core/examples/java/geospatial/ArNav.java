@@ -672,6 +672,7 @@ public class ArNav extends AppCompatActivity
                         distinguisher = latitudes.size();
                         // 안내 객체 추가 완료,
                         // 좋아요 객체 추가 시작
+                        // TODO 기존 coordsRef에서 변경, 오류 발생 여지 있음
                         likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -680,9 +681,12 @@ public class ArNav extends AppCompatActivity
                                     if(result.exists()) {
                                         List<Double> likesLatitudes = (List<Double>) result.get("latitudes");
                                         List<Double> likesLongitudes = (List<Double>) result.get("longitudes");
-                                        for(int i=0; i<likesLatitudes.size(); i++) {
-                                            createAnchor(earth, likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
-                                            storeAnchorParameters(likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+                                        if (likesLongitudes != null) {
+                                            for (int i = 0; i < likesLatitudes.size(); i++) {
+                                                createAnchor(earth, likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+                                                storeAnchorParameters(likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+                                            }
+                                            CONCURRENT_PREVENT_FLAG = true;
                                         }
                                     }
                                 }
@@ -691,9 +695,10 @@ public class ArNav extends AppCompatActivity
                             @Override
                             public void onFailure(@NonNull Exception e) {
                                 Log.e(TAG, "onFailure: " + e);
+                                CONCURRENT_PREVENT_FLAG = true;
                             }
                         });
-                        CONCURRENT_PREVENT_FLAG = true;
+
                     }
                 }
             }
