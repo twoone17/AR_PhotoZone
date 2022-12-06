@@ -37,7 +37,6 @@ class LoginActivity : AppCompatActivity() {
         // 로그인 버튼
         loginButton.setOnClickListener {
             signIn(idEditText.text.toString(),pwEditText.text.toString())
-            Log.e(TAG, "onCreate: " + pwEditText.text.toString())
         }
     }
 
