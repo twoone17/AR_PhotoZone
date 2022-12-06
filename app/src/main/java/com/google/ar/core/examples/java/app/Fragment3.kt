@@ -6,6 +6,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
@@ -14,8 +15,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -30,16 +35,27 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.google.android.gms.tasks.Task
 import com.google.ar.core.examples.java.geospatial.R
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
+import kotlinx.android.synthetic.main.activity_board_click.*
+import kotlinx.android.synthetic.main.custom_marker.*
 import kotlinx.coroutines.*
 import java.net.URL
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.*
 import java.lang.IllegalArgumentException
+import java.util.zip.Inflater
+import android.app.Activity
+import android.graphics.Canvas
+
+import android.util.DisplayMetrics
+
+
+
 
 class Fragment3 : Fragment(), OnMapReadyCallback {
 
@@ -116,6 +132,9 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     private lateinit var mView: MapView
     private lateinit var mGMap: GoogleMap
 
+    private lateinit var marker_root_view : View
+    private lateinit var imageView_marker : ImageView
+
     var fusedLocationProviderClient: FusedLocationProviderClient? = null
     var REQEST_CODE = 101
     var mLocationManager: LocationManager? = null
@@ -147,63 +166,80 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        //initial
-        /*val initial_loc = LatLng(37.568291, 126.997780)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(initial_loc))*/
 
-        //val marker = LatLng(37.39989, 126.9555049)
-        //googleMap.addMarker(MarkerOptions().position(marker).title("initial_marker"))
+//        setCusomMarkerView()
+
+        var collectionReference : CollectionReference = db.collection("photoZone")
+
+        collectionReference.get().addOnSuccessListener { result ->
+            for (documentSnapshot in result) {
+                var imgURL = documentSnapshot.get("imgURL")
+                var lat = documentSnapshot.get("latitude") as Double
+                var lng = documentSnapshot.get("longitude") as Double
+                var position = LatLng(lat,lng)
+
+//                Glide.with(marker_root_view).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imageView_marker)
+//                googleMap.addMarker(MarkerOptions()
+//                    .position(position)
+//                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(marker_root_view))))
+                // 커스텀 마커의 이미지 뷰에 먼저 이미지를 넣어준 후 .icon 파트에서 xml 통째로 불러옴
+                Glide.with(this.requireContext()).asBitmap().load(imgURL).fitCenter()
+                    .into(object : CustomTarget<Bitmap>(300,300) {
+                        override fun onResourceReady(
+                            resource: Bitmap,
+                            transition: Transition<in Bitmap>?
+                        ) {
+                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(resource))
+                                .position(position))
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                                .position(position))
+                        }
+                    })
+            }
+        }
+
+
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
         mGMap = googleMap
 
-//
-//        db.collection("app_board")
-//            .get()
-//            .addOnSuccessListener { result->
-//
-//                var str_url:String = result.documents[0].data?.get("imgURL")?.toString()!!
-//                val url = URL(str_url)
-//
-//                val exceptionHandler = CoroutineExceptionHandler{_, exception ->
-//                    when(exception){
-//                        is IllegalAccessException -> println("More Argument Needed To PRocess Job")
-//                        is InterruptedException -> println("Job Interrupted")
-//                    }
-//                }
-//
-//                val deferred = CoroutineScope(Dispatchers.IO).async {
-//                    throw IllegalArgumentException()
-//                    BitmapFactory.decodeStream(url.openConnection().getInputStream())
-//                }
-//
-//                CoroutineScope(Dispatchers.IO).launch(exceptionHandler){
-//                    deferred.await()
-//                    Log.d("bmp_exception_handler",deferred.toString())
-//                }
-//                Log.d("bmp_main",deferred.toString())
-//
-//                val a = GlobalScope.launch (Dispatchers.IO){
-//                    val bmp = async {  BitmapFactory.decodeStream(url.openConnection().getInputStream()) }
-//                    Log.d("bmp_scope",bmp.await().toString())
-//                    bmp
-//                }
-//
-//                //Log.d("bmp_main",a.toString())
-//
-//                mGMap.addMarker(
-//                    MarkerOptions().icon(BitmapFactory.bmp).position(LatLng(37.3991309, 126.9376358))
-//                )
-//
-//                for(document in result){
-//                Log.d("link", document.data["imgURL"].toString())
-//                var link = document.data["imgURL"].concat(".png")
-//                var url: URL = URL(document.data["imgURL"] as String?)
-//                val image = BitmapFactory.decodeStream(url.openConnection().getInputStream())
-//                }
-//            }
-        //setUpClusterer()
     }
+
+//    private fun setCusomMarkerView() {
+//        val inflater: LayoutInflater = getLayoutInflater()
+//        marker_root_view = inflater.inflate(R.layout.custom_marker, null)
+//        imageView_marker = marker_root_view.findViewById<ImageView>(R.id.marker_circle_img)
+//    }
+
+//    private fun createDrawableFromView(context: Context, view: View): Bitmap {
+//        val displayMetrics = DisplayMetrics()
+//        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+//        view.layoutParams = ViewGroup.LayoutParams(
+//            ViewGroup.LayoutParams.WRAP_CONTENT,
+//            ViewGroup.LayoutParams.WRAP_CONTENT
+//        )
+//        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+//        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+//        view.buildDrawingCache()
+//        val bitmap =
+//            Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
+//        val canvas = Canvas(bitmap)
+//        view.draw(canvas)
+//        return bitmap
+//    }
+
+//    private fun getBitmapFromView(view: View): Bitmap {
+//        val bitmap = Bitmap.createBitmap(
+//            300, 300, Bitmap.Config.ARGB_8888
+//        )
+//        val canvas = Canvas(bitmap)
+//        view.draw(canvas)
+//        return bitmap
+//    }
+
 
     private fun url_to_bmp(url: URL): Bitmap? {
             val bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream())
