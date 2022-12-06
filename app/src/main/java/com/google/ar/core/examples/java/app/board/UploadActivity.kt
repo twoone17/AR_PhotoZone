@@ -140,7 +140,6 @@ class UploadActivity : AppCompatActivity() {
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                // TODO: Get info about the selected place.
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
             }
 
@@ -148,7 +147,6 @@ class UploadActivity : AppCompatActivity() {
                 Log.i(TAG, "An error occurred: $status")
             }
         })
-
 
     }
 }

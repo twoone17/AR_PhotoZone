@@ -140,6 +140,14 @@ public class ArNav extends AppCompatActivity
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
 
+
+    /* TODO
+        순서대로, 안내 객체를 먼저 모두 앵커로 저장한 뒤
+        좋아요 객체를 그 다음에 로드하겠다.
+        반복문에서 shader와 texture의 구분은 위도 경도 리스트의 길이로
+        이루어질 수 있게끔 구현하겠다.
+     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -651,6 +659,7 @@ public class ArNav extends AppCompatActivity
                             createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
                             storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
+                        // TODO 안내 객체가 모두 로드되었을 시점이다. 여기서 좋아요 객체도 불러오면 되겠다.
                         CONCURRENT_PREVENT_FLAG = true;
                     }
                 }
