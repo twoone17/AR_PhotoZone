@@ -56,7 +56,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -128,8 +127,10 @@ public class ArNav extends AppCompatActivity
     private boolean hasSetTextureNames = false;
 
     // Virtual object (ARCore geospatial)
-    private Mesh virtualObjectMesh;
-    private Shader virtualObjectShader;
+    private Mesh navigationObjectMesh;
+    private Shader navigationObjectShader;
+    private Mesh likesObjectMesh;
+    private Shader likesObjectShader;
 
     private final List<Anchor> anchors = new ArrayList<>();
 
@@ -139,6 +140,16 @@ public class ArNav extends AppCompatActivity
     private final float[] projectionMatrix = new float[16];
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
+
+
+    /* TODO
+        순서대로, 안내 객체를 먼저 모두 앵커로 저장한 뒤
+        좋아요 객체를 그 다음에 로드하겠다.
+        반복문에서 shader와 texture의 구분은 위도 경도 리스트의 길이로
+        이루어질 수 있게끔 구현하겠다.
+     */
+
+    private int distinguisher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -345,22 +356,40 @@ public class ArNav extends AppCompatActivity
             backgroundRenderer = new BackgroundRenderer(render);
             virtualSceneFramebuffer = new Framebuffer(render, /*width=*/ 1, /*height=*/ 1);
 
-            // Virtual object to render (ARCore geospatial)
-            Texture virtualObjectTexture =
+            // 안내객체 관련 설정
+            Texture navigationObjectTexture =
                     Texture.createFromAsset(
                             render,
                             "models/example1_baked.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/example1_obj.obj");
-            virtualObjectShader =
+            navigationObjectMesh = Mesh.createFromAsset(render, "models/example1_obj.obj");
+            navigationObjectShader =
                     Shader.createFromAssets(
                             render,
                             "shaders/ar_unlit_object.vert",
                             "shaders/ar_unlit_object.frag",
                             /*defines=*/ null)
-                            .setTexture("u_Texture", virtualObjectTexture);
+                            .setTexture("u_Texture", navigationObjectTexture);
+
+            // 좋아요 객체 관련 설정
+            Texture likesObjectTexture =
+                    Texture.createFromAsset(
+                            render,
+                            "models/spatial_marker_baked.png",
+                            Texture.WrapMode.CLAMP_TO_EDGE,
+                            Texture.ColorFormat.SRGB);
+
+            likesObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
+            likesObjectShader =
+                    Shader.createFromAssets(
+                            render,
+                            "shaders/ar_unlit_object.vert",
+                            "shaders/ar_unlit_object.frag",
+                            /*defines=*/ null)
+                            .setTexture("u_Texture", likesObjectTexture);
+
 
             backgroundRenderer.setUseDepthVisualization(render, false);
             backgroundRenderer.setUseOcclusion(render, false);
@@ -501,21 +530,26 @@ public class ArNav extends AppCompatActivity
 //        Iterator<Anchor> iterator = anchors.iterator();
         Log.e(TAG, "onDrawFrame: " + anchors.size());
         if (CONCURRENT_PREVENT_FLAG) {
-
+            int counter = 0;
             for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
-//    while(iterator.hasNext()){
-//      Anchor anchor = iterator.next();
-                // Get the current pose of an Anchor in world space. The Anchor pose is updated
-                // during calls to session.update() as ARCore refines its estimate of the world.
                 iterator.next().getPose().toMatrix(modelMatrix, 0);
 
                 // Calculate model/view/projection matrices
-                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-
-                // Update shader properties and draw
-                virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-                render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+                // TODO 여기서 조건문으로 구분해서 텍스쳐 바꿔주기
+                if(counter < distinguisher) {
+                    // 이 분기는 안내 객체에 대한 분기이다.
+                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
+                } else {
+                    // 이 분기는 좋아요 객체에 대한 분기이다.
+                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
+                }
+                counter++;
             }
         }
         // Compose the virtual scene with the background.
@@ -610,35 +644,19 @@ public class ArNav extends AppCompatActivity
             return;
         }
 
-//        updateGeospatialPoseText(geospatialPose);
     }
 
-//    private void updateGeospatialPoseText(GeospatialPose geospatialPose) {
-//        String poseText =
-//                getResources()
-//                        .getString(
-//                                R.string.geospatial_pose,
-//                                geospatialPose.getLatitude(),
-//                                geospatialPose.getLongitude(),
-//                                geospatialPose.getHorizontalAccuracy(),
-//                                geospatialPose.getAltitude(),
-//                                geospatialPose.getVerticalAccuracy(),
-//                                geospatialPose.getHeading(),
-//                                geospatialPose.getHeadingAccuracy());
-//        runOnUiThread(
-//                () -> {
-//                    geospatialPoseTextView.setText(poseText);
-//                });
-//    }
 
     private void handleSetAnchorButton() {
         Earth earth = session.getEarth();
         if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
             return;
         }
-        
-        String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
-        DocumentReference coordsRef = db.collection("users").document(tempUID).collection("nav").document(tempUID);
+
+        FirebaseUser user = auth.getCurrentUser();
+
+        DocumentReference coordsRef = db.collection("users").document(user.getUid()).collection("nav").document(user.getUid());
+        DocumentReference likesCoordsRef = db.collection("users").document(user.getUid()).collection("arLikesTest").document(user.getUid());
         coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -651,7 +669,36 @@ public class ArNav extends AppCompatActivity
                             createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
                             storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
-                        CONCURRENT_PREVENT_FLAG = true;
+                        distinguisher = latitudes.size();
+                        // 안내 객체 추가 완료,
+                        // 좋아요 객체 추가 시작
+                        // TODO 기존 coordsRef에서 변경, 오류 발생 여지 있음
+                        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if(task.isSuccessful()) {
+                                    DocumentSnapshot result = task.getResult();
+                                    if(result.exists()) {
+                                        List<Double> likesLatitudes = (List<Double>) result.get("latitudes");
+                                        List<Double> likesLongitudes = (List<Double>) result.get("longitudes");
+                                        if (likesLongitudes != null) {
+                                            for (int i = 0; i < likesLatitudes.size(); i++) {
+                                                createAnchor(earth, likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+                                                storeAnchorParameters(likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+                                            }
+                                            CONCURRENT_PREVENT_FLAG = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(TAG, "onFailure: " + e);
+                                CONCURRENT_PREVENT_FLAG = true;
+                            }
+                        });
+
                     }
                 }
             }

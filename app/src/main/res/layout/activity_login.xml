@@ -11,16 +11,16 @@
         android:gravity="center"
         android:text="LOGIN"
         android:layout_marginTop="65dp"
-        android:textColor="@color/buttonColor1"
+        android:textColor="@color/fbutton_color_peter_river"
         android:textSize="35sp" />
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="150dp"
         android:layout_gravity="center"
         android:layout_marginTop="60dp"
         android:layout_marginBottom="45dp"
-        android:src="@drawable/ic_balloon" />
+        android:src="@mipmap/ic_launcher" />
 
     <TextView
         android:layout_width="match_parent"
@@ -93,7 +93,7 @@
             android:layout_weight="5"
             android:text="Sign Up"
             android:textSize="20sp"
-            android:textColor="@color/buttonColor1"/>
+            android:textColor="@color/fbutton_color_peter_river"/>
 
     </LinearLayout>
 

@@ -14,6 +14,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.api.Status
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.ktx.auth
@@ -25,7 +30,6 @@ import java.util.*
 
 class UploadActivity : AppCompatActivity() {
     private var auth = Firebase.auth
-    private val currentUser = auth.currentUser
     val db = FirebaseFirestore.getInstance()
     var imgURL: String? = null
 
@@ -47,7 +51,6 @@ class UploadActivity : AppCompatActivity() {
         // 키보드 보이기 시, showSoftInput() 호출하기 전 requestFocus() 호출
         editText.requestFocus();
 
-        //TODO: 아니 왜 editText 키보드 안올라오냐
         editText.setOnClickListener {
             fun onClick(v: View?) {
                 editText.clearFocus()
@@ -108,9 +111,42 @@ class UploadActivity : AppCompatActivity() {
             finish()
         }
 
+        initPlaces()
+        initAutoCompleteFragment()
 
     }
 
 
     // 의성형 하고싶은거 다 해
+
+
+    // 여기부터는 내가 하고싶은거 다 할게
+
+    private fun initPlaces() {
+        if(!Places.isInitialized()) {
+            Places.initialize(applicationContext, getString(R.string.google_app_id), Locale.KOREA)
+        }
+    }
+
+    private fun initAutoCompleteFragment() {
+        // Initialize the AutocompleteSupportFragment.
+        val autocompleteFragment =
+            supportFragmentManager.findFragmentById(R.id.autocomplete_fragment)
+                    as AutocompleteSupportFragment
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                Log.i(TAG, "Place: ${place.name}, ${place.id}")
+            }
+
+            override fun onError(status: Status) {
+                Log.i(TAG, "An error occurred: $status")
+            }
+        })
+
+    }
 }

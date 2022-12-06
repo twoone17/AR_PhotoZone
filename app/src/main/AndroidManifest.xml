@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <permission
         android:name="com.example.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -19,18 +20,16 @@
  Limits app visibility in the Google Play Store to ARCore supported devices
        (https://developers.google.com/ar/devices).
     -->
-
-    <!--지도 관련 권한들 - 철웅 추가, 추후에 충돌이 생길 수 있음-->
-
-    <permission android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE"
-        android:protectionLevel="signature"/>
+    <!-- 지도 관련 권한들 - 철웅 추가, 추후에 충돌이 생길 수 있음 -->
+    <permission
+        android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
 
     <uses-permission android:name="com.google.ar.core.examples.java.geospatial.permission.MAPS_RECEIVE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="READ_GSERVICES"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="READ_GSERVICES" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature
         android:name="android.hardware.camera.ar"
@@ -41,17 +40,16 @@
 
     <application
         android:allowBackup="false"
+        android:hardwareAccelerated="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false"
-        android:hardwareAccelerated="false"
-        android:largeHeap="true"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name="com.google.ar.core.examples.java.app.map.MapLocationActivity"
-            android:exported="true" />
-        <!-- 구글맵 API 키 -->
+            android:exported="true" /> <!-- 구글맵 API 키 -->
         <!-- API 키 노출때문에 string xml 안에 정의해두고 해당 파일은 커밋하지 않았습니다. 추후에 공유하도록 하겠습니다! -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -61,10 +59,10 @@
             android:name="com.google.ar.core.examples.java.app.login.LoginActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+<!--             <intent-filter>-->
+<!--             <action android:name="android.intent.action.MAIN" />-->
+<!--             <category android:name="android.intent.category.LAUNCHER" />-->
+<!--             </intent-filter>-->
         </activity>
         <activity
             android:name="com.google.ar.core.examples.java.app.login.SignupActivity"
@@ -114,6 +112,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <meta-data
             android:name="com.google.ar.core"
             android:value="required" />

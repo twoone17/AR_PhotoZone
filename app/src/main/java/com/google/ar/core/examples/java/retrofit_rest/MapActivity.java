@@ -64,6 +64,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private double start_lng = 127.125923;
     private double end_lat = 37.4119623;
     private double end_lng = 127.1284907;
+    // 학교용 테스트 좌표
+//    private double end_lat = 37.4535884;
+//    private double end_lng = 127.1276175;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,17 +87,18 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        LatLng start = new LatLng(start_lat, start_lng);
-        LatLng end = new LatLng(end_lat, end_lng);
-        API_Key = getResources().getString(R.string.tMapAPIKey);
-        try {
-            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
-                    String.valueOf(end.longitude), String.valueOf(end.latitude),
-                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
-                    API_Key);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+//        LatLng start = new LatLng(start_lat, start_lng);
+//        LatLng end = new LatLng(end_lat, end_lng);
+//        API_Key = getResources().getString(R.string.tMapAPIKey);
+//        try {
+//            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
+//                    String.valueOf(end.longitude), String.valueOf(end.latitude),
+//                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
+//                    API_Key);
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+        Log.e(TAG, "onMapReady: " + "지도 준비됨" );
     }
 
     private void tokenInit() {
@@ -124,59 +128,21 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                     start_lat = location.getLatitude();
                     start_lng = location.getLongitude();
                     Log.e(TAG, "현재 위치 설정 완료" + start_lat + " " + start_lng);
+
+                    API_Key = getResources().getString(R.string.tMapAPIKey);
+                    try {
+                        new RoadTracker(MapActivity.this).execute(String.valueOf(start_lng), String.valueOf(start_lat),
+                                String.valueOf(end_lng), String.valueOf(end_lat),
+                                URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
+                                API_Key);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
     }
 
-//    private void setCurrentLocation() {
-//        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-//        try {
-//            long minTime = 1000;    //갱신 시간
-//            float minDistance = 0;  //갱신에 필요한 최소 거리
-//
-//            // 현재 위치를 시작점으로 설정해준다.
-//            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTime, minDistance, new LocationListener() {
-//                @Override
-//                public void onLocationChanged(Location location) {
-//                    start_lat = location.getLatitude();
-//                    start_lng = location.getLongitude();
-//                    Log.e(TAG, "" + start_lat + " " + start_lng );
-//                }
-//            });
-//        } catch (SecurityException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    //------------------권한 설정 시작------------------------
-    private void checkDangerousPermissions() {
-        String[] permissions = {
-                android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_WIFI_STATE
-        };
-
-        int permissionCheck = PackageManager.PERMISSION_GRANTED;
-        for (int i = 0; i < permissions.length; i++) {
-            permissionCheck = ContextCompat.checkSelfPermission(this, permissions[i]);
-            if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-                break;
-            }
-        }
-
-        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "권한 있음", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "권한 없음", Toast.LENGTH_LONG).show();
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
-                Toast.makeText(this, "권한 설명 필요함.", Toast.LENGTH_LONG).show();
-            } else {
-                ActivityCompat.requestPermissions(this, permissions, 1);
-            }
-        }
-    }
 
 }
 
@@ -304,7 +270,8 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
                 extended_coords_lat.add(_middle_lat);
                 extended_coords_lng.add(_middle_lng);
-            } else if(distance > 10 && distance < 50) {
+            } else
+                if(distance > 10 && distance < 50) {
                 double _middle_lat = (locationA.getLatitude() + locationB.getLatitude())/2;
                 double _middle_lng = (locationA.getLongitude() + locationB.getLongitude())/2;
                 extended_coords_lat.add(_middle_lat);
@@ -369,8 +336,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
-                    // set이 완료되었으면 네비게이션 액티비티 시작
-                    // 서버에서 경로를 받아오므로 별도의 putExtra는 필요 없다
                     Intent intent = new Intent(intentFlow.getApplicationContext(), ArNav.class);
                     intentFlow.startActivity(intent);
                 }
