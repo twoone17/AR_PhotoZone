@@ -6,6 +6,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.location.LocationManager
 import android.os.Bundle
@@ -16,6 +17,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -30,6 +34,7 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.gms.tasks.OnTokenCanceledListener
 import com.google.android.gms.tasks.Task
 import com.google.ar.core.examples.java.geospatial.R
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -147,12 +152,34 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
-        //initial
-        /*val initial_loc = LatLng(37.568291, 126.997780)
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(initial_loc))*/
 
-        //val marker = LatLng(37.39989, 126.9555049)
-        //googleMap.addMarker(MarkerOptions().position(marker).title("initial_marker"))
+        var collectionReference : CollectionReference = db.collection("photoZone")
+
+        collectionReference.get().addOnSuccessListener { result ->
+            for (documentSnapshot in result) {
+                var imgURL = documentSnapshot.get("imgURL")
+                var lat = documentSnapshot.get("latitude") as Double
+                var lng = documentSnapshot.get("longitude") as Double
+                var position : LatLng = LatLng(lat,lng)
+                Glide.with(this.requireContext()).asBitmap().load(imgURL).fitCenter()
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(
+                            resource: Bitmap,
+                            transition: Transition<in Bitmap>?
+                        ) {
+                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(resource))
+                                .position(position))
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                                .position(position))
+                        }
+                    })
+            }
+        }
+
+
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
         mGMap = googleMap
