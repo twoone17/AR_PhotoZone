@@ -36,6 +36,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -74,6 +75,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        start_lat = getIntent().getDoubleExtra("startLatitude", 0);
+        start_lng = getIntent().getDoubleExtra("startLongitude", 0);
+        end_lat = getIntent().getDoubleExtra("endLatitude", 0);
+        end_lng = getIntent().getDoubleExtra("endLongitude", 0);
+
+        Log.e(TAG, "onCreate: " + start_lat + " " + start_lng + " " + end_lat + " " + end_lng);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         tokenInit();

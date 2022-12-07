@@ -40,6 +40,7 @@ import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -49,6 +50,8 @@ import android.view.Gravity
 import android.widget.Button
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.tasks.*
+import com.google.ar.core.examples.java.app.board.BoardClickActivity
+import com.google.ar.core.examples.java.retrofit_rest.MapActivity
 import de.hdodenhof.circleimageview.CircleImageView
 
 
@@ -137,6 +140,14 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                     // 도착지 정보 받아오는건 완료
                     Log.e("TAG", " " + p0.position.latitude + p0.position.longitude )
                     Log.e("TAG", " " + currentPosition.latitude + currentPosition.longitude )
+
+                    Intent(requireContext(), MapActivity::class.java).apply {
+                        putExtra("startLatitude", currentPosition.latitude)
+                        putExtra("startLongitude", currentPosition.longitude)
+                        putExtra("endLatitude", p0.position.latitude)
+                        putExtra("endLongitude", p0.position.longitude)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }.run { startActivity(this) }
                 }
 
                     // Custom Dialog 크기 설정
