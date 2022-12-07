@@ -77,6 +77,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -91,10 +92,12 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -230,7 +233,7 @@ public class GeospatialActivity extends AppCompatActivity
         BoardData boardData = (BoardData) intent.getSerializableExtra("boardData");
         documentID = boardData.getDocumentId();
         anchorID = boardData.getAnchorID();
-        Log.e(TAG, "onCreate: anchorID"+ anchorID );
+        Log.e(TAG, "onCreate: anchorID" + anchorID);
         Log.e(TAG, "onCreate: boardData" + boardData);
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
@@ -520,28 +523,32 @@ public class GeospatialActivity extends AppCompatActivity
 
         timeOutCount--;
         String getUid = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
+        Log.e(TAG, "onDrawFrame: anchorID" + anchorID);
         if (timeOutCount == 0) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 //            if(anchorID!="") {
-                db.collection("anchor").document(anchorID).get().
-                        addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                DocumentSnapshot document = task.getResult();
-                                Log.e(TAG, "onDrawFrame:                 document.getData()" + document.getData());
-//                            Anchor anchor =
-//                                    earth.createAnchor(
-//                                            document["latitude"],
-//                                            anchorFirebase.getLongitude(),
-//                                            anchorFirebase.getAltitude(),
-//                                            0.0f,
-//                                            (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
-//                                            0.0f,
-//                                            (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
-//                            anchors.add(anchor);
-                            }
+            DocumentReference docRef = db.collection("anchor").document(anchorID);
+
+            docRef.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    Map<String, Object> data = document.getData();
 
 
-                        });
+                    Anchor anchor =
+                            earth.createAnchor(
+                                    (Double) data.get("latitude"),
+                                    (Double) data.get("longitude"),
+                                    (Double) data.get("altitude"),
+                                    0.0f,
+                                    (float) Math.sin(20 / 2),
+                                    0.0f,
+                                    (float) Math.cos(20 / 2));
+                    anchors.add(anchor);
+                }
+
+
+            });
 
 
         }
@@ -673,11 +680,10 @@ public class GeospatialActivity extends AppCompatActivity
 
         Iterator<Anchor> iterator = anchors.iterator();
         System.out.println("anchors.size() = " + anchors.size());
-        if (timeOutCount == -1) {
+//        if (timeOutCount == -) {
             Log.e(TAG, "onDrawFrame: timeoutCount" + timeOutCount);
             for (Anchor anchor : anchors) {
-//    while(iterator.hasNext()){
-//      Anchor anchor = iterator.next();
+
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
                 // during calls to session.update() as ARCore refines its estimate of the world.
                 anchor.getPose().toMatrix(modelMatrix, 0);
@@ -691,7 +697,7 @@ public class GeospatialActivity extends AppCompatActivity
 
                 render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
             }
-        }
+
         // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
     }
@@ -801,7 +807,7 @@ public class GeospatialActivity extends AppCompatActivity
                             LocalDateTime now = LocalDateTime.now();
                             String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
 
-                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading(),postdocument_bydate);
+                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading(), postdocument_bydate);
 
                             db.collection("anchor").document(postdocument_bydate).set(uploadFirebaseData)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
