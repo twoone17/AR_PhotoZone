@@ -15,9 +15,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.widget.Autocomplete
 import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
@@ -72,6 +79,7 @@ class UploadActivity : AppCompatActivity() {
 
         initPlaces()
         initAutoCompleteFragment()
+        customizeAutoCompleteFragment()
 
         //사진을 고르면 고른 사진을 띄워준다
         if (uploaddata != null) {
@@ -198,30 +206,43 @@ class UploadActivity : AppCompatActivity() {
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-            when (resultCode) {
-                Activity.RESULT_OK -> {
-                    data?.let {
-                        val place = Autocomplete.getPlaceFromIntent(data)
-                        Log.i(TAG, "Place: ${place.name}, ${place.id}")
-                        placeCluster = place.name
+    private fun customizeAutoCompleteFragment() {
+        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
+        // and once again when the user makes a selection (for example when calling fetchPlace()).
 
-                    }
+        Log.e(TAG, "customizeAutoCompleteFragment: 접근", )
+        val token = AutocompleteSessionToken.newInstance()
+
+        // Create a RectangularBounds object.
+//        val bounds = RectangularBounds.newInstance(
+//            LatLng(37.449860, 127.100154),
+//            LatLng(37.458019, 151.177003)
+//        )
+        // Use the builder to create a FindAutocompletePredictionsRequest.
+        val request =
+            FindAutocompletePredictionsRequest.builder()
+                // Call either setLocationBias() OR setLocationRestriction().
+//                .setLocationBias(bounds)
+                //.setLocationRestriction(bounds)
+                .setOrigin(LatLng(37.450655, 127.129188))
+                .setCountries("kr")
+                .setTypesFilter(listOf(TypeFilter.ADDRESS.toString()))
+                .setSessionToken(token)
+                .setQuery("가천")
+                .build()
+        var placesClient = Places.createClient(this);
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                Log.e(TAG, "customizeAutoCompleteFragment: prediction.placeId"  )
+                for (prediction in response.autocompletePredictions) {
+                    Log.e(TAG, "customizeAutoCompleteFragment: prediction.placeId"+ prediction.placeId )
+                    Log.i(TAG, prediction.placeId)
+                    Log.i(TAG, prediction.getPrimaryText(null).toString())
                 }
-                AutocompleteActivity.RESULT_ERROR -> {
-                    // TODO: Handle the error.
-                    data?.let {
-                        val status = Autocomplete.getStatusFromIntent(data)
-                        Log.i(TAG, status.statusMessage ?: "에러 발생")
-                    }
-                }
-                Activity.RESULT_CANCELED -> {
-                    // The user canceled the operation.
+            }.addOnFailureListener { exception: Exception? ->
+                if (exception is ApiException) {
+                    Log.e(TAG, "Place not found: " + exception.statusCode)
                 }
             }
-            return
-        }
-        super.onActivityResult(requestCode, resultCode, data)
     }
 }

@@ -123,7 +123,7 @@ public class GeospatialActivity extends AppCompatActivity
 
     private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
     private static final int MAXIMUM_ANCHORS = 10;
-
+    private boolean CONCURRENT_PREVENT_FLAG = false;
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
 
@@ -188,7 +188,7 @@ public class GeospatialActivity extends AppCompatActivity
     StorageReference storageRef;
 
 
-
+    private int timeOutCount = 5;
     private StoredGeolocation storedGeolocation_Photo;
     private Button setLocationButton;
     private TextView stroedLocationTextView;
@@ -512,6 +512,39 @@ public class GeospatialActivity extends AppCompatActivity
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
 
         //TODO: 여기선 버튼이지만 추후에 촬영시 저장되는 형식으로 변경
+        timeOutCount--;
+
+
+
+        if (timeOutCount==0) {
+            Log.e(TAG, "onDrawFrame: timeOutCount" + timeOutCount);
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collectionGroup("anchor").get().
+                    addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
+                                Anchor anchor =
+                                        earth.createAnchor(
+                                                anchorFirebase.getLatitude(),
+                                                anchorFirebase.getLongitude(),
+                                                anchorFirebase.getAltitude(),
+                                                0.0f,
+                                                (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
+                                                0.0f,
+                                                (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
+                                anchors.add(anchor);
+                            }
+
+                        }
+
+
+                    });
+
+        }
+
+
 
         setLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -640,23 +673,25 @@ public class GeospatialActivity extends AppCompatActivity
 
         Iterator<Anchor> iterator = anchors.iterator();
         System.out.println("anchors.size() = " + anchors.size());
-        for (Anchor anchor : anchors) {
+        if(timeOutCount == -1) {
+            Log.e(TAG, "onDrawFrame: timeoutCount"+ timeOutCount);
+            for (Anchor anchor : anchors) {
 //    while(iterator.hasNext()){
 //      Anchor anchor = iterator.next();
-            // Get the current pose of an Anchor in world space. The Anchor pose is updated
-            // during calls to session.update() as ARCore refines its estimate of the world.
-            anchor.getPose().toMatrix(modelMatrix, 0);
+                // Get the current pose of an Anchor in world space. The Anchor pose is updated
+                // during calls to session.update() as ARCore refines its estimate of the world.
+                anchor.getPose().toMatrix(modelMatrix, 0);
 
-            // Calculate model/view/projection matrices
-            Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                // Calculate model/view/projection matrices
+                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-            // Update shader properties and draw
-            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                // Update shader properties and draw
+                virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
-            render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+                render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+            }
         }
-
         // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
     }
