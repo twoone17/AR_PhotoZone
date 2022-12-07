@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -42,82 +43,86 @@ import com.google.firebase.ktx.Firebase
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import android.app.Activity
+import android.app.Dialog
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 
 import android.util.DisplayMetrics
+import android.view.Gravity
 import com.google.android.gms.maps.model.Marker
 import de.hdodenhof.circleimageview.CircleImageView
 
 
 class Fragment3 : Fragment(), OnMapReadyCallback {
 
-    //refer link : https://developers.google.com/maps/documentation/android-sdk/utility/marker-clustering
-    inner class MyItem(
-        lat: Double,
-        lng: Double,
-        title: String,
-        snippet: String
-    ) : ClusterItem {
-
-        private val position: LatLng
-        private val title: String
-        private val snippet: String
-
-        override fun getPosition(): LatLng {
-            return position
-        }
-
-        override fun getTitle(): String? {
-            return title
-        }
-
-        override fun getSnippet(): String? {
-            return snippet
-        }
-
-        init {
-            position = LatLng(lat, lng)
-            this.title = title
-            this.snippet = snippet
-        }
-    }
-
-    // Declare a variable for the cluster manager.
-    private lateinit var clusterManager: ClusterManager<MyItem>
-
-    private fun setUpClusterer() {
-        // Position the map.
-        mGMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(51.503186, -0.126446), 10f))
-
-        // Initialize the manager with the context and the map.
-        // (Activity extends context, so we can pass 'this' in the constructor.)
-        clusterManager = ClusterManager(context, mGMap)
-
-        // Point the map's listeners at the listeners implemented by the cluster
-        // manager.
-        mGMap.setOnCameraIdleListener(clusterManager)
-        mGMap.setOnMarkerClickListener(clusterManager)
-
-        // Add cluster items (markers) to the cluster manager.
-        addItems()
-    }
-
-    private fun addItems() {
-
-        // Set some lat/lng coordinates to start with.
-        var lat = 51.5145160
-        var lng = -0.1270060
-
-        // Add ten cluster items in close proximity, for purposes of this example.
-        for (i in 0..9) {
-            val offset = i / 60.0
-            lat += offset
-            lng += offset
-            val offsetItem =
-                MyItem(lat, lng, "Title $i", "Snippet $i")
-            clusterManager.addItem(offsetItem)
-        }
-    }
+//    //refer link : https://developers.google.com/maps/documentation/android-sdk/utility/marker-clustering
+//    inner class MyItem(
+//        lat: Double,
+//        lng: Double,
+//        title: String,
+//        snippet: String
+//    ) : ClusterItem {
+//
+//        private val position: LatLng
+//        private val title: String
+//        private val snippet: String
+//
+//        override fun getPosition(): LatLng {
+//            return position
+//        }
+//
+//        override fun getTitle(): String? {
+//            return title
+//        }
+//
+//        override fun getSnippet(): String? {
+//            return snippet
+//        }
+//
+//        init {
+//            position = LatLng(lat, lng)
+//            this.title = title
+//            this.snippet = snippet
+//        }
+//    }
+//
+//    // Declare a variable for the cluster manager.
+//    private lateinit var clusterManager: ClusterManager<MyItem>
+//
+//    private fun setUpClusterer() {
+//        // Position the map.
+//        mGMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(51.503186, -0.126446), 10f))
+//
+//        // Initialize the manager with the context and the map.
+//        // (Activity extends context, so we can pass 'this' in the constructor.)
+//        clusterManager = ClusterManager(context, mGMap)
+//
+//        // Point the map's listeners at the listeners implemented by the cluster
+//        // manager.
+//        mGMap.setOnCameraIdleListener(clusterManager)
+//        mGMap.setOnMarkerClickListener(clusterManager)
+//
+//        // Add cluster items (markers) to the cluster manager.
+//        addItems()
+//    }
+//
+//    private fun addItems() {
+//
+//        // Set some lat/lng coordinates to start with.
+//        var lat = 51.5145160
+//        var lng = -0.1270060
+//
+//        // Add ten cluster items in close proximity, for purposes of this example.
+//        for (i in 0..9) {
+//            val offset = i / 60.0
+//            lat += offset
+//            lng += offset
+//            val offsetItem =
+//                MyItem(lat, lng, "Title $i", "Snippet $i")
+//            clusterManager.addItem(offsetItem)
+//        }
+//    }
 
 
     private lateinit var db: FirebaseFirestore
@@ -157,6 +162,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         return rootView
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
 
         setCusomMarkerView()
@@ -194,7 +200,23 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
             override fun onMarkerClick(p0: Marker): Boolean {
                 // TODO 포토존에 속하는 게시글들의 사진 띄우기
-                Log.e("Fragment3", "onMarkerClick: " + "마커 클릭됨" )
+                val customDialog = Dialog(requireContext())
+                customDialog.setContentView(R.layout.custom_dialog)
+                customDialog.setCancelable(false)
+
+                    // Custom Dialog 크기 설정
+                    customDialog.window?.setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+
+                    // Custom Dialog 위치 조절
+                    customDialog.window?.setGravity(Gravity.BOTTOM)
+                    // Custom Dialog 배경 설정 (다음과 같이 진행해야 좌우 여백 없이 그려짐)
+                    customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                    // Custom Dialog 표시
+                    customDialog.show()
                 return false
             }
         })
