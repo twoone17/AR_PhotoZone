@@ -62,11 +62,12 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private double start_lat = 37.413003;
     private double start_lng = 127.125923;
-    private double end_lat = 37.4119623;
-    private double end_lng = 127.1284907;
-    // 학교용 테스트 좌표
-//    private double end_lat = 37.4535884;
-//    private double end_lng = 127.1276175;
+    // to 야탑역 4번 출구
+//    private double end_lat = 37.4119623;
+//    private double end_lng = 127.1284907;
+    // to 소미랑
+    private double end_lat = 37.4556093;
+    private double end_lng = 127.1271491;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

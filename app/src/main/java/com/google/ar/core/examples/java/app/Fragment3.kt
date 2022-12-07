@@ -41,14 +41,6 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
-import kotlinx.android.synthetic.main.activity_board_click.*
-import kotlinx.android.synthetic.main.custom_marker.*
-import kotlinx.coroutines.*
-import java.net.URL
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
-import java.lang.IllegalArgumentException
-import java.util.zip.Inflater
 import android.app.Activity
 import android.graphics.Canvas
 
@@ -178,11 +170,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 var lng = documentSnapshot.get("longitude") as Double
                 var position = LatLng(lat,lng)
 
-//                Glide.with(marker_root_view).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imageView_marker)
-//                googleMap.addMarker(MarkerOptions()
-//                    .position(position)
-////                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(marker_root_view))))
-//                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(requireContext(), marker_root_view, imgURL))))
                 // 커스텀 마커의 이미지 뷰에 먼저 이미지를 넣어준 후 .icon 파트에서 xml 통째로 불러옴
                 Glide.with(this.requireContext()).asBitmap().load(imgURL).fitCenter()
                     .into(object : CustomTarget<Bitmap>(200,200) {
@@ -190,8 +177,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
                         ) {
-//                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(resource))
-//                                .position(position))
                             googleMap.addMarker(MarkerOptions()
                                 .position(position)
                                 .icon(BitmapDescriptorFactory.fromBitmap(
@@ -205,13 +190,14 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
             }
         }
 
-//        googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
-//            override fun onMarkerClick(p0: Marker): Boolean {
-//                // TODO 포토존에 속하는 게시글들의 사진 띄우기
-//                Log.e("Fragment3", "onMarkerClick: " + "마커 클릭됨" )
-//                return false
-//            }
-//        })
+        // 마커 클릭은 여기서 처리합니다.
+        googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
+            override fun onMarkerClick(p0: Marker): Boolean {
+                // TODO 포토존에 속하는 게시글들의 사진 띄우기
+                Log.e("Fragment3", "onMarkerClick: " + "마커 클릭됨" )
+                return false
+            }
+        })
 
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
@@ -226,7 +212,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     }
 
     private fun createDrawableFromView(context: Context, view: View, resource: Bitmap): Bitmap {
-//        imageView_marker = view.findViewById(R.id.marker_circle_img)
         val displayMetrics = DisplayMetrics()
         (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
         view.layoutParams = ViewGroup.LayoutParams(
@@ -244,21 +229,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         return bitmap
     }
 
-//    private fun getBitmapFromView(view: View): Bitmap {
-//        val bitmap = Bitmap.createBitmap(
-//            300, 300, Bitmap.Config.ARGB_8888
-//        )
-//        val canvas = Canvas(bitmap)
-//        view.draw(canvas)
-//        return bitmap
-//    }
-
-
-    private fun url_to_bmp(url: URL): Bitmap? {
-            val bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream())
-            Log.d("bmp_in_func",bmp.toString())
-        return bmp
-    }
 
     override fun onStart() {
         super.onStart()
