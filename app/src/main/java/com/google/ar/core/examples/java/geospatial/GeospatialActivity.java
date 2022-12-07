@@ -213,7 +213,7 @@ public class GeospatialActivity extends AppCompatActivity
     private Mesh virtualObjectMesh;
     private Shader virtualObjectShader;
     private BoardData boradData;
-    private final List<Anchor> anchors = new ArrayList<>();
+    private List<Anchor> anchors = new ArrayList<>();
     private String anchorID;
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] modelMatrix = new float[16];
@@ -547,55 +547,18 @@ public class GeospatialActivity extends AppCompatActivity
                                     (float) Math.cos(20 / 2));
                     anchors.add(anchor);
                     anchorBoolean = true;
+
+                    Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
+                    Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
+
                 }
 
 
             });
 
-            Log.e(TAG, "onDrawFrame: anchor 1" + anchors);
-            Log.e(TAG, "onDrawFrame: anchor to string1 " + anchors.toString());
         }
 
 
-//        setLocationButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
-//                        geospatialPose.getLongitude(),
-//                        geospatialPose.getAltitude(),
-//                        geospatialPose.getHeading());
-//
-//                stroedLocationTextView.setText("저장되었습니다 ! ");
-//                handleSetAnchorButton();
-//
-//                //기존 저장한 앵커를 파이어베이스에서 불러온다
-//                FirebaseFirestore db = FirebaseFirestore.getInstance();
-//                db.collectionGroup("anchor").get().
-//                        addOnCompleteListener(task -> {
-//                            if (task.isSuccessful()) {
-//
-//                                for (QueryDocumentSnapshot document : task.getResult()) {
-//                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
-//                                    Anchor anchor =
-//                                            earth.createAnchor(
-//                                                    anchorFirebase.getLatitude(),
-//                                                    anchorFirebase.getLongitude(),
-//                                                    anchorFirebase.getAltitude(),
-//                                                    0.0f,
-//                                                    (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
-//                                                    0.0f,
-//                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
-//                                    anchors.add(anchor);
-//                                }
-//
-//                            }
-//
-//
-//                        });
-//
-//
-//            }
-//        });
 
         startCameraGeospatial();
 
@@ -671,7 +634,9 @@ public class GeospatialActivity extends AppCompatActivity
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
         Iterator<Anchor> iterator = anchors.iterator();
-        if (anchorBoolean&&avoidLoopAnchor) {
+        Log.e(TAG, "onDrawFrame: anchorBoolean" + anchorBoolean );
+        Log.e(TAG, "onDrawFrame:avoidLoopAnchor" + avoidLoopAnchor );
+//        if (anchorBoolean&&avoidLoopAnchor) {
             for (Anchor anchor : anchors) {
 
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
@@ -693,7 +658,7 @@ public class GeospatialActivity extends AppCompatActivity
             backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
             avoidLoopAnchor = false;
         }
-    }
+//    }
     //camera가 나옴
     private void startCameraGeospatial() {
 
