@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.app.board
 
+import android.app.Activity
 import android.app.Service
 import android.content.ContentValues.TAG
 import android.content.DialogInterface
@@ -17,21 +18,28 @@ import com.bumptech.glide.Glide
 import com.google.android.gms.common.api.Status
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.math.log
 
 class UploadActivity : AppCompatActivity() {
     private var auth = Firebase.auth
     val db = FirebaseFirestore.getInstance()
     var imgURL: String? = null
+    var placeCluster: String? = null
+    val requestCode:Int? = null
+    val AUTOCOMPLETE_REQUEST_CODE = 200;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +70,9 @@ class UploadActivity : AppCompatActivity() {
             }
         }
 
+        initPlaces()
+        initAutoCompleteFragment()
+
         //사진을 고르면 고른 사진을 띄워준다
         if (uploaddata != null) {
             imgURL = uploaddata!!.imgURL
@@ -87,7 +98,8 @@ class UploadActivity : AppCompatActivity() {
                 longitude = uploaddata!!.longitude as Number?,
                 altitude = uploaddata!!.altitude as Number?,
                 heading = uploaddata!!.heading as Number?,
-                documentId = documentID
+                documentId = documentID ,
+                placeCluster = placeCluster!!
             )
 
             db.collection("app_board").document(documentID).set(data!!)
@@ -98,7 +110,28 @@ class UploadActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
                 }
+            //photoZone에 저장
+            Log.e(TAG, "onCreate: placeclsuter null 전 "+ placeCluster )
+
+            val data2 = BoardData(
+                imgURL = imgURL!!,
+                latitude = uploaddata!!.latitude as Number?,
+                longitude = uploaddata!!.longitude as Number?,
+                altitude = uploaddata!!.altitude as Number?,
+                documentId = documentID ,
+            )
+            if(placeCluster!= null){
+                Log.e(TAG, "onCreate: placeclsuter"+ placeCluster )
+            db.collection("photoZone").document(placeCluster!!).set(data2)
+                .addOnSuccessListener { documentReference ->
+                    Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
+                }
         }
+            }
 
         image_added.setOnClickListener {
             println("!! 사진 이미지 클릭 !!")
@@ -111,8 +144,6 @@ class UploadActivity : AppCompatActivity() {
             finish()
         }
 
-        initPlaces()
-        initAutoCompleteFragment()
 
     }
 
@@ -124,7 +155,8 @@ class UploadActivity : AppCompatActivity() {
 
     private fun initPlaces() {
         if(!Places.isInitialized()) {
-            Places.initialize(applicationContext, getString(R.string.google_app_id), Locale.KOREA)
+            Places.initialize(applicationContext,getString(R.string.googleAPIKey))
+            Log.e(TAG, "initPlaces: 접근", )
         }
     }
 
@@ -133,14 +165,18 @@ class UploadActivity : AppCompatActivity() {
         val autocompleteFragment =
             supportFragmentManager.findFragmentById(R.id.autocomplete_fragment)
                     as AutocompleteSupportFragment
-
+        Log.e(TAG, "initAutoCompleteFragment: autocompleteFragment", )
         // Specify the types of place data to return.
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
+                Log.e(TAG, "onPlaceSelected: ㅎㅇ", )
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
+                requestCode == AUTOCOMPLETE_REQUEST_CODE
+                placeCluster = place.name
+
             }
 
             override fun onError(status: Status) {
@@ -148,5 +184,32 @@ class UploadActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            when (resultCode) {
+                Activity.RESULT_OK -> {
+                    data?.let {
+                        val place = Autocomplete.getPlaceFromIntent(data)
+                        Log.i(TAG, "Place: ${place.name}, ${place.id}")
+                        placeCluster = place.name
+
+                    }
+                }
+                AutocompleteActivity.RESULT_ERROR -> {
+                    // TODO: Handle the error.
+                    data?.let {
+                        val status = Autocomplete.getStatusFromIntent(data)
+                        Log.i(TAG, status.statusMessage ?: "에러 발생")
+                    }
+                }
+                Activity.RESULT_CANCELED -> {
+                    // The user canceled the operation.
+                }
+            }
+            return
+        }
+        super.onActivityResult(requestCode, resultCode, data)
     }
 }

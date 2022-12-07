@@ -14,6 +14,7 @@ data class BoardData(
     val latitude : Number? = 0.0,
     val longitude : Number?= 0.0,
     val altitude : Number? = 0.0,
-    val heading : Number? = 0.0
+    val heading : Number? = 0.0,
+    val placeCluster: String = ""
     // 지형정보, 게시자 정보 등등 SNS 정보들 추가 예정
 ) : Serializable
