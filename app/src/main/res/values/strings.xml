@@ -15,7 +15,8 @@
 -->
 <resources>
     <string name="app_name" translatable="false">Pic-AR</string>
-    <string name="googleAPIKey" translatable="false">AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU</string>
+    <string name="googleAPIKey" translatable="false">AIzaSyB1CL1sEiRBxo9ul2COQXRzQvMgh2x2ywg</string>
+    <!--    <string name="googleAPIKey" translatable="false">AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU</string>-->
     <string name="tMapAPIKey" translatable="false">l7xxa97487515286485e98d6fafe222d88c7</string>
     <string name="button_text_set_anchor" translatable="false">지리 앵커 배치</string>
     <string name="button_text_clear_anchors" translatable="false">지리 앵커 전체 삭제</string>
@@ -27,7 +28,7 @@
     <string name="status_localize_complete" translatable="false">지형 동기화 완료.</string>
     <plurals name="status_anchors_set">
         <item quantity="one">%d 개 앵커 배치됨</item>
-        <item quantity="other">%d 개 앵케들 배치됨</item>
+        <item quantity="other">%d 개 앵커들 배치됨</item>
     </plurals>
     <plurals name="status_anchors_cleared">
         <item quantity="one">%d 개 앵커 제거됨</item>

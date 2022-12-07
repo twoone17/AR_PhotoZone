@@ -513,8 +513,6 @@ public class GeospatialActivity extends AppCompatActivity
 
         //TODO: 여기선 버튼이지만 추후에 촬영시 저장되는 형식으로 변경
 
-        Log.e(TAG, "onDrawFrame: 루프가 도나요?");
-
         setLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
