@@ -377,11 +377,11 @@ public class ArNav extends AppCompatActivity
             Texture likesObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/spatial_marker_baked.png",
+                            "models/heart_baked.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
-            likesObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
+            likesObjectMesh = Mesh.createFromAsset(render, "models/heart.obj");
             likesObjectShader =
                     Shader.createFromAssets(
                             render,
