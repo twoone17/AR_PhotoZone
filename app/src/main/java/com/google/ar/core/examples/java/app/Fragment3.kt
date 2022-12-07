@@ -53,8 +53,7 @@ import android.app.Activity
 import android.graphics.Canvas
 
 import android.util.DisplayMetrics
-
-
+import com.google.android.gms.maps.model.Marker
 
 
 class Fragment3 : Fragment(), OnMapReadyCallback {
@@ -167,13 +166,13 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
 
-//        setCusomMarkerView()
+        setCusomMarkerView()
 
         var collectionReference : CollectionReference = db.collection("photoZone")
 
         collectionReference.get().addOnSuccessListener { result ->
             for (documentSnapshot in result) {
-                var imgURL = documentSnapshot.get("imgURL")
+                var imgURL = documentSnapshot.get("imgURL") as String
                 var lat = documentSnapshot.get("latitude") as Double
                 var lng = documentSnapshot.get("longitude") as Double
                 var position = LatLng(lat,lng)
@@ -181,7 +180,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 //                Glide.with(marker_root_view).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imageView_marker)
 //                googleMap.addMarker(MarkerOptions()
 //                    .position(position)
-//                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(marker_root_view))))
+////                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(marker_root_view))))
+//                    .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(requireContext(), marker_root_view, imgURL))))
                 // 커스텀 마커의 이미지 뷰에 먼저 이미지를 넣어준 후 .icon 파트에서 xml 통째로 불러옴
                 Glide.with(this.requireContext()).asBitmap().load(imgURL).fitCenter()
                     .into(object : CustomTarget<Bitmap>(300,300) {
@@ -189,8 +189,11 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
                         ) {
-                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(resource))
-                                .position(position))
+//                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(resource))
+//                                .position(position))
+                            googleMap.addMarker(MarkerOptions()
+                                .position(position)
+                                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(requireContext(), marker_root_view, resource))))
                         }
 
                         override fun onLoadCleared(placeholder: Drawable?) {
@@ -201,6 +204,13 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
             }
         }
 
+//        googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
+//            override fun onMarkerClick(p0: Marker): Boolean {
+//                // TODO 포토존에 속하는 게시글들의 사진 띄우기
+//                Log.e("Fragment3", "onMarkerClick: " + "마커 클릭됨" )
+//                return false
+//            }
+//        })
 
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
@@ -208,37 +218,41 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
     }
 
-//    private fun setCusomMarkerView() {
-//        val inflater: LayoutInflater = getLayoutInflater()
-//        marker_root_view = inflater.inflate(R.layout.custom_marker, null)
-//        imageView_marker = marker_root_view.findViewById<ImageView>(R.id.marker_circle_img)
-//    }
+    private fun setCusomMarkerView() {
+        val inflater: LayoutInflater = getLayoutInflater()
+        marker_root_view = inflater.inflate(R.layout.custom_marker, null)
+//        imageView_marker = marker_root_view.findViewById(R.id.marker_circle_img)
+    }
 
-//    private fun createDrawableFromView(context: Context, view: View): Bitmap {
-//        val displayMetrics = DisplayMetrics()
-//        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-//        view.layoutParams = ViewGroup.LayoutParams(
-//            ViewGroup.LayoutParams.WRAP_CONTENT,
-//            ViewGroup.LayoutParams.WRAP_CONTENT
-//        )
-//        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-//        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-//        view.buildDrawingCache()
-//        val bitmap =
-//            Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
-//        val canvas = Canvas(bitmap)
-//        view.draw(canvas)
-//        return bitmap
-//    }
+    private fun createDrawableFromView(context: Context, view: View, resource: Bitmap): Bitmap {
 
-//    private fun getBitmapFromView(view: View): Bitmap {
-//        val bitmap = Bitmap.createBitmap(
-//            300, 300, Bitmap.Config.ARGB_8888
-//        )
-//        val canvas = Canvas(bitmap)
-//        view.draw(canvas)
-//        return bitmap
-//    }
+        imageView_marker = view.findViewById(R.id.marker_circle_img)
+        imageView_marker.setImageBitmap(resource)
+//        Glide.with(view).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imageView_marker)
+        val displayMetrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+        view.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        view.buildDrawingCache()
+        val bitmap =
+            Bitmap.createBitmap(300, 300, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        view.draw(canvas)
+        return bitmap
+    }
+
+    private fun getBitmapFromView(view: View): Bitmap {
+        val bitmap = Bitmap.createBitmap(
+            300, 300, Bitmap.Config.ARGB_8888
+        )
+        val canvas = Canvas(bitmap)
+        view.draw(canvas)
+        return bitmap
+    }
 
 
     private fun url_to_bmp(url: URL): Bitmap? {
