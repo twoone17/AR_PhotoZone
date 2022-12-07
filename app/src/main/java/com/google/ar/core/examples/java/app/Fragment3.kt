@@ -31,10 +31,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.OnTokenCanceledListener
-import com.google.android.gms.tasks.Task
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -44,13 +40,18 @@ import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
 import android.app.Activity
 import android.app.Dialog
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 
 import android.util.DisplayMetrics
 import android.view.Gravity
+import android.widget.Button
 import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.tasks.*
+import com.google.ar.core.examples.java.app.board.BoardClickActivity
+import com.google.ar.core.examples.java.retrofit_rest.MapActivity
 import de.hdodenhof.circleimageview.CircleImageView
 
 
@@ -59,6 +60,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     private lateinit var db: FirebaseFirestore
     private lateinit var mView: MapView
     private lateinit var mGMap: GoogleMap
+
+    private lateinit var currentPosition : LatLng
 
     private lateinit var marker_root_view : View
     private lateinit var imageView_marker : CircleImageView
@@ -130,7 +133,22 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 // TODO 포토존에 속하는 게시글들의 사진 띄우기
                 val customDialog = Dialog(requireContext())
                 customDialog.setContentView(R.layout.custom_dialog)
-                customDialog.setCancelable(false)
+
+                val navButton = customDialog.findViewById<Button>(R.id.navigateToPhotozoneButton)
+                navButton.setOnClickListener {
+
+                    // 도착지 정보 받아오는건 완료
+                    Log.e("TAG", " " + p0.position.latitude + p0.position.longitude )
+                    Log.e("TAG", " " + currentPosition.latitude + currentPosition.longitude )
+
+                    Intent(requireContext(), MapActivity::class.java).apply {
+                        putExtra("startLatitude", currentPosition.latitude)
+                        putExtra("startLongitude", currentPosition.longitude)
+                        putExtra("endLatitude", p0.position.latitude)
+                        putExtra("endLongitude", p0.position.longitude)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }.run { startActivity(this) }
+                }
 
                     // Custom Dialog 크기 설정
                     customDialog.window?.setLayout(
@@ -152,7 +170,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
         mGMap = googleMap
-
     }
 
     private fun setCusomMarkerView() {
@@ -261,6 +278,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 else {
                     val lat = location.latitude
                     val lon = location.longitude
+                    currentPosition = LatLng(location.latitude, location.longitude)
                     val now_loc = LatLng(lat, lon)
                     Log.d("curLoc",now_loc.toString())
 

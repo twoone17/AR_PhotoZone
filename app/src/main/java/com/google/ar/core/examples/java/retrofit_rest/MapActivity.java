@@ -36,6 +36,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -75,6 +76,13 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
 
+        start_lat = getIntent().getDoubleExtra("startLatitude", 0);
+        start_lng = getIntent().getDoubleExtra("startLongitude", 0);
+        end_lat = getIntent().getDoubleExtra("endLatitude", 0);
+        end_lng = getIntent().getDoubleExtra("endLongitude", 0);
+
+        Log.e(TAG, "onCreate: " + start_lat + " " + start_lng + " " + end_lat + " " + end_lng);
+
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         tokenInit();
 //        checkDangerousPermissions();
@@ -88,17 +96,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-//        LatLng start = new LatLng(start_lat, start_lng);
-//        LatLng end = new LatLng(end_lat, end_lng);
-//        API_Key = getResources().getString(R.string.tMapAPIKey);
-//        try {
-//            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
-//                    String.valueOf(end.longitude), String.valueOf(end.latitude),
-//                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
-//                    API_Key);
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
         Log.e(TAG, "onMapReady: " + "지도 준비됨" );
     }
 
