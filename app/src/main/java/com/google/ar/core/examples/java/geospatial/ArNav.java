@@ -113,7 +113,6 @@ public class ArNav extends AppCompatActivity
     private SharedPreferences sharedPreferences;
 
     private String lastStatusText;
-//    private TextView geospatialPoseTextView;
     private TextView statusTextView;
     private Button setAnchorButton;
     private Button clearAnchorsButton;
@@ -126,7 +125,6 @@ public class ArNav extends AppCompatActivity
     private Framebuffer virtualSceneFramebuffer;
     private boolean hasSetTextureNames = false;
 
-    // Virtual object (ARCore geospatial)
     private Mesh navigationObjectMesh;
     private Shader navigationObjectShader;
     private Mesh likesObjectMesh;
@@ -134,20 +132,11 @@ public class ArNav extends AppCompatActivity
 
     private final List<Anchor> anchors = new ArrayList<>();
 
-    // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] modelMatrix = new float[16];
     private final float[] viewMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
-
-
-    /* TODO
-        순서대로, 안내 객체를 먼저 모두 앵커로 저장한 뒤
-        좋아요 객체를 그 다음에 로드하겠다.
-        반복문에서 shader와 texture의 구분은 위도 경도 리스트의 길이로
-        이루어질 수 있게끔 구현하겠다.
-     */
 
     private int distinguisher;
 
@@ -168,7 +157,6 @@ public class ArNav extends AppCompatActivity
 
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
 
-        // Set up renderer.
         render = new SampleRender(surfaceView, this, getAssets());
 
         installRequested = false;
@@ -182,14 +170,11 @@ public class ArNav extends AppCompatActivity
     @Override
     protected void onDestroy() {
         if (session != null) {
-            // Explicitly close ARCore Session to release native resources.
-            // Review the API reference for important considerations before calling close() in apps with
-            // more complicated lifecycle requirements:
-            // https://developers.google.com/ar/reference/java/arcore/reference/com/google/ar/core/Session#close()
             session.close();
             session = null;
         }
 
+        // TODO 여기서 안내 종료 관련 기능 추가하기
         super.onDestroy();
     }
 
@@ -225,9 +210,6 @@ public class ArNav extends AppCompatActivity
                     case INSTALLED:
                         break;
                 }
-
-                // ARCore requires camera permissions to operate. If we did not yet obtain runtime
-                // permission on Android M and above, now is a good time to ask the user for it.
                 if (!CameraPermissionHelper.hasCameraPermission(this)) {
                     CameraPermissionHelper.requestCameraPermission(this);
                     return;
@@ -264,15 +246,8 @@ public class ArNav extends AppCompatActivity
             }
         }
 
-        // Note that order matters - see the note in onPause(), the reverse applies here.
         try {
             configureSession();
-            // To record a live camera session for later playback, call
-            // `session.startRecording(recordingConfig)` at anytime. To playback a previously recorded AR
-            // session instead of using the live camera feed, call
-            // `session.setPlaybackDatasetUri(Uri)` before calling `session.resume()`. To
-            // learn more about recording and playback, see:
-            // https://developers.google.com/ar/develop/java/recording-and-playback
             session.resume();
         } catch (CameraNotAvailableException e) {
             message = "Camera not available. Try restarting the app.";
@@ -303,9 +278,6 @@ public class ArNav extends AppCompatActivity
     public void onPause() {
         super.onPause();
         if (session != null) {
-            // Note that the order matters - GLSurfaceView is paused first so that it does not try
-            // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
-            // still call session.update() and get a SessionPausedException.
             displayRotationHelper.onPause();
             surfaceView.onPause();
             session.pause();
@@ -316,26 +288,21 @@ public class ArNav extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(requestCode, permissions, results);
         if (!CameraPermissionHelper.hasCameraPermission(this)) {
-            // Use toast instead of snackbar here since the activity will exit.
             Toast.makeText(this, "Camera permission is needed to run this application", Toast.LENGTH_LONG)
                     .show();
             if (!CameraPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-                // Permission denied with checking "Do not ask again".
                 CameraPermissionHelper.launchPermissionSettings(this);
             }
             finish();
         }
-        // Check if this result pertains to the location permission.
         if (LocationPermissionHelper.hasFineLocationPermissionsResponseInResult(permissions)
                 && !LocationPermissionHelper.hasFineLocationPermission(this)) {
-            // Use toast instead of snackbar here since the activity will exit.
             Toast.makeText(
                     this,
                     "Precise location permission is needed to run this application",
                     Toast.LENGTH_LONG)
                     .show();
             if (!LocationPermissionHelper.shouldShowRequestPermissionRationale(this)) {
-                // Permission denied with checking "Do not ask again".
                 LocationPermissionHelper.launchPermissionSettings(this);
             }
             finish();
@@ -410,25 +377,12 @@ public class ArNav extends AppCompatActivity
         if (session == null) {
             return;
         }
-
-        // Texture names should only be set once on a GL thread unless they change. This is done during
-        // onDrawFrame rather than onSurfaceCreated since the session is not guaranteed to have been
-        // initialized during the execution of onSurfaceCreated.
         if (!hasSetTextureNames) {
             session.setCameraTextureNames(
                     new int[]{backgroundRenderer.getCameraColorTexture().getTextureId()});
             hasSetTextureNames = true;
         }
-
-        // -- Update per-frame state
-
-        // Notify ARCore session that the view size changed so that the perspective matrix and
-        // the video background can be properly adjusted.
         displayRotationHelper.updateSessionIfNeeded(session);
-
-        // Obtain the current frame from ARSession. When the configuration is set to
-        // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-        // camera framerate.
         Frame frame;
         try {
             frame = session.update();
@@ -440,11 +394,7 @@ public class ArNav extends AppCompatActivity
 
         Camera camera = frame.getCamera();
 
-        // BackgroundRenderer.updateDisplayGeometry must be called every frame to update the coordinates
-        // used to draw the background camera image.
         backgroundRenderer.updateDisplayGeometry(frame);
-
-        // Keep the screen unlocked while tracking, but allow it to lock when tracking stops.
         trackingStateHelper.updateKeepScreenOnFlag(camera.getTrackingState());
 
         Earth earth = session.getEarth();
@@ -500,42 +450,25 @@ public class ArNav extends AppCompatActivity
                     });
         }
 
-        // -- Draw background
-        /**
-         * 보여지는 것
-         */
-
         if (frame.getTimestamp() != 0) {
             // Suppress rendering if the camera did not produce the first frame yet. This is to avoid
             // drawing possible leftover data from previous sessions if the texture is reused.
             backgroundRenderer.drawBackground(render);
         }
 
-        // If not tracking, don't draw 3D objects.
-//    if (camera.getTrackingState() != TrackingState.TRACKING || state != State.LOCALIZED) {
-//      return;
-//    }
 
-        // -- Draw virtual objects
-
-        // Get projection matrix.
         camera.getProjectionMatrix(projectionMatrix, 0, Z_NEAR, Z_FAR);
 
-        // Get camera matrix and draw.
         camera.getViewMatrix(viewMatrix, 0);
 
-        // Visualize anchors created by touch.
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-//        Iterator<Anchor> iterator = anchors.iterator();
         Log.e(TAG, "onDrawFrame: " + anchors.size());
         if (CONCURRENT_PREVENT_FLAG) {
             int counter = 0;
             for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
                 iterator.next().getPose().toMatrix(modelMatrix, 0);
 
-                // Calculate model/view/projection matrices
-                // TODO 여기서 조건문으로 구분해서 텍스쳐 바꿔주기
                 if(counter < distinguisher) {
                     // 이 분기는 안내 객체에 대한 분기이다.
                     Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
@@ -552,16 +485,11 @@ public class ArNav extends AppCompatActivity
                 counter++;
             }
         }
-        // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
     }
 
 
-    /**
-     * Configures the session with feature settings.
-     */
     private void configureSession() {
-        // Earth mode may not be supported on this device due to insufficient sensor quality.
         if (!session.isGeospatialModeSupported(Config.GeospatialMode.ENABLED)) {
             state = State.UNSUPPORTED;
             return;
@@ -574,9 +502,6 @@ public class ArNav extends AppCompatActivity
         localizingStartTimestamp = System.currentTimeMillis();
     }
 
-    /**
-     * Change behavior depending on the current {@link State} of the application.
-     */
     private void updateGeospatialState(Earth earth) {
         if (state == State.PRETRACKING) {
             updatePretrackingState(earth);
@@ -597,8 +522,6 @@ public class ArNav extends AppCompatActivity
             state = State.EARTH_STATE_ERROR;
             return;
         }
-
-//        runOnUiThread(() -> geospatialPoseTextView.setText(R.string.geospatial_pose_not_tracking));
     }
 
     private void updateLocalizingState(Earth earth) {
@@ -622,7 +545,6 @@ public class ArNav extends AppCompatActivity
             return;
         }
 
-//        updateGeospatialPoseText(geospatialPose);
     }
 
     private void updateLocalizedState(Earth earth) {
@@ -633,7 +555,6 @@ public class ArNav extends AppCompatActivity
                 || geospatialPose.getHeadingAccuracy()
                 > LOCALIZING_HEADING_ACCURACY_THRESHOLD_DEGREES
                 + LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES) {
-            // Accuracies have degenerated, return to the localizing state.
             state = State.LOCALIZING;
             localizingStartTimestamp = System.currentTimeMillis();
             runOnUiThread(
@@ -672,7 +593,6 @@ public class ArNav extends AppCompatActivity
                         distinguisher = latitudes.size();
                         // 안내 객체 추가 완료,
                         // 좋아요 객체 추가 시작
-                        // TODO 기존 coordsRef에서 변경, 오류 발생 여지 있음
                         coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -721,13 +641,8 @@ public class ArNav extends AppCompatActivity
         clearAnchorsButton.setVisibility(View.INVISIBLE);
     }
 
-    /**
-     * Create an anchor at a specific geodetic location using a heading.
-     */
     private void createAnchor(
             Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
-        // Convert a heading to a EUS quaternion:
-//        double angleRadians = Math.toRadians(180.0f - headingDegrees);
         double angleRadians = Math.toRadians(180.0f - headingDegrees);
 
 
@@ -739,7 +654,7 @@ public class ArNav extends AppCompatActivity
                         altitude,
                         45.0f,
 //                        (float) Math.sin(angleRadians),
-                        90.0f,
+                        -120.0f,
                         45.0f,
                         (float) Math.cos(angleRadians / 2));
         anchors.add(anchor);
@@ -750,9 +665,6 @@ public class ArNav extends AppCompatActivity
         }
     }
 
-    /**
-     * Helper function to store the parameters used in anchor creation in {@link SharedPreferences}.
-     */
     private void storeAnchorParameters(
             double latitude, double longitude, double altitude, double headingDegrees) {
         Set<String> anchorParameterSet =
@@ -773,9 +685,6 @@ public class ArNav extends AppCompatActivity
         editor.commit();
     }
 
-    /**
-     * Creates all anchors that were stored in the {@link SharedPreferences}.
-     */
     private void createAnchorFromSharedPreferences(Earth earth) {
         Set<String> anchorParameterSet =
                 sharedPreferences.getStringSet(SHARED_PREFERENCES_SAVED_ANCHORS, null);

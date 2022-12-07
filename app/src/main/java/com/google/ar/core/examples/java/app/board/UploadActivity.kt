@@ -38,6 +38,7 @@ import com.google.firebase.ktx.Firebase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.log
 
 class UploadActivity : AppCompatActivity() {
@@ -48,6 +49,8 @@ class UploadActivity : AppCompatActivity() {
     val requestCode: Int? = null
     val AUTOCOMPLETE_REQUEST_CODE = 200;
 
+    private lateinit var uid : String
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_upload)
@@ -57,6 +60,8 @@ class UploadActivity : AppCompatActivity() {
         val close = findViewById<ImageView>(R.id.close)
         var editText = findViewById<EditText>(R.id.description)
         var description = editText.text.toString()
+
+        uid = auth.currentUser?.uid ?: ""
 
         val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
@@ -114,6 +119,9 @@ class UploadActivity : AppCompatActivity() {
             db.collection("app_board").document(documentID).set(data!!)
                 .addOnSuccessListener { documentReference ->
                     Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                    var setMap = HashMap<String, String>()
+                    setMap.put("postId", documentID)
+                    db.collection("users").document(uid).collection("MyBoard").add(setMap)
                     finish()
                 }
                 .addOnFailureListener { e ->
