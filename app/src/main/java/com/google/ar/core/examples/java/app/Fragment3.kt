@@ -56,75 +56,6 @@ import de.hdodenhof.circleimageview.CircleImageView
 
 class Fragment3 : Fragment(), OnMapReadyCallback {
 
-//    //refer link : https://developers.google.com/maps/documentation/android-sdk/utility/marker-clustering
-//    inner class MyItem(
-//        lat: Double,
-//        lng: Double,
-//        title: String,
-//        snippet: String
-//    ) : ClusterItem {
-//
-//        private val position: LatLng
-//        private val title: String
-//        private val snippet: String
-//
-//        override fun getPosition(): LatLng {
-//            return position
-//        }
-//
-//        override fun getTitle(): String? {
-//            return title
-//        }
-//
-//        override fun getSnippet(): String? {
-//            return snippet
-//        }
-//
-//        init {
-//            position = LatLng(lat, lng)
-//            this.title = title
-//            this.snippet = snippet
-//        }
-//    }
-//
-//    // Declare a variable for the cluster manager.
-//    private lateinit var clusterManager: ClusterManager<MyItem>
-//
-//    private fun setUpClusterer() {
-//        // Position the map.
-//        mGMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(51.503186, -0.126446), 10f))
-//
-//        // Initialize the manager with the context and the map.
-//        // (Activity extends context, so we can pass 'this' in the constructor.)
-//        clusterManager = ClusterManager(context, mGMap)
-//
-//        // Point the map's listeners at the listeners implemented by the cluster
-//        // manager.
-//        mGMap.setOnCameraIdleListener(clusterManager)
-//        mGMap.setOnMarkerClickListener(clusterManager)
-//
-//        // Add cluster items (markers) to the cluster manager.
-//        addItems()
-//    }
-//
-//    private fun addItems() {
-//
-//        // Set some lat/lng coordinates to start with.
-//        var lat = 51.5145160
-//        var lng = -0.1270060
-//
-//        // Add ten cluster items in close proximity, for purposes of this example.
-//        for (i in 0..9) {
-//            val offset = i / 60.0
-//            lat += offset
-//            lng += offset
-//            val offsetItem =
-//                MyItem(lat, lng, "Title $i", "Snippet $i")
-//            clusterManager.addItem(offsetItem)
-//        }
-//    }
-
-
     private lateinit var db: FirebaseFirestore
     private lateinit var mView: MapView
     private lateinit var mGMap: GoogleMap
@@ -135,9 +66,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     var fusedLocationProviderClient: FusedLocationProviderClient? = null
     var REQEST_CODE = 101
     var mLocationManager: LocationManager? = null
-
-    var bmp: Bitmap? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
