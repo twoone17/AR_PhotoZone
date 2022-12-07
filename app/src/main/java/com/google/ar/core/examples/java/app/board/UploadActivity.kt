@@ -38,7 +38,7 @@ class UploadActivity : AppCompatActivity() {
     val db = FirebaseFirestore.getInstance()
     var imgURL: String? = null
     var placeCluster: String? = null
-    val requestCode:Int? = null
+    val requestCode: Int? = null
     val AUTOCOMPLETE_REQUEST_CODE = 200;
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,7 +98,7 @@ class UploadActivity : AppCompatActivity() {
                 longitude = uploaddata!!.longitude as Number?,
                 altitude = uploaddata!!.altitude as Number?,
                 heading = uploaddata!!.heading as Number?,
-                documentId = documentID ,
+                documentId = documentID,
                 placeCluster = placeCluster!!
             )
 
@@ -111,27 +111,39 @@ class UploadActivity : AppCompatActivity() {
                     Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
                 }
             //photoZone에 저장
-            Log.e(TAG, "onCreate: placeclsuter null 전 "+ placeCluster )
+            Log.e(TAG, "onCreate: placeclsuter null 전 " + placeCluster)
 
-            val data2 = BoardData(
-                imgURL = imgURL!!,
-                latitude = uploaddata!!.latitude as Number?,
-                longitude = uploaddata!!.longitude as Number?,
-                altitude = uploaddata!!.altitude as Number?,
-                documentId = documentID ,
+            val docData = hashMapOf(
+                "imgURL" to uploaddata!!.imgURL!!,
+                "latitude" to uploaddata!!.latitude as Number?,
+                "longitude" to uploaddata!!.longitude as Number?,
+                "altitude" to uploaddata!!.altitude as Number?
             )
-            if(placeCluster!= null){
-                Log.e(TAG, "onCreate: placeclsuter"+ placeCluster )
-            db.collection("photoZone").document(placeCluster!!).set(data2)
-                .addOnSuccessListener { documentReference ->
-                    Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
-                    finish()
-                }
-                .addOnFailureListener { e ->
-                    Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
-                }
-        }
+
+//            val postList =
+            if (placeCluster != null) {
+                //photozone 정보 서버에 업로드
+                db.collection("photoZone").document(placeCluster!!)
+                    .update(docData as Map<String, Any>)
+                    .addOnSuccessListener { documentReference ->
+                        Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
+                    }
+                //photozone에서 촬영한 게시글 데이터 업로드
+                db.collection("photoZone").document(placeCluster!!)
+                    .collection("boardList").document(documentID).set(data)
+                    .addOnSuccessListener { documentReference ->
+                        Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
+                    }
             }
+        }
 
         image_added.setOnClickListener {
             println("!! 사진 이미지 클릭 !!")
@@ -154,9 +166,9 @@ class UploadActivity : AppCompatActivity() {
     // 여기부터는 내가 하고싶은거 다 할게
 
     private fun initPlaces() {
-        if(!Places.isInitialized()) {
-            Places.initialize(applicationContext,getString(R.string.googleAPIKey))
-            Log.e(TAG, "initPlaces: 접근", )
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, getString(R.string.googleAPIKey))
+            Log.e(TAG, "initPlaces: 접근")
         }
     }
 
@@ -165,14 +177,14 @@ class UploadActivity : AppCompatActivity() {
         val autocompleteFragment =
             supportFragmentManager.findFragmentById(R.id.autocomplete_fragment)
                     as AutocompleteSupportFragment
-        Log.e(TAG, "initAutoCompleteFragment: autocompleteFragment", )
+        Log.e(TAG, "initAutoCompleteFragment: autocompleteFragment")
         // Specify the types of place data to return.
         autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
 
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                Log.e(TAG, "onPlaceSelected: ㅎㅇ", )
+                Log.e(TAG, "onPlaceSelected: ㅎㅇ")
                 Log.i(TAG, "Place: ${place.name}, ${place.id}")
                 requestCode == AUTOCOMPLETE_REQUEST_CODE
                 placeCluster = place.name
