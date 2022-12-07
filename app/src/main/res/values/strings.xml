@@ -15,7 +15,7 @@
 -->
 <resources>
     <string name="app_name" translatable="false">Pic-AR</string>
-    <string name="googleAPIKey" translatable="false">AIzaSyB1CL1sEiRBxo9ul2COQXRzQvMgh2x2ywg</string>
+    <string name="googleAPIKey" translatable="false">AIzaSyCTOfpWJbYOuVJIVgr7SSRXUUx1aQW-I6g</string>
     <!--    <string name="googleAPIKey" translatable="false">AIzaSyC2pD2vIttY7OxpjYLX2TV2A1AfgPcuewU</string>-->
     <string name="tMapAPIKey" translatable="false">l7xxa97487515286485e98d6fafe222d88c7</string>
     <string name="button_text_set_anchor" translatable="false">지리 앵커 배치</string>
