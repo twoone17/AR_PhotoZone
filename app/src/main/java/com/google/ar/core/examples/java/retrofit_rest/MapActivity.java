@@ -88,17 +88,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-//        LatLng start = new LatLng(start_lat, start_lng);
-//        LatLng end = new LatLng(end_lat, end_lng);
-//        API_Key = getResources().getString(R.string.tMapAPIKey);
-//        try {
-//            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
-//                    String.valueOf(end.longitude), String.valueOf(end.latitude),
-//                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
-//                    API_Key);
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
         Log.e(TAG, "onMapReady: " + "지도 준비됨" );
     }
 
