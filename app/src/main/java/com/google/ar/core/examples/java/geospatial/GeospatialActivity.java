@@ -550,13 +550,14 @@ public class GeospatialActivity extends AppCompatActivity
 
                     Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
                     Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
-
+                    Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
                 }
 
 
             });
 
         }
+        Log.e(TAG, "onDrawFrame: anchorBoolean 2"+anchorBoolean );
 
 
 
@@ -634,9 +635,9 @@ public class GeospatialActivity extends AppCompatActivity
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
         Iterator<Anchor> iterator = anchors.iterator();
-        Log.e(TAG, "onDrawFrame: anchorBoolean" + anchorBoolean );
+        Log.e(TAG, "onDrawFrame: anchorBoolean 3" + anchorBoolean );
         Log.e(TAG, "onDrawFrame:avoidLoopAnchor" + avoidLoopAnchor );
-//        if (anchorBoolean&&avoidLoopAnchor) {
+        if (anchorBoolean&&avoidLoopAnchor) {
             for (Anchor anchor : anchors) {
 
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
@@ -658,7 +659,7 @@ public class GeospatialActivity extends AppCompatActivity
             backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
             avoidLoopAnchor = false;
         }
-//    }
+    }
     //camera가 나옴
     private void startCameraGeospatial() {
 
