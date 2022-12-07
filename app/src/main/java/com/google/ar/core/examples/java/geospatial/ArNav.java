@@ -377,7 +377,7 @@ public class ArNav extends AppCompatActivity
             Texture likesObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/heart_baked.png",
+                            "models/color_heart_baked.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
@@ -673,7 +673,7 @@ public class ArNav extends AppCompatActivity
                         // 안내 객체 추가 완료,
                         // 좋아요 객체 추가 시작
                         // TODO 기존 coordsRef에서 변경, 오류 발생 여지 있음
-                        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                 if(task.isSuccessful()) {
@@ -727,6 +727,7 @@ public class ArNav extends AppCompatActivity
     private void createAnchor(
             Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
         // Convert a heading to a EUS quaternion:
+//        double angleRadians = Math.toRadians(180.0f - headingDegrees);
         double angleRadians = Math.toRadians(180.0f - headingDegrees);
 
 
@@ -736,9 +737,10 @@ public class ArNav extends AppCompatActivity
                         latitude,
                         longitude,
                         altitude,
-                        0.0f,
-                        (float) Math.sin(angleRadians / 2),
-                        0.0f,
+                        45.0f,
+//                        (float) Math.sin(angleRadians),
+                        90.0f,
+                        45.0f,
                         (float) Math.cos(angleRadians / 2));
         anchors.add(anchor);
 
