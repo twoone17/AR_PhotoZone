@@ -77,6 +77,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -123,7 +124,7 @@ public class GeospatialActivity extends AppCompatActivity
 
     private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
     private static final int MAXIMUM_ANCHORS = 10;
-
+    private boolean CONCURRENT_PREVENT_FLAG = false;
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView surfaceView;
 
@@ -188,7 +189,7 @@ public class GeospatialActivity extends AppCompatActivity
     StorageReference storageRef;
 
 
-
+    private int timeOutCount = 5;
     private StoredGeolocation storedGeolocation_Photo;
     private Button setLocationButton;
     private TextView stroedLocationTextView;
@@ -208,15 +209,17 @@ public class GeospatialActivity extends AppCompatActivity
     // Virtual object (ARCore geospatial)
     private Mesh virtualObjectMesh;
     private Shader virtualObjectShader;
-
+    private BoardData boradData;
     private final List<Anchor> anchors = new ArrayList<>();
-
+    private String anchorID;
     // Temporary matrix allocated here to reduce number of allocations for each frame.
     private final float[] modelMatrix = new float[16];
     private final float[] viewMatrix = new float[16];
     private final float[] projectionMatrix = new float[16];
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
+
+    private String documentID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,6 +228,10 @@ public class GeospatialActivity extends AppCompatActivity
 
         Intent intent = getIntent();
         BoardData boardData = (BoardData) intent.getSerializableExtra("boardData");
+        documentID = boardData.getDocumentId();
+        anchorID = boardData.getAnchorID();
+        Log.e(TAG, "onCreate: anchorID"+ anchorID );
+        Log.e(TAG, "onCreate: boardData" + boardData);
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
         geospatialPoseTextView = findViewById(R.id.geospatial_pose_view);
@@ -511,7 +518,33 @@ public class GeospatialActivity extends AppCompatActivity
 
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
 
-        //TODO: 여기선 버튼이지만 추후에 촬영시 저장되는 형식으로 변경
+        timeOutCount--;
+        String getUid = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
+        if (timeOutCount == 0) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+//            if(anchorID!="") {
+                db.collection("anchor").document(anchorID).get().
+                        addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                Log.e(TAG, "onDrawFrame:                 document.getData()" + document.getData());
+//                            Anchor anchor =
+//                                    earth.createAnchor(
+//                                            document["latitude"],
+//                                            anchorFirebase.getLongitude(),
+//                                            anchorFirebase.getAltitude(),
+//                                            0.0f,
+//                                            (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
+//                                            0.0f,
+//                                            (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
+//                            anchors.add(anchor);
+                            }
+
+
+                        });
+
+
+        }
 
         setLocationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -640,23 +673,25 @@ public class GeospatialActivity extends AppCompatActivity
 
         Iterator<Anchor> iterator = anchors.iterator();
         System.out.println("anchors.size() = " + anchors.size());
-        for (Anchor anchor : anchors) {
+        if (timeOutCount == -1) {
+            Log.e(TAG, "onDrawFrame: timeoutCount" + timeOutCount);
+            for (Anchor anchor : anchors) {
 //    while(iterator.hasNext()){
 //      Anchor anchor = iterator.next();
-            // Get the current pose of an Anchor in world space. The Anchor pose is updated
-            // during calls to session.update() as ARCore refines its estimate of the world.
-            anchor.getPose().toMatrix(modelMatrix, 0);
+                // Get the current pose of an Anchor in world space. The Anchor pose is updated
+                // during calls to session.update() as ARCore refines its estimate of the world.
+                anchor.getPose().toMatrix(modelMatrix, 0);
 
-            // Calculate model/view/projection matrices
-            Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                // Calculate model/view/projection matrices
+                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
-            // Update shader properties and draw
-            virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                // Update shader properties and draw
+                virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
-            render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+                render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+            }
         }
-
         // Compose the virtual scene with the background.
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
     }
@@ -682,7 +717,7 @@ public class GeospatialActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
 
-                Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString() );
+                Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString());
 
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, 101);
@@ -699,12 +734,12 @@ public class GeospatialActivity extends AppCompatActivity
         if (requestCode == 101) {
             if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "onActivityResult: 권한접근" );
+                Log.e(TAG, "onActivityResult: 권한접근");
                 // Should we show an explanation?
                 if (shouldShowRequestPermissionRationale(
                         android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     // Explain to the user why we need to read the contacts
-                    Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale" );
+                    Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale");
                 }
 
                 requestPermissions(
@@ -713,21 +748,21 @@ public class GeospatialActivity extends AppCompatActivity
 
                 // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
                 // app-defined int constant that should be quite unique
-                Log.e(TAG, "onActivityResult: return" );
+                Log.e(TAG, "onActivityResult: return");
                 return;
             }
-            Log.e(TAG, "onActivityResult: 권한성공" );
+            Log.e(TAG, "onActivityResult: 권한성공");
             // BitMap is data structure of image file which store the image in memory
             Bitmap photo = (Bitmap) data.getExtras().get("data");
             // Set the image in imageview for display
             System.out.println("photo = " + photo);
 
-            Uri imgURL = getImageUri(this,photo);
+            Uri imgURL = getImageUri(this, photo);
 //            imgURL = uri.toString();
-            Log.e(TAG, "onActivityResult: imgURL" + imgURL );
-            Log.e(TAG, "onActivityResult: storedGeolocation_Photo"+storedGeolocation_Photo );
+            Log.e(TAG, "onActivityResult: imgURL" + imgURL);
+            Log.e(TAG, "onActivityResult: storedGeolocation_Photo" + storedGeolocation_Photo);
             //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
-            Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" +  auth.getCurrentUser());
+            Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" + auth.getCurrentUser());
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 
             //storage에 파일 저장하는 코드
@@ -766,8 +801,22 @@ public class GeospatialActivity extends AppCompatActivity
                             LocalDateTime now = LocalDateTime.now();
                             String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
 
-                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading());
-//
+                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading(),postdocument_bydate);
+
+                            db.collection("anchor").document(postdocument_bydate).set(uploadFirebaseData)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Log.e("temp", "onSuccess: DB Insertion success");
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            Log.e("temp", "onFailure: DB Insertion failed");
+                                        }
+                                    });
+
                             db.collection("users").document(getUid).collection("posts").document(postdocument_bydate).set(uploadFirebaseData)
                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
@@ -789,7 +838,6 @@ public class GeospatialActivity extends AppCompatActivity
                     }
                 });
             }
-
 
 
         }

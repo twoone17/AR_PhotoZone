@@ -66,6 +66,7 @@ class UploadImageViewActivity : AppCompatActivity() {
                                 longitude = links.data["longitude"] as Number?,
                                 altitude = links.data["altitude"] as Number?,
                                 heading = links.data["heading"] as Number?,
+                                anchorID = links.data["anchorID"].toString()
                                 )
                         )
                     }
