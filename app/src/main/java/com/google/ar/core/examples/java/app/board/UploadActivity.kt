@@ -107,7 +107,8 @@ class UploadActivity : AppCompatActivity() {
                 altitude = uploaddata!!.altitude as Number?,
                 heading = uploaddata!!.heading as Number?,
                 documentId = documentID,
-                placeCluster = placeCluster!!
+                placeCluster = placeCluster!!,
+                anchorID =  uploaddata!!.anchorID
             )
 
             db.collection("app_board").document(documentID).set(data!!)

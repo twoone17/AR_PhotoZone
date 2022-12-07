@@ -15,14 +15,16 @@ public class UploadFirebaseData {
     private double latitude ;
     private double longitude;
     private double altitude;
+    private String anchorID;
 
-    public UploadFirebaseData(String userId, String imgURL, double latitude, double longitude, double altitude, double heading) {
+    public UploadFirebaseData(String userId, String imgURL, double latitude, double longitude, double altitude, double heading,String anchorID) {
         this.userId = userId;
         this.imgURL = imgURL;
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;
         this.heading = heading;
+        this.anchorID = anchorID;
     }
 
     public String getUserId() {
@@ -31,6 +33,10 @@ public class UploadFirebaseData {
 
     public String getImgURL() {
         return imgURL;
+    }
+
+    public String getAnchorID() {
+        return anchorID;
     }
 
     public double getLatitude() {
