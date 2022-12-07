@@ -176,7 +176,7 @@ class UploadActivity : AppCompatActivity() {
 
     private fun initPlaces() {
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, getString(R.string.googleAPIKey))
+            Places.initialize(applicationContext, "AIzaSyCTOfpWJbYOuVJIVgr7SSRXUUx1aQW-I6g")
             Log.e(TAG, "initPlaces: 접근")
         }
     }
