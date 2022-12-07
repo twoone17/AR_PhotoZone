@@ -46,6 +46,8 @@ class UploadActivity : AppCompatActivity() {
     val db = FirebaseFirestore.getInstance()
     var imgURL: String? = null
     var placeCluster: String? = null
+    lateinit var placeClusterLat : Number
+    lateinit var placeClusterLng : Number
     val requestCode: Int? = null
     val AUTOCOMPLETE_REQUEST_CODE = 200;
 
@@ -132,14 +134,13 @@ class UploadActivity : AppCompatActivity() {
 
             val docData = hashMapOf(
                 "imgURL" to uploaddata!!.imgURL!!,
-                "latitude" to uploaddata!!.latitude as Number?,
-                "longitude" to uploaddata!!.longitude as Number?,
+                "latitude" to placeClusterLat,
+                "longitude" to placeClusterLng,
                 "altitude" to uploaddata!!.altitude as Number?
             )
 
-//            val postList =
             if (placeCluster != null) {
-                //photozone 정보 서버에 업로드
+                // TODO 지금은 업로드 시점에 포토존의 대표 사진을 바꿔버린다. 추후에 좋아요 수에 따라 다시 시정해주는 것으로 변경해야 한다.
                 db.collection("photoZone").document(placeCluster!!)
                     .update(docData as Map<String, Any>)
                     .addOnSuccessListener { documentReference ->
@@ -196,16 +197,14 @@ class UploadActivity : AppCompatActivity() {
                     as AutocompleteSupportFragment
         Log.e(TAG, "initAutoCompleteFragment: autocompleteFragment")
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
 
-        // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                Log.e(TAG, "onPlaceSelected: ㅎㅇ")
-                Log.i(TAG, "Place: ${place.name}, ${place.id}")
                 requestCode == AUTOCOMPLETE_REQUEST_CODE
                 placeCluster = place.name
-
+                placeClusterLat = place.latLng.latitude
+                placeClusterLng = place.latLng.longitude
             }
 
             override fun onError(status: Status) {
