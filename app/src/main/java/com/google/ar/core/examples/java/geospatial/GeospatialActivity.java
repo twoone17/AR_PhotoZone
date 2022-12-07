@@ -223,18 +223,19 @@ public class GeospatialActivity extends AppCompatActivity
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
 
     private String documentID;
-
+    private boolean anchorBoolean = false;
+    boolean avoidLoopAnchor = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
+        //게시글에 있는 카메라를 클릭시 boardData 전달
         Intent intent = getIntent();
         BoardData boardData = (BoardData) intent.getSerializableExtra("boardData");
         documentID = boardData.getDocumentId();
         anchorID = boardData.getAnchorID();
-        Log.e(TAG, "onCreate: anchorID" + anchorID);
-        Log.e(TAG, "onCreate: boardData" + boardData);
+
         setContentView(R.layout.activity_main);
         surfaceView = findViewById(R.id.surfaceview);
         geospatialPoseTextView = findViewById(R.id.geospatial_pose_view);
@@ -469,6 +470,7 @@ public class GeospatialActivity extends AppCompatActivity
         virtualSceneFramebuffer.resize(width, height);
     }
 
+    //루프함수
     @Override
     public void onDrawFrame(SampleRender render) {
         if (session == null) {
@@ -523,17 +525,16 @@ public class GeospatialActivity extends AppCompatActivity
 
         timeOutCount--;
         String getUid = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
-        Log.e(TAG, "onDrawFrame: anchorID" + anchorID);
         if (timeOutCount == 0) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 //            if(anchorID!="") {
+            //boardData의 앵커 아이디를 받아와서 해당 앵커만 anchors에 저장한다
             DocumentReference docRef = db.collection("anchor").document(anchorID);
 
             docRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     Map<String, Object> data = document.getData();
-
 
                     Anchor anchor =
                             earth.createAnchor(
@@ -545,62 +546,58 @@ public class GeospatialActivity extends AppCompatActivity
                                     0.0f,
                                     (float) Math.cos(20 / 2));
                     anchors.add(anchor);
+                    anchorBoolean = true;
                 }
 
 
             });
 
-
+            Log.e(TAG, "onDrawFrame: anchor 1" + anchors);
+            Log.e(TAG, "onDrawFrame: anchor to string1 " + anchors.toString());
         }
 
-        setLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
-                        geospatialPose.getLongitude(),
-                        geospatialPose.getAltitude(),
-                        geospatialPose.getHeading());
 
-                stroedLocationTextView.setText("저장되었습니다 ! ");
-                handleSetAnchorButton();
-
-                //기존 저장한 앵커를 파이어베이스에서 불러온다
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
-                db.collectionGroup("anchor").get().
-                        addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
-                                    Anchor anchor =
-                                            earth.createAnchor(
-                                                    anchorFirebase.getLatitude(),
-                                                    anchorFirebase.getLongitude(),
-                                                    anchorFirebase.getAltitude(),
-                                                    0.0f,
-                                                    (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
-                                                    0.0f,
-                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
-                                    anchors.add(anchor);
-                                }
-
-                            }
-
-
-                        });
-
-
-            }
-        });
+//        setLocationButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                storedGeolocation = new StoredGeolocation(geospatialPose.getLatitude(),
+//                        geospatialPose.getLongitude(),
+//                        geospatialPose.getAltitude(),
+//                        geospatialPose.getHeading());
+//
+//                stroedLocationTextView.setText("저장되었습니다 ! ");
+//                handleSetAnchorButton();
+//
+//                //기존 저장한 앵커를 파이어베이스에서 불러온다
+//                FirebaseFirestore db = FirebaseFirestore.getInstance();
+//                db.collectionGroup("anchor").get().
+//                        addOnCompleteListener(task -> {
+//                            if (task.isSuccessful()) {
+//
+//                                for (QueryDocumentSnapshot document : task.getResult()) {
+//                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
+//                                    Anchor anchor =
+//                                            earth.createAnchor(
+//                                                    anchorFirebase.getLatitude(),
+//                                                    anchorFirebase.getLongitude(),
+//                                                    anchorFirebase.getAltitude(),
+//                                                    0.0f,
+//                                                    (float) Math.sin(anchorFirebase.getAngleRadians() / 2),
+//                                                    0.0f,
+//                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
+//                                    anchors.add(anchor);
+//                                }
+//
+//                            }
+//
+//
+//                        });
+//
+//
+//            }
+//        });
 
         startCameraGeospatial();
-
-        // Write a message to the database
-        //
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
-
-        myRef.setValue("Hello, World!");
 
         // Show a message based on whether tracking has failed, if planes are detected, and if the user
         // has placed any objects.
@@ -662,11 +659,6 @@ public class GeospatialActivity extends AppCompatActivity
             backgroundRenderer.drawBackground(render);
         }
 
-        // If not tracking, don't draw 3D objects.
-//    if (camera.getTrackingState() != TrackingState.TRACKING || state != State.LOCALIZED) {
-//      return;
-//    }
-
         // -- Draw virtual objects
 
         // Get projection matrix.
@@ -679,9 +671,7 @@ public class GeospatialActivity extends AppCompatActivity
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
         Iterator<Anchor> iterator = anchors.iterator();
-        System.out.println("anchors.size() = " + anchors.size());
-//        if (timeOutCount == -) {
-            Log.e(TAG, "onDrawFrame: timeoutCount" + timeOutCount);
+        if (anchorBoolean&&avoidLoopAnchor) {
             for (Anchor anchor : anchors) {
 
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
@@ -696,12 +686,14 @@ public class GeospatialActivity extends AppCompatActivity
                 virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
                 render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
+
             }
 
-        // Compose the virtual scene with the background.
-        backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
+            // Compose the virtual scene with the background.
+            backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
+            avoidLoopAnchor = false;
+        }
     }
-
     //camera가 나옴
     private void startCameraGeospatial() {
 
@@ -1028,9 +1020,9 @@ public class GeospatialActivity extends AppCompatActivity
         LocalDateTime now = LocalDateTime.now();
         String AnchorDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
         //현재 위치의 앵커를 파이어베이스에 저장한다
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
-        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
+//        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
 
         Anchor anchor =
                 earth.createAnchor(
@@ -1041,7 +1033,7 @@ public class GeospatialActivity extends AppCompatActivity
                         (float) Math.sin(angleRadians / 2),
                         0.0f,
                         (float) Math.cos(angleRadians / 2));
-        anchors.add(anchor);
+//        anchors.add(anchor);
 
 
         if (anchors.size() > MAXIMUM_ANCHORS) {
