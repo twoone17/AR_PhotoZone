@@ -186,6 +186,7 @@ public class GeospatialActivity extends AppCompatActivity
     private TextView statusTextView;
     private Button setAnchorButton;
     private Button clearAnchorsButton;
+
     //추가
     private String imgURL;
     private StorageTask uploadTask;
@@ -242,7 +243,7 @@ public class GeospatialActivity extends AppCompatActivity
         statusTextView = findViewById(R.id.status_text_view);
         setAnchorButton = findViewById(R.id.set_anchor_button);
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
-
+        setLocationButton = findViewById(R.id.set_location);
 
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
@@ -443,11 +444,11 @@ public class GeospatialActivity extends AppCompatActivity
             Texture virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/spatial_marker_baked.png",
+                            "models/example1_baked.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/geospatial_marker.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/example1_obj.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
@@ -546,7 +547,7 @@ public class GeospatialActivity extends AppCompatActivity
                                     0.0f,
                                     (float) Math.cos(20 / 2));
                     anchors.add(anchor);
-                    anchorBoolean = true;
+//                    anchorBoolean = true;
 
                     Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
                     Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
@@ -558,8 +559,52 @@ public class GeospatialActivity extends AppCompatActivity
 
         }
         Log.e(TAG, "onDrawFrame: anchorBoolean 2"+anchorBoolean );
+        GeospatialPose geospatialPose2 = earth.getCameraGeospatialPose();
+
+        setLocationButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                storedGeolocation = new StoredGeolocation(geospatialPose2.getLatitude(),
+//                        geospatialPose2.getLongitude(),
+//                        geospatialPose2.getHorizontalAccuracy(),
+//                        geospatialPose2.getAltitude(),
+//                        geospatialPose2.getVerticalAccuracy(),
+//                        geospatialPose2.getHeading(),
+//                        geospatialPose2.getHeadingAccuracy());
+
+                stroedLocationTextView.setText("저장되었습니다 ! ");
+                handleSetAnchorButton();
+
+                //기존 저장한 앵커를 파이어베이스에서 불러온다
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+//                db.collectionGroup("anchor").get().
+//                        addOnCompleteListener(task -> {
+//                            if(task.isSuccessful()) {
+//
+//                                for(QueryDocumentSnapshot document : task.getResult()) {
+//                                    AnchorFirebase anchorFirebase = document.toObject(AnchorFirebase.class);
+//                                    Anchor anchor =
+//                                            earth.createAnchor(
+//                                                    anchorFirebase.getLatitude(),
+//                                                    anchorFirebase.getLongitude(),
+//                                                    anchorFirebase.getAltitude(),
+//                                                    0.0f,
+//                                                    (float) Math.sin(anchorFirebase.getAngleRadians()/ 2),
+//                                                    0.0f,
+//                                                    (float) Math.cos(anchorFirebase.getAngleRadians() / 2));
+//                                    anchors.add(anchor);
+//                                }
+//
+//                            }
+//
+//
+//                        });
 
 
+
+            }
+        });
 
         startCameraGeospatial();
 
@@ -637,7 +682,7 @@ public class GeospatialActivity extends AppCompatActivity
         Iterator<Anchor> iterator = anchors.iterator();
         Log.e(TAG, "onDrawFrame: anchorBoolean 3" + anchorBoolean );
         Log.e(TAG, "onDrawFrame:avoidLoopAnchor" + avoidLoopAnchor );
-        if (anchorBoolean&&avoidLoopAnchor) {
+        if (anchorBoolean) {
             for (Anchor anchor : anchors) {
 
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
@@ -999,7 +1044,9 @@ public class GeospatialActivity extends AppCompatActivity
                         (float) Math.sin(angleRadians / 2),
                         0.0f,
                         (float) Math.cos(angleRadians / 2));
-//        anchors.add(anchor);
+        anchors.add(anchor);
+
+        anchorBoolean = true;
 
 
         if (anchors.size() > MAXIMUM_ANCHORS) {

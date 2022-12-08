@@ -142,7 +142,7 @@ class UploadActivity : AppCompatActivity() {
             if (placeCluster != null) {
                 // TODO 지금은 업로드 시점에 포토존의 대표 사진을 바꿔버린다. 추후에 좋아요 수에 따라 다시 시정해주는 것으로 변경해야 한다.
                 db.collection("photoZone").document(placeCluster!!)
-                    .update(docData as Map<String, Any>)
+                    .set(docData as Map<String, Any>)
                     .addOnSuccessListener { documentReference ->
                         Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
                         finish()
