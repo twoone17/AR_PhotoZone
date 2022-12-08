@@ -344,11 +344,11 @@ public class ArNav extends AppCompatActivity
             Texture likesObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/color_heart_baked.png",
+                            "models/heart_object_baked_colored.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
-            likesObjectMesh = Mesh.createFromAsset(render, "models/heart.obj");
+            likesObjectMesh = Mesh.createFromAsset(render, "models/heart_object_obj.obj");
             likesObjectShader =
                     Shader.createFromAssets(
                             render,
@@ -469,20 +469,24 @@ public class ArNav extends AppCompatActivity
             for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
                 iterator.next().getPose().toMatrix(modelMatrix, 0);
 
-                if(counter < distinguisher) {
-                    // 이 분기는 안내 객체에 대한 분기이다.
-                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
-                } else {
-                    // 이 분기는 좋아요 객체에 대한 분기이다.
-                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
-                }
-                counter++;
+//                if(counter < distinguisher) {
+//                    // 이 분기는 안내 객체에 대한 분기이다.
+//                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+//                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+//                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+//                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
+//                } else {
+//                    // 이 분기는 좋아요 객체에 대한 분기이다.
+//                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+//                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+//                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+//                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
+//                }
+//                counter++;
+                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
             }
         }
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
@@ -587,37 +591,39 @@ public class ArNav extends AppCompatActivity
                         List<Double> latitudes = (List<Double>) ds.get("latitudes");
                         List<Double> longitudes = (List<Double>) ds.get("longitudes");
                         for(int i=0; i<latitudes.size(); i++) {
-                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
-                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
+                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 58, 100);
+                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 58, 100);
                         }
                         distinguisher = latitudes.size();
+                        CONCURRENT_PREVENT_FLAG = true;
                         // 안내 객체 추가 완료,
                         // 좋아요 객체 추가 시작
-                        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if(task.isSuccessful()) {
-                                    DocumentSnapshot result = task.getResult();
-                                    if(result.exists()) {
-                                        List<Double> likesLatitudes = (List<Double>) result.get("latitudes");
-                                        List<Double> likesLongitudes = (List<Double>) result.get("longitudes");
-                                        if (likesLongitudes != null) {
-                                            for (int i = 0; i < likesLatitudes.size(); i++) {
-                                                createAnchor(earth, likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
-                                                storeAnchorParameters(likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
-                                            }
-                                            CONCURRENT_PREVENT_FLAG = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(TAG, "onFailure: " + e);
-                                CONCURRENT_PREVENT_FLAG = true;
-                            }
-                        });
+//                        coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+//                            @Override
+//                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+//                                if(task.isSuccessful()) {
+//                                    DocumentSnapshot result = task.getResult();
+//                                    if(result.exists()) {
+//                                        List<Double> likesLatitudes = (List<Double>) result.get("latitudes");
+//                                        List<Double> likesLongitudes = (List<Double>) result.get("longitudes");
+//                                        Log.e(TAG, "onComplete: " + likesLongitudes.size());
+//                                        if (likesLongitudes != null) {
+//                                            for (int i = 0; i < likesLatitudes.size(); i++) {
+//                                                createAnchor(earth, likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+//                                                storeAnchorParameters(likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
+//                                            }
+//                                            CONCURRENT_PREVENT_FLAG = true;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }).addOnFailureListener(new OnFailureListener() {
+//                            @Override
+//                            public void onFailure(@NonNull Exception e) {
+//                                Log.e(TAG, "onFailure: " + e);
+//                                CONCURRENT_PREVENT_FLAG = true;
+//                            }
+//                        });
 
                     }
                 }
@@ -654,7 +660,7 @@ public class ArNav extends AppCompatActivity
                         altitude,
                         45.0f,
 //                        (float) Math.sin(angleRadians),
-                        -120.0f,
+                        -140.0f,
                         45.0f,
                         (float) Math.cos(angleRadians / 2));
         anchors.add(anchor);

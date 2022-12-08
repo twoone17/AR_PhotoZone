@@ -43,21 +43,21 @@ class Fragment1 : Fragment() {
             }.run { startActivity(this) }
         }
 
-//        retrofitTester.setOnClickListener{
-//            Intent(context, MapActivity::class.java).apply {
-//                putExtra("startLatitude", 37.413003)
-//                putExtra("startLongitude", 127.125923)
-//                putExtra("endLatitude", 37.4119623)
-//                putExtra("endLongitude", 127.1284907)
-//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//            }.run { startActivity(this) }
-//        }
-
         retrofitTester.setOnClickListener{
-            Intent(context, ArLikes::class.java).apply {
+            Intent(context, MapActivity::class.java).apply {
+                putExtra("startLatitude", 37.413003)
+                putExtra("startLongitude", 127.125923)
+                putExtra("endLatitude", 37.4556093)
+                putExtra("endLongitude", 127.1271491)
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.run { startActivity(this) }
         }
+
+//        retrofitTester.setOnClickListener{
+//            Intent(context, ArLikes::class.java).apply {
+//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            }.run { startActivity(this) }
+//        }
 
         return v
     }
