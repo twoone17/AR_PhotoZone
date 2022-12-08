@@ -48,11 +48,6 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/*TODO
- * 현재 위치, 게시글에서 도착지 위치 얻어서 intent MapActivity 로 넘김
- * MapActivity에서 좌표 넣어서 티맵 보내고 결과 파이어베이스에 저장 + ArNav 액티비티 호출
- * 그러면 ArNav 액티비티에서 길안내 시작
- */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
