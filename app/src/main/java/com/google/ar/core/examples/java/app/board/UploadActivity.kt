@@ -38,6 +38,7 @@ import com.google.firebase.ktx.Firebase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.collections.HashMap
 import kotlin.math.log
 
 class UploadActivity : AppCompatActivity() {
@@ -45,8 +46,12 @@ class UploadActivity : AppCompatActivity() {
     val db = FirebaseFirestore.getInstance()
     var imgURL: String? = null
     var placeCluster: String? = null
+    lateinit var placeClusterLat : Number
+    lateinit var placeClusterLng : Number
     val requestCode: Int? = null
     val AUTOCOMPLETE_REQUEST_CODE = 200;
+
+    private lateinit var uid : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +62,8 @@ class UploadActivity : AppCompatActivity() {
         val close = findViewById<ImageView>(R.id.close)
         var editText = findViewById<EditText>(R.id.description)
         var description = editText.text.toString()
+
+        uid = auth.currentUser?.uid ?: ""
 
         val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
@@ -114,6 +121,9 @@ class UploadActivity : AppCompatActivity() {
             db.collection("app_board").document(documentID).set(data!!)
                 .addOnSuccessListener { documentReference ->
                     Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                    var setMap = HashMap<String, String>()
+                    setMap.put("postId", documentID)
+                    db.collection("users").document(uid).collection("MyBoard").add(setMap)
                     finish()
                 }
                 .addOnFailureListener { e ->
@@ -124,14 +134,13 @@ class UploadActivity : AppCompatActivity() {
 
             val docData = hashMapOf(
                 "imgURL" to uploaddata!!.imgURL!!,
-                "latitude" to uploaddata!!.latitude as Number?,
-                "longitude" to uploaddata!!.longitude as Number?,
+                "latitude" to placeClusterLat,
+                "longitude" to placeClusterLng,
                 "altitude" to uploaddata!!.altitude as Number?
             )
 
-//            val postList =
             if (placeCluster != null) {
-                //photozone 정보 서버에 업로드
+                // TODO 지금은 업로드 시점에 포토존의 대표 사진을 바꿔버린다. 추후에 좋아요 수에 따라 다시 시정해주는 것으로 변경해야 한다.
                 db.collection("photoZone").document(placeCluster!!)
                     .update(docData as Map<String, Any>)
                     .addOnSuccessListener { documentReference ->
@@ -188,16 +197,14 @@ class UploadActivity : AppCompatActivity() {
                     as AutocompleteSupportFragment
         Log.e(TAG, "initAutoCompleteFragment: autocompleteFragment")
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
 
-        // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                Log.e(TAG, "onPlaceSelected: ㅎㅇ")
-                Log.i(TAG, "Place: ${place.name}, ${place.id}")
                 requestCode == AUTOCOMPLETE_REQUEST_CODE
                 placeCluster = place.name
-
+                placeClusterLat = place.latLng.latitude
+                placeClusterLng = place.latLng.longitude
             }
 
             override fun onError(status: Status) {

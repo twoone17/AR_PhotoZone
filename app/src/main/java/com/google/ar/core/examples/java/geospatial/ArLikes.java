@@ -64,7 +64,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-public class ArNav extends AppCompatActivity
+public class ArLikes extends AppCompatActivity
         implements SampleRender.Renderer, NoticeDialogListener {
 
     private static final String TAG = GeospatialActivity.class.getSimpleName();
@@ -115,6 +115,7 @@ public class ArNav extends AppCompatActivity
     private String lastStatusText;
     private TextView statusTextView;
     private Button setAnchorButton;
+    private Button setLikesButton;
     private Button clearAnchorsButton;
 
 
@@ -125,8 +126,6 @@ public class ArNav extends AppCompatActivity
     private Framebuffer virtualSceneFramebuffer;
     private boolean hasSetTextureNames = false;
 
-    private Mesh navigationObjectMesh;
-    private Shader navigationObjectShader;
     private Mesh likesObjectMesh;
     private Shader likesObjectShader;
 
@@ -138,7 +137,6 @@ public class ArNav extends AppCompatActivity
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
 
-    private int distinguisher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,12 +145,14 @@ public class ArNav extends AppCompatActivity
 
         db = FirebaseFirestore.getInstance();
 
-        setContentView(R.layout.activity_geospatial_camera_view);
+        setContentView(R.layout.activity_geospatial_camera_view_likes);
         surfaceView = findViewById(R.id.surfaceview);
         statusTextView = findViewById(R.id.status_text_view);
         setAnchorButton = findViewById(R.id.set_anchor_button);
+        setLikesButton = findViewById(R.id.set_likes_button);
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
+        setLikesButton.setOnClickListener(view -> handleSetLikesButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
 
         displayRotationHelper = new DisplayRotationHelper(/*context=*/ this);
@@ -322,24 +322,6 @@ public class ArNav extends AppCompatActivity
         try {
             backgroundRenderer = new BackgroundRenderer(render);
             virtualSceneFramebuffer = new Framebuffer(render, /*width=*/ 1, /*height=*/ 1);
-
-            // 안내객체 관련 설정
-            Texture navigationObjectTexture =
-                    Texture.createFromAsset(
-                            render,
-                            "models/example1_baked.png",
-                            Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
-
-            navigationObjectMesh = Mesh.createFromAsset(render, "models/example1_obj.obj");
-            navigationObjectShader =
-                    Shader.createFromAssets(
-                            render,
-                            "shaders/ar_unlit_object.vert",
-                            "shaders/ar_unlit_object.frag",
-                            /*defines=*/ null)
-                            .setTexture("u_Texture", navigationObjectTexture);
-
             // 좋아요 객체 관련 설정
             Texture likesObjectTexture =
                     Texture.createFromAsset(
@@ -356,7 +338,6 @@ public class ArNav extends AppCompatActivity
                             "shaders/ar_unlit_object.frag",
                             /*defines=*/ null)
                             .setTexture("u_Texture", likesObjectTexture);
-
 
             backgroundRenderer.setUseDepthVisualization(render, false);
             backgroundRenderer.setUseOcclusion(render, false);
@@ -463,26 +444,14 @@ public class ArNav extends AppCompatActivity
 
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
-        Log.e(TAG, "onDrawFrame: " + anchors.size());
         if (CONCURRENT_PREVENT_FLAG) {
             int counter = 0;
             for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
                 iterator.next().getPose().toMatrix(modelMatrix, 0);
-
-                if(counter < distinguisher) {
-                    // 이 분기는 안내 객체에 대한 분기이다.
-                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
-                } else {
-                    // 이 분기는 좋아요 객체에 대한 분기이다.
                     Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
                     Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
                     likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
                     render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
-                }
-                counter++;
             }
         }
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
@@ -576,9 +545,8 @@ public class ArNav extends AppCompatActivity
 
         FirebaseUser user = auth.getCurrentUser();
 
-        DocumentReference coordsRef = db.collection("users").document(user.getUid()).collection("nav").document(user.getUid());
         DocumentReference likesCoordsRef = db.collection("users").document(user.getUid()).collection("arLikesTest").document(user.getUid());
-        coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if(task.isSuccessful()) {
@@ -590,35 +558,6 @@ public class ArNav extends AppCompatActivity
                             createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
                             storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
-                        distinguisher = latitudes.size();
-                        // 안내 객체 추가 완료,
-                        // 좋아요 객체 추가 시작
-                        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                                if(task.isSuccessful()) {
-                                    DocumentSnapshot result = task.getResult();
-                                    if(result.exists()) {
-                                        List<Double> likesLatitudes = (List<Double>) result.get("latitudes");
-                                        List<Double> likesLongitudes = (List<Double>) result.get("longitudes");
-                                        if (likesLongitudes != null) {
-                                            for (int i = 0; i < likesLatitudes.size(); i++) {
-                                                createAnchor(earth, likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
-                                                storeAnchorParameters(likesLatitudes.get(i), likesLongitudes.get(i), 55, 100);
-                                            }
-                                            CONCURRENT_PREVENT_FLAG = true;
-                                        }
-                                    }
-                                }
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(TAG, "onFailure: " + e);
-                                CONCURRENT_PREVENT_FLAG = true;
-                            }
-                        });
-
                     }
                 }
             }
@@ -634,6 +573,25 @@ public class ArNav extends AppCompatActivity
         }
     }
 
+    private void handleSetLikesButton() {
+        Earth earth = session.getEarth();
+        if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
+            return;
+        }
+        GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
+        double latitude = geospatialPose.getLatitude();
+        double longitude = geospatialPose.getLongitude();
+        double altitude = geospatialPose.getAltitude();
+        double headingDegrees = geospatialPose.getHeading();
+        createAnchor(earth, latitude, longitude, altitude, headingDegrees);
+        storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
+        runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
+        if (clearedAnchorsAmount != null) {
+            clearedAnchorsAmount = null;
+        }
+    }
+
+
     private void handleClearAnchorsButton() {
         clearedAnchorsAmount = anchors.size();
         anchors.clear();
@@ -644,8 +602,6 @@ public class ArNav extends AppCompatActivity
     private void createAnchor(
             Earth earth, double latitude, double longitude, double altitude, double headingDegrees) {
         double angleRadians = Math.toRadians(180.0f - headingDegrees);
-
-
 
         Anchor anchor =
                 earth.createAnchor(

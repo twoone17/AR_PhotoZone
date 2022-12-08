@@ -1,6 +1,7 @@
 package com.google.ar.core.examples.java.app
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -30,10 +31,6 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.CancellationToken
-import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.OnTokenCanceledListener
-import com.google.android.gms.tasks.Task
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -41,106 +38,37 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
-import kotlinx.android.synthetic.main.activity_board_click.*
-import kotlinx.android.synthetic.main.custom_marker.*
-import kotlinx.coroutines.*
-import java.net.URL
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.*
-import java.lang.IllegalArgumentException
-import java.util.zip.Inflater
 import android.app.Activity
+import android.app.Dialog
+import android.content.Intent
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 
 import android.util.DisplayMetrics
-
-
+import android.view.Gravity
+import android.widget.Button
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.tasks.*
+import com.google.ar.core.examples.java.app.board.BoardClickActivity
+import com.google.ar.core.examples.java.retrofit_rest.MapActivity
+import de.hdodenhof.circleimageview.CircleImageView
 
 
 class Fragment3 : Fragment(), OnMapReadyCallback {
-
-    //refer link : https://developers.google.com/maps/documentation/android-sdk/utility/marker-clustering
-    inner class MyItem(
-        lat: Double,
-        lng: Double,
-        title: String,
-        snippet: String
-    ) : ClusterItem {
-
-        private val position: LatLng
-        private val title: String
-        private val snippet: String
-
-        override fun getPosition(): LatLng {
-            return position
-        }
-
-        override fun getTitle(): String? {
-            return title
-        }
-
-        override fun getSnippet(): String? {
-            return snippet
-        }
-
-        init {
-            position = LatLng(lat, lng)
-            this.title = title
-            this.snippet = snippet
-        }
-    }
-
-    // Declare a variable for the cluster manager.
-    private lateinit var clusterManager: ClusterManager<MyItem>
-
-    private fun setUpClusterer() {
-        // Position the map.
-        mGMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(51.503186, -0.126446), 10f))
-
-        // Initialize the manager with the context and the map.
-        // (Activity extends context, so we can pass 'this' in the constructor.)
-        clusterManager = ClusterManager(context, mGMap)
-
-        // Point the map's listeners at the listeners implemented by the cluster
-        // manager.
-        mGMap.setOnCameraIdleListener(clusterManager)
-        mGMap.setOnMarkerClickListener(clusterManager)
-
-        // Add cluster items (markers) to the cluster manager.
-        addItems()
-    }
-
-    private fun addItems() {
-
-        // Set some lat/lng coordinates to start with.
-        var lat = 51.5145160
-        var lng = -0.1270060
-
-        // Add ten cluster items in close proximity, for purposes of this example.
-        for (i in 0..9) {
-            val offset = i / 60.0
-            lat += offset
-            lng += offset
-            val offsetItem =
-                MyItem(lat, lng, "Title $i", "Snippet $i")
-            clusterManager.addItem(offsetItem)
-        }
-    }
-
 
     private lateinit var db: FirebaseFirestore
     private lateinit var mView: MapView
     private lateinit var mGMap: GoogleMap
 
+    private lateinit var currentPosition : LatLng
+
     private lateinit var marker_root_view : View
-    private lateinit var imageView_marker : ImageView
+    private lateinit var imageView_marker : CircleImageView
 
     var fusedLocationProviderClient: FusedLocationProviderClient? = null
     var REQEST_CODE = 101
     var mLocationManager: LocationManager? = null
-
-    var bmp: Bitmap? = null
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -165,34 +93,32 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         return rootView
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
 
-//        setCusomMarkerView()
+        setCusomMarkerView()
 
         var collectionReference : CollectionReference = db.collection("photoZone")
 
         collectionReference.get().addOnSuccessListener { result ->
             for (documentSnapshot in result) {
-                var imgURL = documentSnapshot.get("imgURL")
+                var imgURL = documentSnapshot.get("imgURL") as String
                 var lat = documentSnapshot.get("latitude") as Double
                 var lng = documentSnapshot.get("longitude") as Double
                 var position = LatLng(lat,lng)
 
-//                Glide.with(marker_root_view).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).into(imageView_marker)
-//                googleMap.addMarker(MarkerOptions()
-//                    .position(position)
-//                    .icon(BitmapDescriptorFactory.fromBitmap(getBitmapFromView(marker_root_view))))
                 // 커스텀 마커의 이미지 뷰에 먼저 이미지를 넣어준 후 .icon 파트에서 xml 통째로 불러옴
                 Glide.with(this.requireContext()).asBitmap().load(imgURL).fitCenter()
-                    .into(object : CustomTarget<Bitmap>(300,300) {
+                    .into(object : CustomTarget<Bitmap>(200,200) {
                         override fun onResourceReady(
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
                         ) {
-                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(resource))
-                                .position(position))
+                            googleMap.addMarker(MarkerOptions()
+                                .position(position)
+                                .icon(BitmapDescriptorFactory.fromBitmap(
+                                    createDrawableFromView(requireContext(), marker_root_view, resource))))
                         }
-
                         override fun onLoadCleared(placeholder: Drawable?) {
                             googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
                                 .position(position))
@@ -201,51 +127,75 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
             }
         }
 
+        // 마커 클릭은 여기서 처리합니다.
+        googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
+            override fun onMarkerClick(p0: Marker): Boolean {
+                // TODO 포토존에 속하는 게시글들의 사진 띄우기
+                val customDialog = Dialog(requireContext())
+                customDialog.setContentView(R.layout.custom_dialog)
+
+                val navButton = customDialog.findViewById<Button>(R.id.navigateToPhotozoneButton)
+                navButton.setOnClickListener {
+
+                    // 도착지 정보 받아오는건 완료
+                    Log.e("TAG", " " + p0.position.latitude + p0.position.longitude )
+                    Log.e("TAG", " " + currentPosition.latitude + currentPosition.longitude )
+
+                    Intent(requireContext(), MapActivity::class.java).apply {
+                        putExtra("startLatitude", currentPosition.latitude)
+                        putExtra("startLongitude", currentPosition.longitude)
+                        putExtra("endLatitude", p0.position.latitude)
+                        putExtra("endLongitude", p0.position.longitude)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }.run { startActivity(this) }
+                }
+
+                    // Custom Dialog 크기 설정
+                    customDialog.window?.setLayout(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+
+                    // Custom Dialog 위치 조절
+                    customDialog.window?.setGravity(Gravity.BOTTOM)
+                    // Custom Dialog 배경 설정 (다음과 같이 진행해야 좌우 여백 없이 그려짐)
+                    customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                    // Custom Dialog 표시
+                    customDialog.show()
+                return false
+            }
+        })
 
         googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
 
         mGMap = googleMap
-
     }
 
-//    private fun setCusomMarkerView() {
-//        val inflater: LayoutInflater = getLayoutInflater()
-//        marker_root_view = inflater.inflate(R.layout.custom_marker, null)
-//        imageView_marker = marker_root_view.findViewById<ImageView>(R.id.marker_circle_img)
-//    }
-
-//    private fun createDrawableFromView(context: Context, view: View): Bitmap {
-//        val displayMetrics = DisplayMetrics()
-//        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
-//        view.layoutParams = ViewGroup.LayoutParams(
-//            ViewGroup.LayoutParams.WRAP_CONTENT,
-//            ViewGroup.LayoutParams.WRAP_CONTENT
-//        )
-//        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
-//        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
-//        view.buildDrawingCache()
-//        val bitmap =
-//            Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
-//        val canvas = Canvas(bitmap)
-//        view.draw(canvas)
-//        return bitmap
-//    }
-
-//    private fun getBitmapFromView(view: View): Bitmap {
-//        val bitmap = Bitmap.createBitmap(
-//            300, 300, Bitmap.Config.ARGB_8888
-//        )
-//        val canvas = Canvas(bitmap)
-//        view.draw(canvas)
-//        return bitmap
-//    }
-
-
-    private fun url_to_bmp(url: URL): Bitmap? {
-            val bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream())
-            Log.d("bmp_in_func",bmp.toString())
-        return bmp
+    private fun setCusomMarkerView() {
+        val inflater: LayoutInflater = getLayoutInflater()
+        marker_root_view = inflater.inflate(R.layout.custom_marker, null)
+        imageView_marker = marker_root_view.findViewById(R.id.marker_circle_img)
     }
+
+    private fun createDrawableFromView(context: Context, view: View, resource: Bitmap): Bitmap {
+        val displayMetrics = DisplayMetrics()
+        (context as Activity).windowManager.defaultDisplay.getMetrics(displayMetrics)
+        view.layoutParams = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        view.findViewById<CircleImageView>(R.id.marker_circle_img).setImageBitmap(resource)
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels)
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels)
+        view.buildDrawingCache()
+        val bitmap =
+            Bitmap.createBitmap(view.measuredWidth, view.measuredHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        view.draw(canvas)
+        return bitmap
+    }
+
 
     override fun onStart() {
         super.onStart()
@@ -328,6 +278,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 else {
                     val lat = location.latitude
                     val lon = location.longitude
+                    currentPosition = LatLng(location.latitude, location.longitude)
                     val now_loc = LatLng(lat, lon)
                     Log.d("curLoc",now_loc.toString())
 
