@@ -15,6 +15,7 @@
 
 
         <LinearLayout
+            android:background = "@color/color_palette_2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -25,19 +26,21 @@
                 android:orientation="vertical">
 
                 <ImageButton
+                    android:padding = "5dp"
                     android:id="@+id/Temp_Setting_Button"
                     android:layout_width="45dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:layout_weight="1"
                     android:backgroundTint="@color/white"
-                    app:srcCompat="@drawable/ic_baseline_settings_24" />
+                    app:srcCompat="@drawable/option_btn_ver2" />
 
 
                 <de.hdodenhof.circleimageview.CircleImageView
+                    android:layout_marginTop = "10dp"
                     android:id="@+id/circle_img"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
+                    android:layout_width="130dp"
+                    android:layout_height="130dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_baseline_android_24"
                     app:civ_border_color="#FFFFFF"
@@ -62,8 +65,9 @@
                             android:padding="10dp"
                             android:layout_marginBottom="15dp"
                             android:textAlignment="center"
-                            android:text="유저 닉네임"
-                            android:textSize="15dp"
+                            android:gravity="center"
+                            android:text="user_name"
+                            android:textSize="20dp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -83,25 +87,26 @@
                         app:layout_constraintVertical_bias="0.784">
 
                         <ImageButton
-                            android:id="@+id/ClosetButton"
-                            android:layout_width="160dp"
+                            android:id="@+id/bookmarkButton"
+                            android:layout_width="100dp"
                             android:layout_height="80dp"
                             android:layout_marginLeft="10dp"
                             android:layout_marginRight="18dp"
                             android:padding="0dp"
-                            android:src="@drawable/bluebookmark"
+                            android:paddingLeft="20dp"
                             android:scaleType="fitXY"
-                            android:paddingLeft="20dp" />
+                            android:src="@drawable/bookmark_icon_ver2" />
+                        <!--android:src="@drawable/bluebookmark"-->
 
                         <ImageButton
-                            android:id="@+id/bookmarkButton"
-                            android:layout_width="160dp"
+                            android:id="@+id/Closetbutton"
+                            android:layout_width="100dp"
                             android:layout_height="80dp"
                             android:layout_marginRight="15dp"
                             android:padding="0dp"
                             android:paddingLeft="20dp"
                             android:scaleType="fitXY"
-                            android:src="@drawable/bluebookmark" />
+                            android:src="@drawable/my_location_list_up_btn_ver2" />
 
                     </LinearLayout>
                 </LinearLayout>
@@ -109,6 +114,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:background="@drawable/background_round_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -117,7 +123,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
-                android:text="나의 포스트"
+                android:textColor="@color/fbutton_color_concrete"
+                android:text="My Post"
                 android:fontFamily="@font/military" />
 
             <androidx.recyclerview.widget.RecyclerView

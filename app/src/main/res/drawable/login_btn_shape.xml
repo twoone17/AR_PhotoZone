@@ -3,7 +3,7 @@
     android:shape="rectangle" android:padding="10dp">
 
     <!-- button color -->
-    <solid android:color="@color/fbutton_color_peter_river" />
+    <solid android:color="@color/color_palette_2" />
 
     <corners android:radius="100dp"/>
 

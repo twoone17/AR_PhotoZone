@@ -16,7 +16,8 @@
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/fbutton_color_peter_river"/>
+    <solid android:color="@color/color_palette_1"/>
+    <!--<solid android:color="@color/fbutton_color_peter_river"/>-->
     <corners android:radius="10dp"/>
     <padding
         android:left="2dp"
