@@ -444,11 +444,11 @@ public class GeospatialActivity extends AppCompatActivity
             Texture virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/example1_baked.png",
+                            "models/heart_object_baked_just_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
-                            Texture.ColorFormat.SRGB);
+                            Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/example1_obj.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/cube.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
