@@ -35,4 +35,19 @@
     <color name="fbutton_color_silver">#bdc3c7</color>
     <color name="fbutton_color_concrete">#95a5a6</color>
     <color name="fbutton_color_asbestos">#7f8c8d</color>
+
+    <!--added-->
+    <color name="color_palette_1">#F5F4F4</color>
+    <color name="color_palette_2">#CAE4DB</color>
+    <color name="color_palette_3">#CDAC81</color>
+    <color name="color_palette_4">#00303F</color>
+
+    <!--음영-->
+    <color name="color_palette_2_dark1">#91A39D</color>
+    <color name="color_palette_3_bright_gray">#DFDFDF</color>
+    <color name="color_palette_4_light1">#00516A</color>
+    <!--보색-->
+    <color name="color_palette_2_complementary1">#967782</color>
+    <color name="color_palette_2_complementary2">#968677</color>
+
 </resources>

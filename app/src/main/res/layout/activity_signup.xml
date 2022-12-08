@@ -3,25 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background = "@drawable/background_gradient_1">
 
     <ImageView
         android:id="@+id/back"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="30dp"
+        android:layout_height="25dp"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="15dp"
         android:layout_marginStart="15dp"
-        android:src="@drawable/ic_backbutton" />
+        android:src="@drawable/ic_backbutton_ver2" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="REGISTER"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="15dp"
-        android:layout_marginBottom="60dp"
-        android:textColor="@color/buttonColor1"
-        android:textSize="35sp" />
+        android:layout_marginBottom="30dp"
+        android:gravity="left"
+        android:text="SIGN UP"
+        android:textColor="@color/black"
+        android:textSize="35sp"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
@@ -119,10 +123,11 @@
         android:layout_marginEnd="45dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="50dp"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textColor="#000000"
+        android:textSize="25sp"
         android:textStyle="bold"
-        android:typeface="monospace"
+        android:typeface="sans"
+        android:letterSpacing="0.2"
         android:background="@drawable/login_btn_shape" />
 
 
