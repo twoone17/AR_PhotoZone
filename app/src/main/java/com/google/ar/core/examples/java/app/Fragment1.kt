@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity
 import com.google.ar.core.examples.java.app.map.MapLocationActivity
+import com.google.ar.core.examples.java.geospatial.ArLikes
 import com.google.ar.core.examples.java.geospatial.ArNav
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.ar.core.examples.java.retrofit_rest.MapActivity
@@ -42,8 +43,18 @@ class Fragment1 : Fragment() {
             }.run { startActivity(this) }
         }
 
+//        retrofitTester.setOnClickListener{
+//            Intent(context, MapActivity::class.java).apply {
+//                putExtra("startLatitude", 37.413003)
+//                putExtra("startLongitude", 127.125923)
+//                putExtra("endLatitude", 37.4119623)
+//                putExtra("endLongitude", 127.1284907)
+//                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//            }.run { startActivity(this) }
+//        }
+
         retrofitTester.setOnClickListener{
-            Intent(context, MapActivity::class.java).apply {
+            Intent(context, ArLikes::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.run { startActivity(this) }
         }
