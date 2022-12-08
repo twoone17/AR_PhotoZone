@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:context="com.google.ar.core.examples.java.camera.CameraActivity">
+
+    <com.google.ar.core.examples.java.camera.CameraSurfaceView
+        android:id="@+id/surfaceview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <FrameLayout
+        android:id="@+id/content_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/profile"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha='0.35' />
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/capture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="capture" />
+
+</RelativeLayout>

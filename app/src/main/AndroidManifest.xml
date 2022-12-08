@@ -100,6 +100,10 @@
             android:screenOrientation="locked"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
         <activity
+            android:name="com.google.ar.core.examples.java.camera.CameraActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
+        <activity
             android:name="com.google.ar.core.examples.java.app.board.upload.UploadUsingPicaActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
