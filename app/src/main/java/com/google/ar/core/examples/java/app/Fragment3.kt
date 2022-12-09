@@ -130,7 +130,11 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         // 마커 클릭은 여기서 처리합니다.
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
             override fun onMarkerClick(p0: Marker): Boolean {
-                // TODO 포토존에 속하는 게시글들의 사진 띄우기
+                //TODO: 의성) 마커 클릭시 포토존과 게시글 리스트
+
+
+
+//                 TODO 포토존에 속하는 게시글들의 사진 띄우기
                 val customDialog = Dialog(requireContext())
                 customDialog.setContentView(R.layout.custom_dialog)
 
@@ -157,7 +161,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                     )
 
                     // Custom Dialog 위치 조절
-                    customDialog.window?.setGravity(Gravity.BOTTOM)
+                    customDialog.window?.setGravity(Gravity.TOP)
                     // Custom Dialog 배경 설정 (다음과 같이 진행해야 좌우 여백 없이 그려짐)
                     customDialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 

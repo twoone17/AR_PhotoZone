@@ -225,7 +225,7 @@ class ProfileFragment : Fragment() {
                                 likes = result.get("likes") as Long,
                                 publisher = result.get("publisher").toString(),
                                 userId = result.get("userId").toString(),
-                                result.id))
+                                documentId = result.id))
                             profileAdapter.datas = datas
                             profileAdapter.notifyDataSetChanged()
                         }
