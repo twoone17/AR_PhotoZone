@@ -53,6 +53,7 @@ import android.widget.TextView
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.tasks.*
 import com.google.ar.core.examples.java.app.board.BoardClickActivity
+import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity
 import com.google.ar.core.examples.java.retrofit_rest.MapActivity
 import de.hdodenhof.circleimageview.CircleImageView
@@ -64,17 +65,18 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     private lateinit var db: FirebaseFirestore
     private lateinit var mView: MapView
     private lateinit var mGMap: GoogleMap
-
+    val datas = mutableListOf<BoardData>()
     private lateinit var currentPosition : LatLng
 
     private lateinit var marker_root_view : View
     private lateinit var imageView_marker : CircleImageView
-
+    private var markerPerth: Marker? = null
     var fusedLocationProviderClient: FusedLocationProviderClient? = null
     var REQEST_CODE = 101
     var mLocationManager: LocationManager? = null
 
     var imgURL: String?=null
+    var imgURL2: String?=null
     var lat: Double? =0.0
     var lng: Double? =0.0
 
@@ -116,7 +118,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 lng = documentSnapshot.get("longitude") as Double
                 var position = LatLng(lat!!,lng!!)
                 Log.e(TAG, "onMapReady: "+ documentSnapshot.id )
-
                 // 커스텀 마커의 이미지 뷰에 먼저 이미지를 넣어준 후 .icon 파트에서 xml 통째로 불러옴
                 Glide.with(this.requireContext()).asBitmap().load(imgURL).fitCenter()
                     .into(object : CustomTarget<Bitmap>(200,200) {
@@ -124,15 +125,18 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                             resource: Bitmap,
                             transition: Transition<in Bitmap>?
                         ) {
-                            googleMap.addMarker(MarkerOptions()
+                            markerPerth = googleMap.addMarker(MarkerOptions()
                                 .position(position)
                                 .title(documentSnapshot.id)
                                 .icon(BitmapDescriptorFactory.fromBitmap(
                                     createDrawableFromView(requireContext(), marker_root_view, resource))))
+
+                            markerPerth?.tag = imgURL
                         }
                         override fun onLoadCleared(placeholder: Drawable?) {
-                            googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                            markerPerth = googleMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
                                 .position(position))
+                            markerPerth?.tag = imgURL
                         }
                     })
             }
@@ -141,7 +145,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
         // 마커 클릭은 여기서 처리합니다.
         googleMap.setOnMarkerClickListener(object : GoogleMap.OnMarkerClickListener {
             override fun onMarkerClick(p0: Marker): Boolean {
-
 
                 val customDialog = Dialog(requireContext())
                 customDialog.setContentView(R.layout.custom_dialog)
@@ -155,7 +158,33 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                     .addOnSuccessListener { document ->
                         if (document != null) {
                             Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                            imgURL = document.data?.get("imgURL")?.toString()
+                            imgURL= document.data?.get("imgURL")?.toString()
+//                            likes = document.data?.get("likes")?.toString(),
+                        } else {
+                            Log.d(TAG, "No such document")
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.d(TAG, "get failed with ", exception)
+                    }
+                Log.e(TAG, "onMarkerClick: tag"+ tag.toString() )
+
+                //포토존 사진 불러오기
+                val circle_img : CircleImageView = customDialog.findViewById(R.id.circle_img)
+                Glide.with(requireContext()).load(imgURL.toString()).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
+
+                //포토존 정보 불러오기
+                val photozoneDetail : TextView = customDialog.findViewById(R.id.photozoneDetail)
+                //위도 경도 소수점 자르기
+                photozoneDetail.text = "위도 : " + p0.position.latitude.toString().substring(0 until 6) + "    " +
+                         "경도 : " + p0.position.longitude.toString().substring(0 until 6)
+
+
+                db.collection("photoZone").document(p0.title!!).collection("boardList").get()
+                    .addOnSuccessListener { document ->
+                        if (document != null) {
+                            Log.d(TAG, "DocumentSnapshot data: ${document.data}")
+                            imgURL= document.data?.get("imgURL")?.toString()
 //                            likes = document.data?.get("likes")?.toString(),
                         } else {
                             Log.d(TAG, "No such document")
@@ -165,16 +194,26 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                         Log.d(TAG, "get failed with ", exception)
                     }
 
+                db.collection("photoZone").document(p0.title!!).collection("boardList").get()
+                    .addOnSuccessListener { result ->
+                        for (post in result) {
+                            datas.apply {
+                                add(
+                                    BoardData(
+                                        imgURL = post.get("imgURL").toString(),
+                                        description = post?.get("description").toString(),
+                                        likes = post.get("likes") as Long,
+                                        publisher = post.get("publisher").toString(),
+                                        userId = post.get("userId").toString(),
+                                        documentId = post.id
+                                    )
+                                )
 
-                //포토존 사진 불러오기
-                val circle_img : CircleImageView = customDialog.findViewById(R.id.circle_img)
-                Glide.with(requireContext()).load(imgURL).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
+                            }
+                        }
+                    }
 
-                //포토존 정보 불러오기
-                val photozoneDetail : TextView = customDialog.findViewById(R.id.photozoneDetail)
-                //위도 경도 소수점 자르기
-                photozoneDetail.text = "위도 : " + p0.position.latitude.toString().substring(0 until 6) + "    " +
-                         "경도 : " + p0.position.longitude.toString().substring(0 until 6)
+
 
                 val navButton = customDialog.findViewById<Button>(R.id.navigateToPhotozoneButton)
                 navButton.setOnClickListener {
