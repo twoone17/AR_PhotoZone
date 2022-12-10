@@ -7,7 +7,7 @@ import java.io.Serializable
 data class BoardData(
     val imgURL : String = "",
     var description : String = "",
-    var likes : Long = 0,
+    var likes : Long? = 0,
     val publisher : String = "",
     val userId : String = "",
     val documentId : String = "",

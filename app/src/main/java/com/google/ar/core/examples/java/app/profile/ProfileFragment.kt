@@ -210,6 +210,11 @@ class ProfileFragment : Fragment() {
         initRecyclerData(profileAdapter)
     }
 
+    /**
+     * 마이페이지 오류 : 게시판 db를 지웠는데
+     * users - user 이름 - MyBoard안에 있는 postID를 지우지 않아서 null 오류 발생
+     * 해결 방법 : 게시글 지울때 myboard 안에있는것도 같이 지워줘야함
+     */
     private fun initRecyclerData(profileAdapter: ProfileAdapter) {
         auth = Firebase.auth
         val currentUser = auth.currentUser
@@ -222,7 +227,7 @@ class ProfileFragment : Fragment() {
                         datas.apply {
                             add(BoardData(imgURL = result.get("imgURL").toString(),
                                 description = result.get("description").toString(),
-                                likes = result.get("likes") as Long,
+                                likes = result.get("likes") as Long?,
                                 publisher = result.get("publisher").toString(),
                                 userId = result.get("userId").toString(),
                                 documentId = result.id))

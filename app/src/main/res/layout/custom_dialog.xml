@@ -135,7 +135,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="5dp"
-                    android:text="나의 포스트"
+                    android:text="포토존 사진 리스트"
                     android:fontFamily="@font/military" />
 
                 <androidx.recyclerview.widget.RecyclerView

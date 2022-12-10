@@ -113,6 +113,7 @@ class UploadActivity : AppCompatActivity() {
                 longitude = uploaddata!!.longitude as Number?,
                 altitude = uploaddata!!.altitude as Number?,
                 heading = uploaddata!!.heading as Number?,
+                likes = 0,
                 documentId = documentID,
                 placeCluster = placeCluster!!,
                 anchorID =  uploaddata!!.anchorID
