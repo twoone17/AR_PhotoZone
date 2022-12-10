@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.geospatial;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -52,9 +53,12 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import com.google.ar.core.exceptions.UnsupportedConfigurationException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -140,12 +144,17 @@ public class ArNav extends AppCompatActivity
 
     private int distinguisher;
 
+    private String photoZoneName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
         db = FirebaseFirestore.getInstance();
+
+        Intent intent = getIntent();
+        photoZoneName = intent.getStringExtra("photoZoneName");
 
         setContentView(R.layout.activity_geospatial_camera_view);
         surfaceView = findViewById(R.id.surfaceview);
@@ -327,7 +336,7 @@ public class ArNav extends AppCompatActivity
             Texture navigationObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/example1_baked.png",
+                            "models/plain_red_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
@@ -344,7 +353,7 @@ public class ArNav extends AppCompatActivity
             Texture likesObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/heart_object_baked_colored.png",
+                            "models/heart_object_baked_just_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
@@ -469,24 +478,24 @@ public class ArNav extends AppCompatActivity
             for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
                 iterator.next().getPose().toMatrix(modelMatrix, 0);
 
-//                if(counter < distinguisher) {
-//                    // 이 분기는 안내 객체에 대한 분기이다.
-//                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-//                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-//                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-//                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
-//                } else {
-//                    // 이 분기는 좋아요 객체에 대한 분기이다.
-//                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-//                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-//                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-//                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
-//                }
-//                counter++;
-                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-                likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-                render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
+                if(counter < distinguisher) {
+                    // 이 분기는 안내 객체에 대한 분기이다.
+                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
+                } else {
+                    // 이 분기는 좋아요 객체에 대한 분기이다.
+                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
+                }
+                counter++;
+//                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+//                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+//                likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+//                render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
             }
         }
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
@@ -581,7 +590,7 @@ public class ArNav extends AppCompatActivity
         FirebaseUser user = auth.getCurrentUser();
 
         DocumentReference coordsRef = db.collection("users").document(user.getUid()).collection("nav").document(user.getUid());
-        DocumentReference likesCoordsRef = db.collection("users").document(user.getUid()).collection("arLikesTest").document(user.getUid());
+        CollectionReference likesCoordsRef = db.collection("photoZone").document(photoZoneName).collection("userLikes");
         coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -591,13 +600,31 @@ public class ArNav extends AppCompatActivity
                         List<Double> latitudes = (List<Double>) ds.get("latitudes");
                         List<Double> longitudes = (List<Double>) ds.get("longitudes");
                         for(int i=0; i<latitudes.size(); i++) {
-                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 58, 100);
-                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 58, 100);
+                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
+                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
                         distinguisher = latitudes.size();
                         CONCURRENT_PREVENT_FLAG = true;
                         // 안내 객체 추가 완료,
                         // 좋아요 객체 추가 시작
+
+                        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if(task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot results : task.getResult()) {
+                                        createAnchor(earth, (Double)results.get("latitude"), (Double)results.get("longitude"),
+                                                55, 100);
+                                    }
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(TAG, "onFailure: " + e );
+                            }
+                        });
+
 //                        coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
 //                            @Override
 //                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -660,7 +687,7 @@ public class ArNav extends AppCompatActivity
                         altitude,
                         45.0f,
 //                        (float) Math.sin(angleRadians),
-                        -140.0f,
+                        -120.0f,
                         45.0f,
                         (float) Math.cos(angleRadians / 2));
         anchors.add(anchor);
