@@ -249,8 +249,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 return false
             }
         })
-
-        googleMap.moveCamera(CameraUpdateFactory.zoomTo(20f))
+        //지도 초기 줌 설정
+        googleMap.moveCamera(CameraUpdateFactory.zoomTo(16f))
 
         mGMap = googleMap
     }
