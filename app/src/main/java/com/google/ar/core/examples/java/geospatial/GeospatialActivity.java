@@ -263,7 +263,7 @@ public class GeospatialActivity extends AppCompatActivity
 
         System.out.println("boardData = " + boardData);
 
-        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
+//        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
 
 
     }
@@ -557,41 +557,57 @@ public class GeospatialActivity extends AppCompatActivity
                         DocumentSnapshot document = task.getResult();
                         Map<String, Object> data = document.getData();
 
-                        Anchor anchor =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude"),
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
+//                        Anchor anchor =
+//                                earth.createAnchor(
+//                                        (Double) data.get("latitude"),
+//                                        (Double) data.get("longitude"),
+//                                        (Double) data.get("altitude"),
+//                                        0.0f,
+//                                        (float) Math.sin(20 / 2),
+//                                        0.0f,
+//                                        (float) Math.cos(20 / 2));
+//
+//
+//                        Anchor anchor2 =
+//                                earth.createAnchor(
+//                                        (Double) data.get("latitude"),
+//                                        (Double) data.get("longitude"),
+//                                        (Double) data.get("altitude") + 1,
+//                                        0.0f,
+//                                        (float) Math.sin(20 / 2),
+//                                        0.0f,
+//                                        (float) Math.cos(20 / 2));
+//
+//
+//
+//                        Anchor anchor3 =
+//                                earth.createAnchor(
+//                                        (Double) data.get("latitude"),
+//                                        (Double) data.get("longitude"),
+//                                        (Double) data.get("altitude") -1,
+//                                        0.0f,
+//                                        (float) Math.sin(20 / 2),
+//                                        0.0f,
+//                                        (float) Math.cos(20 / 2));
 
+                        for(int i = 0 ; i< 50 ; i++)
+                        {
+                            Anchor anchor =
+                                    earth.createAnchor(
+                                            (Double) data.get("latitude"),
+                                            (Double) data.get("longitude"),
+                                            (Double) data.get("altitude") -1 +i*0.5,
+                                            0.0f,
+                                            (float) Math.sin(20 / 2),
+                                            0.0f,
+                                            (float) Math.cos(20 / 2));
 
-                        Anchor anchor2 =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude") + 1,
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
+                            anchors.add(anchor);
+                        }
 
-
-
-                        Anchor anchor3 =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude") -1,
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
-                        anchors.add(anchor);
-                        anchors.add(anchor2);
-                        anchors.add(anchor3);
+//                        anchors.add(anchor);
+//                        anchors.add(anchor2);
+//                        anchors.add(anchor3);
                     anchorBoolean = true;
 
                         Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
