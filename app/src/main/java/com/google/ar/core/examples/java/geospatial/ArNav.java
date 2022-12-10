@@ -336,7 +336,7 @@ public class ArNav extends AppCompatActivity
             Texture navigationObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/example1_baked.png",
+                            "models/plain_red_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
@@ -600,8 +600,8 @@ public class ArNav extends AppCompatActivity
                         List<Double> latitudes = (List<Double>) ds.get("latitudes");
                         List<Double> longitudes = (List<Double>) ds.get("longitudes");
                         for(int i=0; i<latitudes.size(); i++) {
-                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 58, 100);
-                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 58, 100);
+                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
+                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
                         }
                         distinguisher = latitudes.size();
                         CONCURRENT_PREVENT_FLAG = true;
@@ -614,7 +614,7 @@ public class ArNav extends AppCompatActivity
                                 if(task.isSuccessful()) {
                                     for (QueryDocumentSnapshot results : task.getResult()) {
                                         createAnchor(earth, (Double)results.get("latitude"), (Double)results.get("longitude"),
-                                                58, 100);
+                                                55, 100);
                                     }
                                 }
                             }

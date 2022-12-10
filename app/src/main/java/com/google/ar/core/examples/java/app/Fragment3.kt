@@ -47,6 +47,7 @@ import com.google.android.gms.tasks.*
 import com.google.ar.core.examples.java.app.board.BoardClickActivity
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.app.profile.ProfileAdapter
+import com.google.ar.core.examples.java.geospatial.ArLikes
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.ar.core.examples.java.retrofit_rest.MapActivity
 import com.google.firebase.auth.ktx.auth
@@ -227,6 +228,14 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                         putExtra("startLongitude", currentPosition.longitude)
                         putExtra("endLatitude", p0.position.latitude)
                         putExtra("endLongitude", p0.position.longitude)
+                        putExtra("photoZoneName", p0.title)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }.run { startActivity(this) }
+                }
+
+                val likesButton = customDialog.findViewById<Button>(R.id.likesARButton)
+                likesButton.setOnClickListener {
+                    Intent(context, ArLikes::class.java).apply {
                         putExtra("photoZoneName", p0.title)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }.run { startActivity(this) }

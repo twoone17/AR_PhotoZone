@@ -563,9 +563,9 @@ public class ArLikes extends AppCompatActivity
                     for (QueryDocumentSnapshot results : task.getResult()) {
                         latitude = (Double) results.get("latitude");
                         longitude = (Double) results.get("longitude");
-                        altitude = (Double) results.get("altitude");
+//                        altitude = (Double) results.get("altitude");
                         headingDegrees = (Double) results.get("headingDegrees");
-                        createAnchor(earth, latitude, longitude, altitude, headingDegrees);
+                        createAnchor(earth, latitude, longitude, 55, headingDegrees);
                     }
                 }
             }
