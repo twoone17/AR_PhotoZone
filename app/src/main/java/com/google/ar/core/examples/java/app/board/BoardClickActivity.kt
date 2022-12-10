@@ -248,6 +248,7 @@ class BoardClickActivity : AppCompatActivity() {
                  println("camera click")
                  Intent(this,GeospatialActivity::class.java).apply {
                      putExtra("boardData", boardData)
+                     putExtra("imgURL", boardData.imgURL)
                      addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                  }.run { startActivity(this) }
 
