@@ -566,7 +566,32 @@ public class GeospatialActivity extends AppCompatActivity
                                         (float) Math.sin(20 / 2),
                                         0.0f,
                                         (float) Math.cos(20 / 2));
+
+
+                        Anchor anchor2 =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude") + 1,
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
+
+
+
+                        Anchor anchor3 =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude") -1,
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
                         anchors.add(anchor);
+                        anchors.add(anchor2);
+                        anchors.add(anchor3);
                     anchorBoolean = true;
 
                         Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
@@ -689,10 +714,7 @@ public class GeospatialActivity extends AppCompatActivity
 
         Iterator<Anchor> iterator = anchors.iterator();
         if (anchorBoolean) {
-            Log.e(TAG, "onDrawFrame: if문 접근");
             for (Anchor anchor : anchors) {
-                Log.e(TAG, "onDrawFrame: 앵커한번");
-                Log.e(TAG, "onDrawFrame: 앵커한번" + anchor);
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
                 // during calls to session.update() as ARCore refines its estimate of the world.
                 anchor.getPose().toMatrix(modelMatrix, 0);
