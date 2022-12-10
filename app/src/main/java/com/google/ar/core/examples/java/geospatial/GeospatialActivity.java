@@ -107,7 +107,6 @@ import java.util.concurrent.TimeUnit;
 public class GeospatialActivity extends AppCompatActivity
         implements SampleRender.Renderer, NoticeDialogListener {
 
-    public static Context mContext;
     private static final String TAG = GeospatialActivity.class.getSimpleName();
 
     private static final String SHARED_PREFERENCES_SAVED_ANCHORS = "SHARED_PREFERENCES_SAVED_ANCHORS";
@@ -215,7 +214,7 @@ public class GeospatialActivity extends AppCompatActivity
     // Virtual object (ARCore geospatial)
     private Mesh virtualObjectMesh;
     private Shader virtualObjectShader;
-    private BoardData boradData;
+    private BoardData boardData;
     private List<Anchor> anchors = new ArrayList<>();
     private String anchorID;
     // Temporary matrix allocated here to reduce number of allocations for each frame.
@@ -225,20 +224,18 @@ public class GeospatialActivity extends AppCompatActivity
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
 
-    BoardData boardData;
-    String getImgURL;
+    private Intent intent;
     private String documentID;
     private boolean anchorBoolean = false;
     boolean avoidLoopAnchor = true;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
         //게시글에 있는 카메라를 클릭시 boardData 전달
-        Intent intent = getIntent();
-        BoardData boardData = (BoardData) intent.getSerializableExtra("boardData");
+        intent = getIntent();
+        boardData = (BoardData) intent.getSerializableExtra("boardData");
         documentID = boardData.getDocumentId();
         anchorID = boardData.getAnchorID();
 
@@ -250,16 +247,9 @@ public class GeospatialActivity extends AppCompatActivity
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
         setLocationButton = findViewById(R.id.set_location);
 
-
-        mContext = this;
-        Intent intent = getIntent();
-        boardData = (BoardData) intent.getSerializableExtra("boardData");
-        getImgURL = (String) intent.getSerializableExtra("imgURL");
-
 //        //임시로 textview 안보이게 함 (for UI)
 //        geospatialPoseTextView.setVisibility(View.INVISIBLE);
 //        statusTextView.setVisibility(View.INVISIBLE);
-
 
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
@@ -274,7 +264,7 @@ public class GeospatialActivity extends AppCompatActivity
 
         System.out.println("boardData = " + boardData);
 
-//        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
+        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
 
 
     }
@@ -460,11 +450,11 @@ public class GeospatialActivity extends AppCompatActivity
             Texture virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/map_pointer_baked.png",
+                            "models/heart_object_baked_just_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/map_pointer_v3.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/heart_object.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
@@ -535,7 +525,7 @@ public class GeospatialActivity extends AppCompatActivity
             updateGeospatialState(earth);
         }
         setLocationButton = findViewById(R.id.set_location);
-/*        stroedLocationTextView = findViewById(R.id.stored_location);*/
+        /*        stroedLocationTextView = findViewById(R.id.stored_location);*/
         cameraGeospatial = findViewById(R.id.camera_geospatial);
 
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
@@ -568,59 +558,49 @@ public class GeospatialActivity extends AppCompatActivity
                         DocumentSnapshot document = task.getResult();
                         Map<String, Object> data = document.getData();
 
-//                        Anchor anchor =
-//                                earth.createAnchor(
-//                                        (Double) data.get("latitude"),
-//                                        (Double) data.get("longitude"),
-//                                        (Double) data.get("altitude"),
-//                                        0.0f,
-//                                        (float) Math.sin(20 / 2),
-//                                        0.0f,
-//                                        (float) Math.cos(20 / 2));
-//
-//
-//                        Anchor anchor2 =
-//                                earth.createAnchor(
-//                                        (Double) data.get("latitude"),
-//                                        (Double) data.get("longitude"),
-//                                        (Double) data.get("altitude") + 1,
-//                                        0.0f,
-//                                        (float) Math.sin(20 / 2),
-//                                        0.0f,
-//                                        (float) Math.cos(20 / 2));
-//
-//
-//
-//                        Anchor anchor3 =
-//                                earth.createAnchor(
-//                                        (Double) data.get("latitude"),
-//                                        (Double) data.get("longitude"),
-//                                        (Double) data.get("altitude") -1,
-//                                        0.0f,
-//                                        (float) Math.sin(20 / 2),
-//                                        0.0f,
-//                                        (float) Math.cos(20 / 2));
+                        Anchor anchor =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude"),
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
 
-                        for(int i = 0 ; i< 50 ; i++)
-                        {
-                            Anchor anchor =
-                                    earth.createAnchor(
-                                            (Double) data.get("latitude"),
-                                            (Double) data.get("longitude"),
-                                            (Double) data.get("altitude") -5 +i*0.5,
-                                            0.0f,
-                                            (float) Math.sin(20 / 2),
-                                            0.0f,
-                                            (float) Math.cos(20 / 2));
 
-                            anchors.add(anchor);
-                        }
+                        Anchor anchor2 =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude") + 1,
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
 
-//                        anchors.add(anchor);
-//                        anchors.add(anchor2);
-//                        anchors.add(anchor3);
-                    anchorBoolean = true;
 
+
+                        Anchor anchor3 =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude") -1,
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
+                        anchors.add(anchor);
+                        anchors.add(anchor2);
+                        anchors.add(anchor3);
+                        anchorBoolean = true;
+
+                        Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
+                        Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
+                        Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
+                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("latitude"));
+                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("longitude"));
+                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("altitude"));
                     }
 
 
@@ -778,217 +758,128 @@ public class GeospatialActivity extends AppCompatActivity
 
                 Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString());
 
-                Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
-                intent.putExtra("boardData", boardData);
-                intent.putExtra("imgURL", getImgURL);
-                startActivity(intent);
-
+                intent = new Intent(getApplicationContext(), CameraActivity.class);
+                intent.putExtra("boardData",boardData);
+                startActivityForResult(intent, 101);
             }
         });
-
     }
 
-
-    public void savePhoto(){
-        if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.e(TAG, "onActivityResult: 권한접근" );
-            // Should we show an explanation?
-            if (shouldShowRequestPermissionRationale(
-                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                // Explain to the user why we need to read the contacts
-                Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale" );
-            }
-            
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Match the request 'pic id with requestCode
 
-        if (requestCode == 101) {
-            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Log.e(TAG, "onActivityResult: 권한접근");
-                // Should we show an explanation?
-                if (shouldShowRequestPermissionRationale(
-                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    // Explain to the user why we need to read the contacts
-                    Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale");
-                }
+        Log.d(TAG, "onActivityResult: 권한접근1");
+        switch(requestCode) {
+            case 101:
+                if (resultCode == RESULT_OK) {
+                    Log.d(TAG, "onActivityResult: 권한접근2");
+                    if (requestCode == 101) {
+                        if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                                != PackageManager.PERMISSION_GRANTED) {
+                            Log.d(TAG, "onActivityResult: 권한접근3");
+                            // Should we show an explanation?
+                            if (shouldShowRequestPermissionRationale(
+                                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                                // Explain to the user why we need to read the contacts
+                                Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale");
+                            }
 
-            requestPermissions(
-                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
-                    1000);
+                            requestPermissions(
+                                    new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                                    1000);
 
+                            // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
+                            // app-defined int constant that should be quite unique
+                            Log.e(TAG, "onActivityResult: return");
+                            return;
+                        }
+                        Log.e(TAG, "onActivityResult: 권한성공");
 
-            // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
-            // app-defined int constant that should be quite unique
-            Log.e(TAG, "onActivityResult: return" );
-            return;
-        }
+                        Uri imgURL = (Uri) data.getParcelableExtra("imgURL");
 
-        // BitMap is data structure of image file which store the image in memory
-        Intent intent = getIntent();
-        Bitmap photo = (Bitmap) intent.getParcelableExtra("bitmap");
-        Log.d(TAG, "String bitmap");
-        // Set the image in i0mageview for display
-        System.out.println("photo = " + photo);
+                        //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
+                        Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" + auth.getCurrentUser());
+                        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        Uri imgURL = getImageUri(this,photo);
-//            imgURL = uri.toString();
-        Log.e(TAG, "onActivityResult: imgURL" + imgURL );
-        Log.e(TAG, "onActivityResult: storedGeolocation_Photo"+storedGeolocation_Photo );
-        //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
-        Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" +  auth.getCurrentUser());
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        //storage에 파일 저장하는 코드
-        /**
-         * 파이어베이스에 저장할 데이터
-         * 위치 : users - uid - posts - postID - {document}
-         *
-         * -anchorFirebase : latitude, longitude, altitude, angleRadians
-         * -imgURL : 촬영한 사진 이미지
-         * -userID
-         * -활용한 게시글
-         */
-        if (imgURL != null) {
-
-                // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
-                // app-defined int constant that should be quite unique
-                Log.e(TAG, "onActivityResult: return");
-                return;
-            }
-            Log.e(TAG, "onActivityResult: 권한성공");
-            // BitMap is data structure of image file which store the image in memory
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            // Set the image in imageview for display
-            System.out.println("photo = " + photo);
-
-            Uri imgURL = getImageUri(this, photo);
-//            imgURL = uri.toString();
-            Log.e(TAG, "onActivityResult: imgURL" + imgURL);
-            Log.e(TAG, "onActivityResult: storedGeolocation_Photo" + storedGeolocation_Photo);
-            //TODO: 현재 bitmap 상태로 저장, firebase에 boardData, 위치정보와 함께 담아야함
-            Log.e(TAG, "onActivityResult:  firebaseAuth.getCurrentUser()" + auth.getCurrentUser());
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-            //storage에 파일 저장하는 코드
-            /**
-             * 파이어베이스에 저장할 데이터
-             * 위치 : users - uid - posts - postID - {document}
-             *
-             * -anchorFirebase : latitude, longitude, altitude, angleRadians
-             * -imgURL : 촬영한 사진 이미지
-             * -userID
-             * -활용한 게시글
-             */
-            if (imgURL != null) {
-            
+                        //storage에 파일 저장하는 코드
+                        /**
+                         * 파이어베이스에 저장할 데이터
+                         * 위치 : users - uid - posts - postID - {document}
+                         *
+                         * -anchorFirebase : latitude, longitude, altitude, angleRadians
+                         * -imgURL : 촬영한 사진 이미지
+                         * -userID
+                         * -활용한 게시글
+                         */
+                        if (imgURL != null) {
 //                String GetUid = firebaseUser.getUid();
-            //TODO: 로그인구현 이후 수정
-            String getUid = auth.getCurrentUser().getUid();
-            StorageReference storageRef = FirebaseStorage.getInstance().getReference("Gallery/" + getUid); //storgae의 저장경로
-            final StorageReference ref = storageRef.child(System.currentTimeMillis() + ".jpg"); //이미지의 파일이름
-            uploadTask = ref.putFile(imgURL); //storage에 file을 업로드, uri를 통해서
-            uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                @Override
-                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                    if (!task.isSuccessful()) {
-                        throw task.getException();
-                    }
-
-                    // Continue with the task to get the download URL
-                    return ref.getDownloadUrl();
-                }
-            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                @Override
-                public void onComplete(@NonNull Task<Uri> task) {
-                    if (task.isSuccessful()) { //task가 성공하면
-                        Uri downloadUri = task.getResult(); //위의 return값을 받아 downloadUri에 저장
-                        String DownloadUrl = downloadUri.toString();
-                        LocalDateTime now = LocalDateTime.now();
-                        String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
-
-                        UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading());
-//
-                        db.collection("users").document(getUid).collection("posts").document(postdocument_bydate).set(uploadFirebaseData)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Log.e("temp", "onSuccess: DB Insertion success");
+                            //TODO: 로그인구현 이후 수정
+                            String getUid = auth.getCurrentUser().getUid();
+                            StorageReference storageRef = FirebaseStorage.getInstance().getReference("Gallery/" + getUid); //storgae의 저장경로
+                            final StorageReference ref = storageRef.child(System.currentTimeMillis() + ".jpg"); //이미지의 파일이름
+                            uploadTask = ref.putFile(imgURL); //storage에 file을 업로드, uri를 통해서
+                            uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                                @Override
+                                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                    if (!task.isSuccessful()) {
+                                        throw task.getException();
                                     }
-                                })
-                                .addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        Log.e("temp", "onFailure: DB Insertion failed");
+
+                                    // Continue with the task to get the download URL
+                                    return ref.getDownloadUrl();
+                                }
+                            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    if (task.isSuccessful()) { //task가 성공하면
+                                        Uri downloadUri = task.getResult(); //위의 return값을 받아 downloadUri에 저장
+                                        String DownloadUrl = downloadUri.toString();
+                                        LocalDateTime now = LocalDateTime.now();
+                                        String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
+
+                                        UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading(), postdocument_bydate);
+
+                                        db.collection("anchor").document(postdocument_bydate).set(uploadFirebaseData)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Log.e("temp", "onSuccess: DB Insertion success");
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.e("temp", "onFailure: DB Insertion failed");
+                                                    }
+                                                });
+
+                                        db.collection("users").document(getUid).collection("posts").document(postdocument_bydate).set(uploadFirebaseData)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        Log.e("temp", "onSuccess: DB Insertion success");
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        Log.e("temp", "onFailure: DB Insertion failed");
+                                                    }
+                                                });
+                                        finish();
+
+                                    } else {
+                                        Toast.makeText(GeospatialActivity.this, "Failed", Toast.LENGTH_SHORT).show();
                                     }
-                                });
-                        finish();
-
-                    } else {
-                        Toast.makeText(GeospatialActivity.this, "Failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-
-                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Uri> task) {
-                        if (task.isSuccessful()) { //task가 성공하면
-                            Uri downloadUri = task.getResult(); //위의 return값을 받아 downloadUri에 저장
-                            String DownloadUrl = downloadUri.toString();
-                            LocalDateTime now = LocalDateTime.now();
-                            String postdocument_bydate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
-
-                            UploadFirebaseData uploadFirebaseData = new UploadFirebaseData(getUid, DownloadUrl, storedGeolocation_Photo.getLatitude(), storedGeolocation_Photo.getLongitude(), storedGeolocation_Photo.getAltitude(), storedGeolocation_Photo.getHeading(), postdocument_bydate);
-
-                            db.collection("anchor").document(postdocument_bydate).set(uploadFirebaseData)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Log.e("temp", "onSuccess: DB Insertion success");
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.e("temp", "onFailure: DB Insertion failed");
-                                        }
-                                    });
-
-                            db.collection("users").document(getUid).collection("posts").document(postdocument_bydate).set(uploadFirebaseData)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            Log.e("temp", "onSuccess: DB Insertion success");
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Log.e("temp", "onFailure: DB Insertion failed");
-                                        }
-                                    });
-                            finish();
-
-                        } else {
-                            Toast.makeText(GeospatialActivity.this, "Failed", Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                     }
-                });
-            }
-
-
+                }
+                break;
         }
 
-    }
-
-    public Uri getImageUri(Context context, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
     }
 
     /**
