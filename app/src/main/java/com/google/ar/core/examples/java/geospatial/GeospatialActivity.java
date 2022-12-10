@@ -528,7 +528,7 @@ public class GeospatialActivity extends AppCompatActivity
         cameraGeospatial = findViewById(R.id.camera_geospatial);
 
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-
+//
 
         String getUid = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
 
@@ -976,7 +976,7 @@ public class GeospatialActivity extends AppCompatActivity
         }
 
         updateGeospatialPoseText(geospatialPose);
-    }
+    }w
 //
 
     /**
