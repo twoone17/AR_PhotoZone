@@ -227,6 +227,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                         putExtra("startLongitude", currentPosition.longitude)
                         putExtra("endLatitude", p0.position.latitude)
                         putExtra("endLongitude", p0.position.longitude)
+                        putExtra("photoZoneName", p0.title)
                         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }.run { startActivity(this) }
                 }

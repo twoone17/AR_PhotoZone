@@ -54,6 +54,9 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
     private CancellationToken token;
 
     private static final String TAG = "테스트용";
+
+    private String photoZoneName;
+
     String API_Key;
 
     private double start_lat = 37.413003;
@@ -75,6 +78,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
         start_lng = getIntent().getDoubleExtra("startLongitude", 0);
         end_lat = getIntent().getDoubleExtra("endLatitude", 0);
         end_lng = getIntent().getDoubleExtra("endLongitude", 0);
+        photoZoneName = getIntent().getStringExtra("photoZoneName");
 
         Log.e(TAG, "onCreate: " + start_lat + " " + start_lng + " " + end_lat + " " + end_lng);
 
@@ -127,7 +131,7 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
                         new RoadTracker(MapActivity.this).execute(String.valueOf(start_lng), String.valueOf(start_lat),
                                 String.valueOf(end_lng), String.valueOf(end_lat),
                                 URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
-                                API_Key);
+                                API_Key, photoZoneName);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -153,7 +157,6 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
 
     FirebaseAuth auth = FirebaseAuth.getInstance();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    String tempUID = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
 
     public RoadTracker(MapActivity intentFlow) {
         this.intentFlow = intentFlow;
@@ -220,7 +223,7 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
                 }
             }
 
-            coords_extend(latitudes, longitudes);
+            coords_extend(latitudes, longitudes, positions[7]);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -229,7 +232,7 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         return mapPoints;
     }
 
-    private void coords_extend(ArrayList<Double> latitudes, ArrayList<Double> longitudes) {
+    private void coords_extend(ArrayList<Double> latitudes, ArrayList<Double> longitudes, String photoZoneName) {
 
         Log.e(TAG, "size: " + latitudes.size() );
 
@@ -324,12 +327,13 @@ class RoadTracker extends AsyncTask<String, Void, ArrayList<LatLng>> {
         Map insertData = new HashMap<String, List<Double>>();
         insertData.put("latitudes", extended_coords_lat);
         insertData.put("longitudes", extended_coords_lng);
-        db.collection("users").document(tempUID).collection("nav").document(tempUID).set(insertData)
+        db.collection("users").document(auth.getCurrentUser().getUid()).collection("nav").document(auth.getCurrentUser().getUid()).set(insertData)
         .addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
                     Intent intent = new Intent(intentFlow.getApplicationContext(), ArNav.class);
+                    intent.putExtra("photoZoneName", photoZoneName);
                     intentFlow.startActivity(intent);
                 }
             }

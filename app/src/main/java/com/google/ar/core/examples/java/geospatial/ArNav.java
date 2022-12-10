@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.geospatial;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -52,9 +53,12 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import com.google.ar.core.exceptions.UnsupportedConfigurationException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -140,12 +144,17 @@ public class ArNav extends AppCompatActivity
 
     private int distinguisher;
 
+    private String photoZoneName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
         db = FirebaseFirestore.getInstance();
+
+        Intent intent = getIntent();
+        photoZoneName = intent.getStringExtra("photoZoneName");
 
         setContentView(R.layout.activity_geospatial_camera_view);
         surfaceView = findViewById(R.id.surfaceview);
@@ -581,7 +590,7 @@ public class ArNav extends AppCompatActivity
         FirebaseUser user = auth.getCurrentUser();
 
         DocumentReference coordsRef = db.collection("users").document(user.getUid()).collection("nav").document(user.getUid());
-        DocumentReference likesCoordsRef = db.collection("users").document(user.getUid()).collection("arLikesTest").document(user.getUid());
+        CollectionReference likesCoordsRef = db.collection("photoZone").document(photoZoneName).collection("userLikes");
         coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -598,6 +607,24 @@ public class ArNav extends AppCompatActivity
                         CONCURRENT_PREVENT_FLAG = true;
                         // 안내 객체 추가 완료,
                         // 좋아요 객체 추가 시작
+
+                        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if(task.isSuccessful()) {
+                                    for (QueryDocumentSnapshot results : task.getResult()) {
+                                        createAnchor(earth, (Double)results.get("latitude"), (Double)results.get("longitude"),
+                                                58, 100);
+                                    }
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e(TAG, "onFailure: " + e );
+                            }
+                        });
+
 //                        coordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
 //                            @Override
 //                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
