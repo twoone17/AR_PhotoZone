@@ -29,6 +29,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -245,6 +246,10 @@ public class GeospatialActivity extends AppCompatActivity
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
         setLocationButton = findViewById(R.id.set_location);
 
+        //임시로 textview 안보이게 함 (for UI)
+        geospatialPoseTextView.setVisibility(View.INVISIBLE);
+        statusTextView.setVisibility(View.INVISIBLE);
+
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
 
@@ -448,7 +453,7 @@ public class GeospatialActivity extends AppCompatActivity
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/heart_object_obj.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/heart_object.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
@@ -534,27 +539,26 @@ public class GeospatialActivity extends AppCompatActivity
 
             docRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    if (task.getResult().getId() == anchorID) {
-                        DocumentSnapshot document = task.getResult();
-                        Map<String, Object> data = document.getData();
+                    DocumentSnapshot document = task.getResult();
+                    Map<String, Object> data = document.getData();
 
-                        Anchor anchor =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude"),
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
-                        anchors.add(anchor);
+                    Anchor anchor =
+                            earth.createAnchor(
+                                    (Double) data.get("latitude"),
+                                    (Double) data.get("longitude"),
+                                    (Double) data.get("altitude"),
+                                    0.0f,
+                                    (float) Math.sin(20 / 2),
+                                    0.0f,
+                                    (float) Math.cos(20 / 2));
+                    anchors.add(anchor);
 //                    anchorBoolean = true;
 
-                        Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
-                        Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
-                        Log.e(TAG, "onDrawFrame: anchorBoolean 1 " + anchorBoolean);
-                    }
+                    Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
+                    Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
+                    Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
                 }
+
 
             });
 
@@ -1032,9 +1036,9 @@ public class GeospatialActivity extends AppCompatActivity
         LocalDateTime now = LocalDateTime.now();
         String AnchorDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
         //현재 위치의 앵커를 파이어베이스에 저장한다
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
-        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
+//        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
 
         Anchor anchor =
                 earth.createAnchor(

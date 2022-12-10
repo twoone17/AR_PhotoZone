@@ -7,9 +7,6 @@
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="littlegray">#8A8D89</color>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
@@ -39,15 +36,27 @@
     <!--added-->
     <color name="color_palette_1">#F5F4F4</color>
     <color name="color_palette_2">#CAE4DB</color>
+    <color name="color_palette_2_1">#ABBFB8</color>
     <color name="color_palette_3">#CDAC81</color>
     <color name="color_palette_4">#00303F</color>
 
     <!--음영-->
-    <color name="color_palette_2_dark1">#91A39D</color>
-    <color name="color_palette_3_bright_gray">#DFDFDF</color>
     <color name="color_palette_4_light1">#00516A</color>
     <!--보색-->
     <color name="color_palette_2_complementary1">#967782</color>
     <color name="color_palette_2_complementary2">#968677</color>
+
+    <!--white,gray,black-->
+    <color name="white">#FFFFFFFF</color>
+    <color name="gray1">#ecf0f1</color>
+    <color name="color_palette_3_bright_gray">#DFDFDF</color>
+    <color name="gray2">#bdc3c7</color>
+    <color name="gray3">#95a5a6</color>
+    <color name="gray4">#8A8D89</color>
+    <color name="gray5">#7f8c8d</color>
+    <color name="color_palette_2_dark1">#91A39D</color>
+    <color name="black">#FF000000</color>
+
+    <color name="gray_line_cl">#AFAFAF</color>
 
 </resources>
