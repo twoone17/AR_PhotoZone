@@ -55,10 +55,10 @@ class HelloActivity : AppCompatActivity() {
         // 하단 네비게이션 바 클릭 이벤트 설정
         bottomNagivationView.setOnNavigationItemSelectedListener {item ->
             when(item.itemId) {
-                R.id.nav_home -> {
-                    replaceFragment(Fragment1())
-                    true
-                }
+//                R.id.nav_home -> {
+//                    replaceFragment(Fragment1())
+//                    true
+//                }
                 R.id.nav_board -> {
                     replaceFragment(Boardfragment())
                     true

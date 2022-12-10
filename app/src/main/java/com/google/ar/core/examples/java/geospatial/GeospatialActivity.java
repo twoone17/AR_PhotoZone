@@ -590,7 +590,7 @@ public class GeospatialActivity extends AppCompatActivity
 //                                        0.0f,
 //                                        (float) Math.cos(20 / 2));
 
-                        for(int i = 0 ; i< 3 ; i++)
+                        for(int i = 0 ; i< 50 ; i++)
                         {
                             Anchor anchor =
                                     earth.createAnchor(
@@ -610,12 +610,6 @@ public class GeospatialActivity extends AppCompatActivity
 //                        anchors.add(anchor3);
                     anchorBoolean = true;
 
-                        Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
-                        Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
-                        Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
-                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("latitude"));
-                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("longitude"));
-                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("altitude"));
                     }
 
 
