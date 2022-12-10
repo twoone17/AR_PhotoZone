@@ -3,26 +3,26 @@
     <item
         android:id="@+id/nav_home"
         android:title="홈"
-        android:icon="@drawable/ic_noun_home_1059985"
+        android:icon="@drawable/home_btn_on_off"
         android:enabled="true"
         />
 
     <item
         android:id="@+id/nav_board"
         android:title="게시판"
-        android:icon="@drawable/ic_baseline_dashboard_24"
+        android:icon="@drawable/dashboard_btn_on_off"
         android:enabled="true"
         />
 
     <item
         android:id="@+id/nav_search"
         android:enabled="true"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/searchview_btn_on_off"
         android:title="검색" />
     <item
         android:id="@+id/nav_profile"
         android:title="마이페이지"
-        android:icon="@drawable/ic_profile"
+        android:icon="@drawable/mypage_btn_on_off"
         android:enabled="true"
         />
 
