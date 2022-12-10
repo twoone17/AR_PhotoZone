@@ -68,7 +68,7 @@ public class CameraActivity extends AppCompatActivity {
     public final void control() {
 
         ImageView load = (ImageView) this.findViewById(R.id.profile);
-
+//
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
 
@@ -119,6 +119,8 @@ public class CameraActivity extends AppCompatActivity {
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
+
+
 
             //bitmap 을  byte array 로 변환
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
