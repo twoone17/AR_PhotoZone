@@ -25,6 +25,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -177,6 +178,15 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 photozoneDetail.text = "위도 : " + p0.position.latitude.toString().substring(0 until 6) + "    " +
                          "경도 : " + p0.position.longitude.toString().substring(0 until 6)
 
+                val photozoneLikes : TextView = customDialog.findViewById(R.id.photozoneLikes)
+
+                db.collection("photoZone").document(p0.title!!).collection("userLikes").get().addOnSuccessListener { result ->
+                    photozoneLikes.text = result.size().toString() + " likes"
+                }.addOnFailureListener { error ->
+                    Log.e(TAG, "onMarkerClick: " + error )
+                    photozoneLikes.text = "Unknown"
+                }
+
                 profileAdapter = ProfileAdapter(requireContext())
                 val recyclerView: RecyclerView = customDialog.recycler_mypost
 
@@ -216,7 +226,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
 
 
-                val navButton = customDialog.findViewById<Button>(R.id.navigateToPhotozoneButton)
+                val navButton = customDialog.findViewById<ImageButton>(R.id.navigateToPhotozoneButton)
                 navButton.setOnClickListener {
 
                     // 도착지 정보 받아오는건 완료
@@ -233,7 +243,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                     }.run { startActivity(this) }
                 }
 
-                val likesButton = customDialog.findViewById<Button>(R.id.likesARButton)
+                val likesButton = customDialog.findViewById<ImageButton>(R.id.likesARButton)
                 likesButton.setOnClickListener {
                     Intent(context, ArLikes::class.java).apply {
                         putExtra("photoZoneName", p0.title)
