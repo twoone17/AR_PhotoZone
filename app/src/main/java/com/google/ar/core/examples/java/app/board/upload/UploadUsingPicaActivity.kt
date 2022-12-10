@@ -50,7 +50,7 @@ class UploadUsingPicaActivity : AppCompatActivity() {
 
         auth = Firebase.auth
 
-        auth.signInWithEmailAndPassword("euisung@naver.com", "2580as2580@")
+//        auth.signInWithEmailAndPassword("euisung@naver.com", "2580as2580@")
 
         firebaseStore = FirebaseStorage.getInstance()
         storageReference = FirebaseStorage.getInstance().reference

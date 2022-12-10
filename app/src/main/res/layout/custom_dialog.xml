@@ -30,7 +30,7 @@
                         android:layout_height="170dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_baseline_android_24"
-                        app:civ_border_color="@color/black"
+                        app:civ_border_color="@color/white"
                         app:civ_border_overlay="true"
                         app:civ_border_width="2dp" />
 

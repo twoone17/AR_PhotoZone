@@ -162,7 +162,7 @@ public class ArLikes extends AppCompatActivity
         installRequested = false;
         clearedAnchorsAmount = null;
 
-        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
+//        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
 
 
     }
