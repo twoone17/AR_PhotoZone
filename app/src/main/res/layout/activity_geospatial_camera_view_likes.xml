@@ -44,7 +44,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:text="좋아요 표시하기"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <Button
         android:id="@+id/set_likes_button"
@@ -64,6 +64,6 @@
         android:text="@string/button_text_clear_anchors"
         android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
-        android:visibility="invisible"/>
+        android:visibility="visible"/>
 
 </RelativeLayout>
