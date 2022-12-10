@@ -534,26 +534,27 @@ public class GeospatialActivity extends AppCompatActivity
 
             docRef.get().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    Map<String, Object> data = document.getData();
+                    if (task.getResult().getId() == anchorID) {
+                        DocumentSnapshot document = task.getResult();
+                        Map<String, Object> data = document.getData();
 
-                    Anchor anchor =
-                            earth.createAnchor(
-                                    (Double) data.get("latitude"),
-                                    (Double) data.get("longitude"),
-                                    (Double) data.get("altitude"),
-                                    0.0f,
-                                    (float) Math.sin(20 / 2),
-                                    0.0f,
-                                    (float) Math.cos(20 / 2));
-                    anchors.add(anchor);
+                        Anchor anchor =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude"),
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
+                        anchors.add(anchor);
 //                    anchorBoolean = true;
 
-                    Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
-                    Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
-                    Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
+                        Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
+                        Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
+                        Log.e(TAG, "onDrawFrame: anchorBoolean 1 " + anchorBoolean);
+                    }
                 }
-
 
             });
 
@@ -1031,9 +1032,9 @@ public class GeospatialActivity extends AppCompatActivity
         LocalDateTime now = LocalDateTime.now();
         String AnchorDate = now.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss", Locale.ENGLISH));
         //현재 위치의 앵커를 파이어베이스에 저장한다
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
-//        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
+        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
 
         Anchor anchor =
                 earth.createAnchor(
