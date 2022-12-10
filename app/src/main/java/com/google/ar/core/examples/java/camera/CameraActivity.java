@@ -120,6 +120,8 @@ public class CameraActivity extends AppCompatActivity {
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, true);
 
+
+
             //bitmap 을  byte array 로 변환
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
