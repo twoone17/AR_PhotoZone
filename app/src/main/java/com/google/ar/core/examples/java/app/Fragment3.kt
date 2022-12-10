@@ -173,10 +173,19 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 Glide.with(requireContext()).load(imgURL.toString()).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
 
                 //포토존 정보 불러오기
-//                val photozoneDetail : TextView = customDialog.findViewById(R.id.photozoneDetail)
-//                //위도 경도 소수점 자르기
-//                photozoneDetail.text = "위도 : " + p0.position.latitude.toString().substring(0 until 6) + "    " +
-//                         "경도 : " + p0.position.longitude.toString().substring(0 until 6)
+                val photozoneDetail : TextView = customDialog.findViewById(R.id.photozoneDetail)
+                //위도 경도 소수점 자르기
+                photozoneDetail.text = "위도 : " + p0.position.latitude.toString().substring(0 until 6) + "    " +
+                         "경도 : " + p0.position.longitude.toString().substring(0 until 6)
+
+                val photozoneLikes : TextView = customDialog.findViewById(R.id.photozoneLikes)
+
+                db.collection("photoZone").document(p0.title!!).collection("userLikes").get().addOnSuccessListener { result ->
+                    photozoneLikes.text = result.size().toString() + " likes"
+                }.addOnFailureListener { error ->
+                    Log.e(TAG, "onMarkerClick: " + error )
+                    photozoneLikes.text = "Unknown"
+                }
 
                 profileAdapter = ProfileAdapter(requireContext())
                 val recyclerView: RecyclerView = customDialog.recycler_mypost

@@ -24,14 +24,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <ImageButton
-                    android:id="@+id/Temp_Setting_Button"
-                    android:layout_width="45dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_weight="1"
-                    android:backgroundTint="@color/white"
-                    app:srcCompat="@drawable/ic_baseline_settings_24" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
                     android:id="@+id/circle_img"
@@ -60,9 +52,9 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="15dp"
+                            android:gravity="center"
                             android:padding="10dp"
                             android:text="포토존 이름"
-                            android:gravity="center"
                             android:textAlignment="center"
                             android:textSize="20sp"
                             android:textStyle="bold"
@@ -71,14 +63,47 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
-<!--                        <TextView-->
-<!--                            android:id="@+id/photozoneDetail"-->
-<!--                            android:layout_width="wrap_content"-->
-<!--                            android:layout_height="wrap_content"-->
-<!--                            android:layout_weight="1"-->
-<!--                            android:text="TextView" />-->
 
+                    </LinearLayout>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView2"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            app:srcCompat="@drawable/img" />
+
+                        <TextView
+                            android:id="@+id/photozoneDetail"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="포토존 디테일"
+                            android:textAlignment="center"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/imageView"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            app:srcCompat="@drawable/ic_liked" />
+
+                        <TextView
+                            android:id="@+id/photozoneLikes"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="2 likes"
+                            android:textStyle="bold"
+                            android:textAlignment="center" />
                     </LinearLayout>
 
                     <LinearLayout
