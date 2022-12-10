@@ -42,9 +42,48 @@
 
                         <LinearLayout
                             android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingTop="10dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintVertical_bias="0.784">
+
+
+                            <ImageView
+                                android:id="@+id/like"
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:background="#3200"
+                                android:src="@drawable/navigation" />
+
+                            <Button
+                                android:id="@+id/navigateToPhotozoneButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="50dp"
+                                android:textSize="20dp"
+                                android:text="AR 내비게이션으로 길 안내"
+                                android:textAlignment="center"
+                                android:layout_weight="1"
+                                android:textColor="@color/white"
+                                android:background="#3200"
+             />
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="match_parent"
+                            android:background="#3000"
                             android:orientation="vertical"
-                            android:padding="10dp">
+                            android:paddingLeft="10dp"
+
+                            android:paddingRight="10dp">
+
+
 
                             <TextView
                                 android:id="@+id/photozoneName"
@@ -54,6 +93,7 @@
                                 android:text="포토존 이름"
                                 android:textSize="20dp"
                                 android:textStyle="bold"
+                                android:textColor="@color/white"
                                 app:layout_constraintBottom_toBottomOf="parent"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
@@ -66,18 +106,14 @@
                                 android:textAlignment="center"
                                 android:text="포토존 정보"
                                 android:textSize="15dp"
-                                android:textStyle="bold"
+                                android:textColor="@color/white"
                                 />
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal">
 
-                                <ImageView
-                                android:id="@+id/like"
-                                android:layout_width="15dp"
-                                android:layout_height="18dp"
-                                android:src="@drawable/ic_like" />
+
 
                                 <TextView
                                     android:id="@+id/photozoneLikes"
@@ -87,41 +123,14 @@
                                     android:layout_marginLeft="5dp"
                                     android:textAlignment="center"
                                     android:text="2 likes"
+                                    android:textColor="@color/white"
                                     android:textSize="15dp"
-                                    android:textStyle="bold"
                                     />
                             </LinearLayout>
 
 
                         </LinearLayout>
 
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="10dp"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintVertical_bias="0.784">
-
-
-
-
-                            <Button
-                                android:id="@+id/navigateToPhotozoneButton"
-                                android:layout_width="wrap_content"
-                                android:layout_height="30dp"
-                                android:layout_weight="1"
-                                android:text="포토존까지 안내 시작"
-                                android:background="#3000" />
-
-
-
-
-
-                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
