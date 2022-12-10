@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background = "@drawable/background_gradient_1">
+    android:background = "@color/white">
 
     <ImageView
         android:id="@+id/back"
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
-        android:text="Name"
+        android:text="Name*"
         android:textSize="15sp" />
     <EditText
         android:id="@+id/nameEditText"
@@ -49,7 +49,7 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
-        android:text="Phone number"
+        android:text="Phone number*"
         android:textSize="15sp" />
     <EditText
         android:id="@+id/phoneEditText"
@@ -66,7 +66,7 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
-        android:text="Email"
+        android:text="Email*"
         android:textSize="15sp" />
     <EditText
         android:id="@+id/idEditText"
@@ -83,7 +83,7 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
-        android:text="Password"
+        android:text="Password*"
         android:textSize="15sp" />
     <EditText
         android:id="@+id/passwordEditText"
@@ -100,7 +100,7 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
-        android:text="Password check"
+        android:text="Password check*"
         android:textSize="15sp" />
     <EditText
         android:id="@+id/pwcheckEditText"
@@ -127,7 +127,7 @@
         android:textSize="25sp"
         android:textStyle="bold"
         android:typeface="sans"
-        android:letterSpacing="0.2"
+        android:letterSpacing="0.1"
         android:background="@drawable/login_btn_shape" />
 
 

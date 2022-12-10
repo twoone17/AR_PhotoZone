@@ -15,7 +15,7 @@
 
 
         <LinearLayout
-            android:background = "@color/color_palette_2"
+            android:background = "@color/color_palette_1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -37,11 +37,11 @@
 
 
                 <de.hdodenhof.circleimageview.CircleImageView
-                    android:layout_marginTop = "10dp"
                     android:id="@+id/circle_img"
-                    android:layout_width="130dp"
-                    android:layout_height="130dp"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
                     android:layout_gravity="center"
+                    android:layout_marginTop="10dp"
                     android:src="@drawable/ic_baseline_android_24"
                     app:civ_border_color="#FFFFFF"
                     app:civ_border_overlay="true"
@@ -62,12 +62,12 @@
                             android:id="@+id/userNickname"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="10dp"
-                            android:layout_marginBottom="15dp"
-                            android:textAlignment="center"
+                            android:layout_marginBottom="10dp"
                             android:gravity="center"
+                            android:padding="10dp"
                             android:text="user_name"
-                            android:textSize="20dp"
+                            android:textAlignment="center"
+                            android:textSize="18dp"
                             android:textStyle="bold"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toEndOf="parent"
@@ -75,44 +75,59 @@
                             app:layout_constraintTop_toTopOf="parent" />
                     </LinearLayout>
 
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2px"
+                        android:background="@color/black"
+                        android:layout_gravity ="center" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="43dp"
+                        android:layout_marginTop="15dp"
+                        android:background="@color/color_palette_1"
                         android:orientation="horizontal"
-                        android:layout_marginBottom="10dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.784">
 
-                        <ImageButton
-                            android:id="@+id/bookmarkButton"
-                            android:layout_width="100dp"
-                            android:layout_height="80dp"
-                            android:layout_marginLeft="10dp"
-                            android:layout_marginRight="18dp"
-                            android:padding="0dp"
-                            android:paddingLeft="20dp"
-                            android:scaleType="fitXY"
-                            android:src="@drawable/bookmark_icon_ver2" />
                         <!--android:src="@drawable/bluebookmark"-->
 
                         <ImageButton
-                            android:id="@+id/Closetbutton"
-                            android:layout_width="100dp"
-                            android:layout_height="80dp"
-                            android:layout_marginRight="15dp"
+                            android:id="@+id/bookmarkButton"
+                            android:layout_width="25dp"
+                            android:layout_height="30dp"
+                            android:layout_marginLeft="130dp"
+                            android:layout_marginRight="70dp"
                             android:padding="0dp"
                             android:paddingLeft="20dp"
                             android:scaleType="fitXY"
-                            android:src="@drawable/my_location_list_up_btn_ver2" />
+                            android:src="@drawable/bookmark_btn" />
+
+                        <ImageButton
+                            android:id="@+id/Closetbutton"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_marginLeft="20dp"
+                            android:layout_marginRight="100dp"
+                            android:padding="0dp"
+                            android:paddingLeft="20dp"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/liked_list_btn" />
 
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
+
+        <LinearLayout
+            android:background="@color/color_palette_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
         <LinearLayout
             android:background="@drawable/background_round_layout"
             android:layout_width="match_parent"
@@ -122,10 +137,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_margin="10dp"
                 android:textColor="@color/fbutton_color_concrete"
                 android:text="My Post"
-                android:fontFamily="@font/military" />
+                android:layout_gravity="left"
+                android:fontFamily="@font/military"
+                android:textSize="13dp"/>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_mypost"
@@ -135,6 +152,7 @@
 
         </LinearLayout>
 
+    </LinearLayout>
     </LinearLayout>
 
 </androidx.core.widget.NestedScrollView>

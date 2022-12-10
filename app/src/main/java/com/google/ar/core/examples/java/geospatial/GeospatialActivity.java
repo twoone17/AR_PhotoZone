@@ -29,6 +29,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -198,6 +199,7 @@ public class GeospatialActivity extends AppCompatActivity
     private Button setLocationButton;
     private TextView stroedLocationTextView;
     private Button cameraGeospatial;
+    //private ImageButton cameraGeospatial;//Button -> ImgBtn으로 변경 필요.
     private double location;
 
     FirebaseAuth firebaseAuth;
@@ -244,6 +246,10 @@ public class GeospatialActivity extends AppCompatActivity
         setAnchorButton = findViewById(R.id.set_anchor_button);
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
         setLocationButton = findViewById(R.id.set_location);
+
+        //임시로 textview 안보이게 함 (for UI)
+        geospatialPoseTextView.setVisibility(View.INVISIBLE);
+        statusTextView.setVisibility(View.INVISIBLE);
 
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
@@ -448,7 +454,7 @@ public class GeospatialActivity extends AppCompatActivity
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/cube.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/heart_object.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
