@@ -590,13 +590,13 @@ public class GeospatialActivity extends AppCompatActivity
 //                                        0.0f,
 //                                        (float) Math.cos(20 / 2));
 
-                        for(int i = 0 ; i< 50 ; i++)
+                        for(int i = 0 ; i< 3 ; i++)
                         {
                             Anchor anchor =
                                     earth.createAnchor(
                                             (Double) data.get("latitude"),
                                             (Double) data.get("longitude"),
-                                            (Double) data.get("altitude") -1 +i*0.5,
+                                            (Double) data.get("altitude") -5 +i*0.5,
                                             0.0f,
                                             (float) Math.sin(20 / 2),
                                             0.0f,

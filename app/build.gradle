@@ -77,6 +77,9 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils:2.4.0'
     implementation 'com.google.maps.android:android-maps-utils:2.4.0'
 
+    implementation 'com.royrodriguez:transitionbutton:0.2.0' //로그인 싱기한 버튼
+    implementation 'com.github.florent37:materialtextfield:1.0.7' //로그인 뾰로롱 editText
+
 }
 
 //for data-binding error
