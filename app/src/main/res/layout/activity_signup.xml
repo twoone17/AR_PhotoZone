@@ -3,33 +3,40 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background = "@color/white">
 
     <ImageView
         android:id="@+id/back"
-        android:layout_width="35dp"
-        android:layout_height="35dp"
+        android:layout_width="30dp"
+        android:layout_height="25dp"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="15dp"
         android:layout_marginStart="15dp"
-        android:src="@drawable/ic_backbutton" />
+        android:src="@drawable/ic_backbutton_ver2" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="REGISTER"
+        android:layout_marginLeft="20dp"
         android:layout_marginTop="15dp"
-        android:layout_marginBottom="60dp"
-        android:textColor="@color/buttonColor1"
-        android:textSize="35sp" />
-
+        android:layout_marginBottom="30dp"
+        android:gravity="left"
+        android:text="SIGN UP"
+        android:textColor="@color/black"
+        android:textSize="35sp"
+        android:textStyle="bold" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
         android:text="Name"
-        android:textSize="15sp" />
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="20sp"/>
+
+
     <EditText
         android:id="@+id/nameEditText"
         android:layout_width="match_parent"
@@ -38,6 +45,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="20dp"
         android:focusableInTouchMode="true"
+        android:background="@drawable/border"
         android:inputType="textPersonName" />
 
     <TextView
@@ -46,7 +54,10 @@
         android:gravity="left"
         android:layout_marginStart="55dp"
         android:text="Phone number"
-        android:textSize="15sp" />
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="20sp"/>
+
     <EditText
         android:id="@+id/phoneEditText"
         android:layout_width="match_parent"
@@ -55,6 +66,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="20dp"
         android:focusableInTouchMode="true"
+        android:background="@drawable/border"
         android:inputType="phone" />
 
     <TextView
@@ -63,7 +75,10 @@
         android:gravity="left"
         android:layout_marginStart="55dp"
         android:text="Email"
-        android:textSize="15sp" />
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="20sp"/>
+
     <EditText
         android:id="@+id/idEditText"
         android:layout_width="match_parent"
@@ -72,6 +87,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="20dp"
         android:focusableInTouchMode="true"
+        android:background="@drawable/border"
         android:inputType="textEmailAddress" />
 
     <TextView
@@ -80,7 +96,10 @@
         android:gravity="left"
         android:layout_marginStart="55dp"
         android:text="Password"
-        android:textSize="15sp" />
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="20sp"/>
+
     <EditText
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
@@ -89,6 +108,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="20dp"
         android:focusableInTouchMode="true"
+        android:background="@drawable/border"
         android:inputType="textPassword" />
 
     <TextView
@@ -96,8 +116,11 @@
         android:layout_height="wrap_content"
         android:gravity="left"
         android:layout_marginStart="55dp"
-        android:text="Password check"
-        android:textSize="15sp" />
+        android:text="Password Check"
+        android:textStyle="bold"
+        android:textColor="#000000"
+        android:textSize="20sp"/>
+
     <EditText
         android:id="@+id/pwcheckEditText"
         android:layout_width="match_parent"
@@ -106,6 +129,7 @@
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="20dp"
         android:focusableInTouchMode="true"
+        android:background="@drawable/border"
         android:inputType="textPassword" />
 
 
@@ -119,10 +143,11 @@
         android:layout_marginEnd="45dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="50dp"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:textColor="#000000"
+        android:textSize="25sp"
         android:textStyle="bold"
-        android:typeface="monospace"
+        android:typeface="sans"
+        android:letterSpacing="0.1"
         android:background="@drawable/login_btn_shape" />
 
 

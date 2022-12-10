@@ -22,15 +22,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Username"
-            android:textColor="@color/colorPrimaryDark"
-            android:textStyle="bold" />
+            android:textColor="@color/color_palette_4_light1"
+            android:textStyle="bold"
+            android:textSize = "14sp" />
 
         <TextView
             android:id="@+id/comment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="5"
-            android:text="Comments here" />
+            android:text="Comments here"
+            android:textSize = "13sp"/>
 
     </LinearLayout>
 

@@ -68,7 +68,8 @@ class Boardfragment : Fragment() {
                         likes = links.data["likes"] as Long,
                         publisher = links.data["publisher"].toString(),
                         userId = links.data["userId"].toString(),
-                        links.id))
+                        anchorID = links.data["anchorID"].toString(),
+                        documentId = links.id))
                     boardAdapter.datas = datas
                     boardAdapter.notifyDataSetChanged()
                 }

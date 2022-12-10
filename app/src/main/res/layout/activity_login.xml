@@ -1,58 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
+    <!--<TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="LOGIN"
         android:layout_marginTop="65dp"
         android:textColor="@color/fbutton_color_peter_river"
-        android:textSize="35sp" />
+        android:textSize="35sp" />-->
 
     <ImageView
-        android:layout_width="300dp"
-        android:layout_height="150dp"
+        android:layout_width="wrap_content"
+        android:layout_height="95dp"
         android:layout_gravity="center"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="150dp"
         android:layout_marginBottom="45dp"
-        android:src="@mipmap/ic_launcher" />
+        android:src="@drawable/app_name_logo_v2" />
+
+
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
         android:layout_marginStart="55dp"
         android:text="Email"
-        android:textSize="15sp" />
+        android:textColor="@color/black"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
+
     <EditText
         android:id="@+id/idEditText"
         android:layout_width="match_parent"
         android:layout_height="40dp"
+        android:layout_marginTop="5dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
         android:layout_marginBottom="10dp"
         android:focusableInTouchMode="true"
+        android:textSize="20sp"
+        android:text = "euisung@naver.com"
+        android:background="@drawable/border"
+        android:hint="   이메일 Ex) picar@picar.com"
+        android:ems="20"
         android:inputType="textEmailAddress" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
         android:layout_marginStart="55dp"
         android:text="Password"
-        android:textSize="15sp" />
+        android:textColor="@color/black"
+        android:textSize="20dp"
+        android:textStyle="bold" />
     <EditText
+        android:fontFamily="@font/nanumbarungothic"
         android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_marginTop="5dp"
+        android:layout_height="35dp"
         android:layout_marginStart="50dp"
         android:layout_marginEnd="50dp"
+        android:layout_marginBottom="10dp"
+        android:text = "aaaaaaaaa"
         android:focusableInTouchMode="true"
+        android:textSize="20sp"
+        android:background="@drawable/border"
+        android:ems="20"
         android:inputType="textPassword" />
 
     <androidx.appcompat.widget.AppCompatButton
@@ -63,13 +83,13 @@
         android:gravity="center"
         android:layout_marginStart="45dp"
         android:layout_marginEnd="45dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="50dp"
-        android:textColor="#FFFFFF"
-        android:textSize="18sp"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp"
+        android:textColor="@color/black"
+        android:textSize="20sp"
         android:textStyle="bold"
-        android:typeface="monospace"
-        android:background="@drawable/login_btn_shape" />
+        android:typeface="sans"
+        android:background="@drawable/login_btn_on_off" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -78,22 +98,41 @@
         android:weightSum="10">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="117dp"
             android:layout_height="wrap_content"
+            android:layout_weight="2"
             android:gravity="center"
-            android:layout_weight="5"
+            android:text=""
+            android:textColor="@color/fbutton_color_concrete"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="117dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:gravity="center"
             android:text="Find Password"
-            android:textSize="20sp" />
+            android:textColor="@color/fbutton_color_concrete"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:gravity="center"
+            android:text="|"
+            android:textColor="@color/color_palette_4"
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/signupText"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
             android:gravity="center"
-            android:layout_weight="5"
             android:text="Sign Up"
-            android:textSize="20sp"
-            android:textColor="@color/fbutton_color_peter_river"/>
+            android:textColor="@color/color_palette_4"
+            android:textSize="15sp" />
 
     </LinearLayout>
 

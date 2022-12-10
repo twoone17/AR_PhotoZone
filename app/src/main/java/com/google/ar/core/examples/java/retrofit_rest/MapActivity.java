@@ -36,6 +36,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -47,11 +48,6 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/*TODO
- * 현재 위치, 게시글에서 도착지 위치 얻어서 intent MapActivity 로 넘김
- * MapActivity에서 좌표 넣어서 티맵 보내고 결과 파이어베이스에 저장 + ArNav 액티비티 호출
- * 그러면 ArNav 액티비티에서 길안내 시작
- */
 public class MapActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -62,17 +58,25 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     private double start_lat = 37.413003;
     private double start_lng = 127.125923;
-    private double end_lat = 37.4119623;
-    private double end_lng = 127.1284907;
-    // 학교용 테스트 좌표
-//    private double end_lat = 37.4535884;
-//    private double end_lng = 127.1276175;
+    // to 야탑역 4번 출구
+//    private double end_lat = 37.4119623;
+//    private double end_lng = 127.1284907;
+    // to 소미랑
+    private double end_lat = 37.4556093;
+    private double end_lng = 127.1271491;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+
+        start_lat = getIntent().getDoubleExtra("startLatitude", 0);
+        start_lng = getIntent().getDoubleExtra("startLongitude", 0);
+        end_lat = getIntent().getDoubleExtra("endLatitude", 0);
+        end_lng = getIntent().getDoubleExtra("endLongitude", 0);
+
+        Log.e(TAG, "onCreate: " + start_lat + " " + start_lng + " " + end_lat + " " + end_lng);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         tokenInit();
@@ -87,17 +91,6 @@ public class MapActivity extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-//        LatLng start = new LatLng(start_lat, start_lng);
-//        LatLng end = new LatLng(end_lat, end_lng);
-//        API_Key = getResources().getString(R.string.tMapAPIKey);
-//        try {
-//            new RoadTracker(this).execute(String.valueOf(start.longitude), String.valueOf(start.latitude),
-//                    String.valueOf(end.longitude), String.valueOf(end.latitude),
-//                    URLEncoder.encode("출발지", "UTF-8"), URLEncoder.encode("도착지", "UTF-8"),
-//                    API_Key);
-//        } catch (UnsupportedEncodingException e) {
-//            e.printStackTrace();
-//        }
         Log.e(TAG, "onMapReady: " + "지도 준비됨" );
     }
 

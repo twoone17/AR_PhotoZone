@@ -1,5 +1,6 @@
 package com.google.ar.core.examples.java.app.board
 
+import android.app.Activity
 import android.app.Service
 import android.content.ContentValues.TAG
 import android.content.DialogInterface
@@ -14,24 +15,43 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.api.model.RectangularBounds
+import com.google.android.libraries.places.api.model.TypeFilter
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.ar.core.examples.java.app.board.upload.UploadImageViewActivity
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.math.log
 
 class UploadActivity : AppCompatActivity() {
     private var auth = Firebase.auth
     val db = FirebaseFirestore.getInstance()
     var imgURL: String? = null
+    var placeCluster: String? = null
+    lateinit var placeClusterLat : Number
+    lateinit var placeClusterLng : Number
+    val requestCode: Int? = null
+    val AUTOCOMPLETE_REQUEST_CODE = 200;
+
+    private lateinit var uid : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +62,8 @@ class UploadActivity : AppCompatActivity() {
         val close = findViewById<ImageView>(R.id.close)
         var editText = findViewById<EditText>(R.id.description)
         var description = editText.text.toString()
+
+        uid = auth.currentUser?.uid ?: ""
 
         val uploaddata = intent.getSerializableExtra("uploadData") as BoardData?
         println("uploaddata = ${uploaddata}")
@@ -61,6 +83,10 @@ class UploadActivity : AppCompatActivity() {
                 imm.showSoftInput(editText, InputMethodManager.SHOW_IMPLICIT)
             }
         }
+
+        initPlaces()
+        initAutoCompleteFragment()
+        customizeAutoCompleteFragment()
 
         //사진을 고르면 고른 사진을 띄워준다
         if (uploaddata != null) {
@@ -87,17 +113,55 @@ class UploadActivity : AppCompatActivity() {
                 longitude = uploaddata!!.longitude as Number?,
                 altitude = uploaddata!!.altitude as Number?,
                 heading = uploaddata!!.heading as Number?,
-                documentId = documentID
+                likes = 0,
+                documentId = documentID,
+                placeCluster = placeCluster!!,
+                anchorID =  uploaddata!!.anchorID
             )
 
             db.collection("app_board").document(documentID).set(data!!)
                 .addOnSuccessListener { documentReference ->
                     Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                    var setMap = HashMap<String, String>()
+                    setMap.put("postId", documentID)
+                    db.collection("users").document(uid).collection("MyBoard").add(setMap)
                     finish()
                 }
                 .addOnFailureListener { e ->
                     Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
                 }
+            //photoZone에 저장
+            Log.e(TAG, "onCreate: placeclsuter null 전 " + placeCluster)
+
+            val docData = hashMapOf(
+                "imgURL" to uploaddata!!.imgURL!!,
+                "latitude" to placeClusterLat,
+                "longitude" to placeClusterLng,
+                "altitude" to uploaddata!!.altitude as Number?
+            )
+
+            if (placeCluster != null) {
+                // TODO 지금은 업로드 시점에 포토존의 대표 사진을 바꿔버린다. 추후에 좋아요 수에 따라 다시 시정해주는 것으로 변경해야 한다.
+                db.collection("photoZone").document(placeCluster!!)
+                    .set(docData as Map<String, Any>)
+                    .addOnSuccessListener { documentReference ->
+                        Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
+                    }
+                //photozone에서 촬영한 게시글 데이터 업로드
+                db.collection("photoZone").document(placeCluster!!)
+                    .collection("boardList").document(documentID).set(data)
+                    .addOnSuccessListener { documentReference ->
+                        Toast.makeText(this, "게시글 작성완료", Toast.LENGTH_LONG).show()
+                        finish()
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "게시글 작성 실패", Toast.LENGTH_LONG).show()
+                    }
+            }
         }
 
         image_added.setOnClickListener {
@@ -111,8 +175,6 @@ class UploadActivity : AppCompatActivity() {
             finish()
         }
 
-        initPlaces()
-        initAutoCompleteFragment()
 
     }
 
@@ -123,8 +185,9 @@ class UploadActivity : AppCompatActivity() {
     // 여기부터는 내가 하고싶은거 다 할게
 
     private fun initPlaces() {
-        if(!Places.isInitialized()) {
-            Places.initialize(applicationContext, getString(R.string.google_app_id), Locale.KOREA)
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, "AIzaSyCTOfpWJbYOuVJIVgr7SSRXUUx1aQW-I6g")
+            Log.e(TAG, "initPlaces: 접근")
         }
     }
 
@@ -133,14 +196,16 @@ class UploadActivity : AppCompatActivity() {
         val autocompleteFragment =
             supportFragmentManager.findFragmentById(R.id.autocomplete_fragment)
                     as AutocompleteSupportFragment
-
+        Log.e(TAG, "initAutoCompleteFragment: autocompleteFragment")
         // Specify the types of place data to return.
-        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME))
+        autocompleteFragment.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
 
-        // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                Log.i(TAG, "Place: ${place.name}, ${place.id}")
+                requestCode == AUTOCOMPLETE_REQUEST_CODE
+                placeCluster = place.name
+                placeClusterLat = place.latLng.latitude
+                placeClusterLng = place.latLng.longitude
             }
 
             override fun onError(status: Status) {
@@ -148,5 +213,45 @@ class UploadActivity : AppCompatActivity() {
             }
         })
 
+    }
+
+    private fun customizeAutoCompleteFragment() {
+        // Create a new token for the autocomplete session. Pass this to FindAutocompletePredictionsRequest,
+        // and once again when the user makes a selection (for example when calling fetchPlace()).
+
+        Log.e(TAG, "customizeAutoCompleteFragment: 접근", )
+        val token = AutocompleteSessionToken.newInstance()
+
+        // Create a RectangularBounds object.
+//        val bounds = RectangularBounds.newInstance(
+//            LatLng(37.449860, 127.100154),
+//            LatLng(37.458019, 151.177003)
+//        )
+        // Use the builder to create a FindAutocompletePredictionsRequest.
+        val request =
+            FindAutocompletePredictionsRequest.builder()
+                // Call either setLocationBias() OR setLocationRestriction().
+//                .setLocationBias(bounds)
+                //.setLocationRestriction(bounds)
+                .setOrigin(LatLng(37.450655, 127.129188))
+                .setCountries("kr")
+                .setTypesFilter(listOf(TypeFilter.ADDRESS.toString()))
+                .setSessionToken(token)
+                .setQuery("가천")
+                .build()
+        var placesClient = Places.createClient(this);
+        placesClient.findAutocompletePredictions(request)
+            .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                Log.e(TAG, "customizeAutoCompleteFragment: prediction.placeId"  )
+                for (prediction in response.autocompletePredictions) {
+                    Log.e(TAG, "customizeAutoCompleteFragment: prediction.placeId"+ prediction.placeId )
+                    Log.i(TAG, prediction.placeId)
+                    Log.i(TAG, prediction.getPrimaryText(null).toString())
+                }
+            }.addOnFailureListener { exception: Exception? ->
+                if (exception is ApiException) {
+                    Log.e(TAG, "Place not found: " + exception.statusCode)
+                }
+            }
     }
 }

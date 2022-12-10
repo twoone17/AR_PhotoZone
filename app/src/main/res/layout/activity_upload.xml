@@ -64,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
-            android:hint="문구 입력..."
+            android:hint="    how do you feel?"
             android:id="@+id/description"
             android:maxLines="5"/>
 

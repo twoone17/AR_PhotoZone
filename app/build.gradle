@@ -3,6 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'//for data-binding error
+
 android {
     compileSdkVersion 33
     defaultConfig {
@@ -37,6 +38,7 @@ android {
 
 dependencies {
     // ARCore (Google Play Services for AR) library.
+    implementation 'com.android.databinding:viewbinding:4.0.1'
     implementation 'com.google.ar:core:1.32.0'
     implementation 'com.google.android.gms:play-services-location:19.0.1'
     implementation platform('com.google.firebase:firebase-bom:30.3.2')
@@ -76,7 +78,11 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils:2.4.0'
     implementation 'com.google.maps.android:android-maps-utils:2.4.0'
 
+    implementation 'com.royrodriguez:transitionbutton:0.2.0' //로그인 싱기한 버튼
+    implementation 'com.github.florent37:materialtextfield:1.0.7' //로그인 뾰로롱 editText
+
 }
+
 //for data-binding error
 kapt {
     generateStubs = true
