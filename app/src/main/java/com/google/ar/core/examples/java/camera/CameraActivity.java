@@ -68,7 +68,7 @@ public class CameraActivity extends AppCompatActivity {
     public final void control() {
 
         ImageView load = (ImageView) this.findViewById(R.id.profile);
-
+//
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
 
