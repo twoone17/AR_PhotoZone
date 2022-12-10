@@ -52,17 +52,16 @@
       android:layout_height="wrap_content"
       android:layout_marginStart="10dp"
       android:layout_toEndOf="@id/set_location"
-      android:text="사진 촬영"
-      android:visibility="invisible"/>
+      android:text="사진 촬영" />
 
-  <TextView
-      android:id="@+id/stored_location"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_alignParentRight="true"
-      android:layout_marginRight="2dp"
-      android:text=""
-      android:textSize="30dp" />
+<!--  <TextView-->
+<!--      android:id="@+id/stored_location"-->
+<!--      android:layout_width="wrap_content"-->
+<!--      android:layout_height="wrap_content"-->
+<!--      android:layout_alignParentRight="true"-->
+<!--      android:layout_marginRight="2dp"-->
+<!--      android:text=""-->
+<!--      android:textSize="30dp" />-->
 
   <Button
       android:id="@+id/set_anchor_button"

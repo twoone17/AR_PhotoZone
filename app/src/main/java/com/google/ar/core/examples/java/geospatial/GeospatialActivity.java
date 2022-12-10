@@ -246,9 +246,9 @@ public class GeospatialActivity extends AppCompatActivity
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
         setLocationButton = findViewById(R.id.set_location);
 
-        //임시로 textview 안보이게 함 (for UI)
-        geospatialPoseTextView.setVisibility(View.INVISIBLE);
-        statusTextView.setVisibility(View.INVISIBLE);
+//        //임시로 textview 안보이게 함 (for UI)
+//        geospatialPoseTextView.setVisibility(View.INVISIBLE);
+//        statusTextView.setVisibility(View.INVISIBLE);
 
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
@@ -524,46 +524,14 @@ public class GeospatialActivity extends AppCompatActivity
             updateGeospatialState(earth);
         }
         setLocationButton = findViewById(R.id.set_location);
-        stroedLocationTextView = findViewById(R.id.stored_location);
+/*        stroedLocationTextView = findViewById(R.id.stored_location);*/
         cameraGeospatial = findViewById(R.id.camera_geospatial);
 
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
 
-        timeOutCount--;
+
         String getUid = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
-        if (timeOutCount == 0) {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-//            if(anchorID!="") {
-            //boardData의 앵커 아이디를 받아와서 해당 앵커만 anchors에 저장한다
-            DocumentReference docRef = db.collection("anchor").document(anchorID);
 
-            docRef.get().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    Map<String, Object> data = document.getData();
-
-                    Anchor anchor =
-                            earth.createAnchor(
-                                    (Double) data.get("latitude"),
-                                    (Double) data.get("longitude"),
-                                    (Double) data.get("altitude"),
-                                    0.0f,
-                                    (float) Math.sin(20 / 2),
-                                    0.0f,
-                                    (float) Math.cos(20 / 2));
-                    anchors.add(anchor);
-//                    anchorBoolean = true;
-
-                    Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
-                    Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
-                    Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
-                }
-
-
-            });
-
-        }
-        Log.e(TAG, "onDrawFrame: anchorBoolean 2"+anchorBoolean );
         GeospatialPose geospatialPose2 = earth.getCameraGeospatialPose();
 
         setLocationButton.setOnClickListener(new View.OnClickListener() {
@@ -577,11 +545,45 @@ public class GeospatialActivity extends AppCompatActivity
 //                        geospatialPose2.getHeading(),
 //                        geospatialPose2.getHeadingAccuracy());
 
-                stroedLocationTextView.setText("저장되었습니다 ! ");
+//                stroedLocationTextView.setText("저장되었습니다 ! ");
+
+                FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                //boardData의 앵커 아이디를 받아와서 해당 앵커만 anchors에 저장한다
+                DocumentReference docRef = db.collection("anchor").document(anchorID);
+
+                docRef.get().addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        Map<String, Object> data = document.getData();
+
+                        Anchor anchor =
+                                earth.createAnchor(
+                                        (Double) data.get("latitude"),
+                                        (Double) data.get("longitude"),
+                                        (Double) data.get("altitude"),
+                                        0.0f,
+                                        (float) Math.sin(20 / 2),
+                                        0.0f,
+                                        (float) Math.cos(20 / 2));
+                        anchors.add(anchor);
+                    anchorBoolean = true;
+
+                        Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
+                        Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
+                        Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
+                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("latitude"));
+                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("longitude"));
+                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("altitude"));
+                    }
+
+
+                });
+
+                anchorBoolean = true;
                 handleSetAnchorButton();
 
                 //기존 저장한 앵커를 파이어베이스에서 불러온다
-                FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 //                db.collectionGroup("anchor").get().
 //                        addOnCompleteListener(task -> {
@@ -663,7 +665,7 @@ public class GeospatialActivity extends AppCompatActivity
         }
 
         // -- Draw background
-        /**
+        /**`
          * 보여지는 것
          */
 
@@ -672,6 +674,7 @@ public class GeospatialActivity extends AppCompatActivity
             // drawing possible leftover data from previous sessions if the texture is reused.
             backgroundRenderer.drawBackground(render);
         }
+
 
         // -- Draw virtual objects
 
@@ -685,11 +688,11 @@ public class GeospatialActivity extends AppCompatActivity
         render.clear(virtualSceneFramebuffer, 0f, 0f, 0f, 0f);
 
         Iterator<Anchor> iterator = anchors.iterator();
-        Log.e(TAG, "onDrawFrame: anchorBoolean 3" + anchorBoolean );
-        Log.e(TAG, "onDrawFrame:avoidLoopAnchor" + avoidLoopAnchor );
         if (anchorBoolean) {
+            Log.e(TAG, "onDrawFrame: if문 접근");
             for (Anchor anchor : anchors) {
-
+                Log.e(TAG, "onDrawFrame: 앵커한번");
+                Log.e(TAG, "onDrawFrame: 앵커한번" + anchor);
                 // Get the current pose of an Anchor in world space. The Anchor pose is updated
                 // during calls to session.update() as ARCore refines its estimate of the world.
                 anchor.getPose().toMatrix(modelMatrix, 0);
@@ -702,12 +705,11 @@ public class GeospatialActivity extends AppCompatActivity
                 virtualObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
 
                 render.draw(virtualObjectMesh, virtualObjectShader, virtualSceneFramebuffer);
-
+//                avoidLoopAnchor = false;
             }
 
             // Compose the virtual scene with the background.
             backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
-            avoidLoopAnchor = false;
         }
     }
     //camera가 나옴
@@ -1040,16 +1042,16 @@ public class GeospatialActivity extends AppCompatActivity
 //        AnchorFirebase anchorFirebase = new AnchorFirebase(latitude, longitude, altitude, angleRadians);
 //        db.collection("anchor").document(AnchorDate).set(anchorFirebase);
 
-        Anchor anchor =
-                earth.createAnchor(
-                        latitude,
-                        longitude,
-                        altitude,
-                        0.0f,
-                        (float) Math.sin(angleRadians / 2),
-                        0.0f,
-                        (float) Math.cos(angleRadians / 2));
-        anchors.add(anchor);
+//        Anchor anchor =
+//                earth.createAnchor(
+//                        latitude,
+//                        longitude,
+//                        altitude,
+//                        0.0f,
+//                        (float) Math.sin(angleRadians / 2),
+//                        0.0f,
+//                        (float) Math.cos(angleRadians / 2));
+//        anchors.add(anchor);
 
         anchorBoolean = true;
 
