@@ -50,12 +50,17 @@ import android.util.DisplayMetrics
 import android.view.Gravity
 import android.widget.Button
 import android.widget.TextView
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.tasks.*
 import com.google.ar.core.examples.java.app.board.BoardClickActivity
 import com.google.ar.core.examples.java.app.board.BoardData
+import com.google.ar.core.examples.java.app.profile.ProfileAdapter
 import com.google.ar.core.examples.java.app.profile.bookmark.BookmarkActivity
 import com.google.ar.core.examples.java.retrofit_rest.MapActivity
+import com.google.firebase.auth.ktx.auth
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.android.synthetic.main.fragment_profile.*
 
@@ -74,7 +79,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
     var fusedLocationProviderClient: FusedLocationProviderClient? = null
     var REQEST_CODE = 101
     var mLocationManager: LocationManager? = null
-
+    private lateinit var profileAdapter : ProfileAdapter
     var imgURL: String?=null
     var imgURL2: String?=null
     var lat: Double? =0.0
@@ -179,20 +184,21 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 photozoneDetail.text = "위도 : " + p0.position.latitude.toString().substring(0 until 6) + "    " +
                          "경도 : " + p0.position.longitude.toString().substring(0 until 6)
 
+                profileAdapter = ProfileAdapter(requireContext())
+                val recyclerView: RecyclerView = customDialog.recycler_mypost
 
-                db.collection("photoZone").document(p0.title!!).collection("boardList").get()
-                    .addOnSuccessListener { document ->
-                        if (document != null) {
-                            Log.d(TAG, "DocumentSnapshot data: ${document.data}")
-                            imgURL= document.data?.get("imgURL")?.toString()
-//                            likes = document.data?.get("likes")?.toString(),
-                        } else {
-                            Log.d(TAG, "No such document")
-                        }
+                profileAdapter.setOnItemClickListener(object : ProfileAdapter.OnItemClickListener{
+                    override fun onItemClick(view: View, boardData: BoardData, position: Int) {
+                        Intent(requireContext(), BoardClickActivity::class.java).apply {
+                            putExtra("boardData", boardData)
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }.run { startActivity(this) }
                     }
-                    .addOnFailureListener { exception ->
-                        Log.d(TAG, "get failed with ", exception)
-                    }
+                })
+
+                recyclerView.adapter = profileAdapter
+                val gm = GridLayoutManager(requireContext(), 2)
+                recyclerView.layoutManager = gm
 
                 db.collection("photoZone").document(p0.title!!).collection("boardList").get()
                     .addOnSuccessListener { result ->
@@ -208,6 +214,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                                         documentId = post.id
                                     )
                                 )
+                                profileAdapter.datas = datas
+                                profileAdapter.notifyDataSetChanged()
 
                             }
                         }
@@ -236,6 +244,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                         ViewGroup.LayoutParams.MATCH_PARENT,
                         ViewGroup.LayoutParams.WRAP_CONTENT
                     )
+
+
 
                     // Custom Dialog 위치 조절
                     customDialog.window?.setGravity(Gravity.TOP)
