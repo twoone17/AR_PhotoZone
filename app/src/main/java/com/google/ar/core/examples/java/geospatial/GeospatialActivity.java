@@ -107,6 +107,8 @@ import java.util.concurrent.TimeUnit;
 public class GeospatialActivity extends AppCompatActivity
         implements SampleRender.Renderer, NoticeDialogListener {
 
+    //!!
+    public static Context mContext;
     private static final String TAG = GeospatialActivity.class.getSimpleName();
 
     private static final String SHARED_PREFERENCES_SAVED_ANCHORS = "SHARED_PREFERENCES_SAVED_ANCHORS";
@@ -126,7 +128,7 @@ public class GeospatialActivity extends AppCompatActivity
     // revert back to the LOCALIZING state.
     private static final double LOCALIZED_HORIZONTAL_ACCURACY_HYSTERESIS_METERS = 10;
     private static final double LOCALIZED_HEADING_ACCURACY_HYSTERESIS_DEGREES = 10;
-
+    //
     private static final int LOCALIZING_TIMEOUT_SECONDS = 180;
     private static final int MAXIMUM_ANCHORS = 10;
     private boolean CONCURRENT_PREVENT_FLAG = false;
@@ -214,7 +216,7 @@ public class GeospatialActivity extends AppCompatActivity
     // Virtual object (ARCore geospatial)
     private Mesh virtualObjectMesh;
     private Shader virtualObjectShader;
-    private BoardData boardData;
+    private BoardData boradData;
     private List<Anchor> anchors = new ArrayList<>();
     private String anchorID;
     // Temporary matrix allocated here to reduce number of allocations for each frame.
@@ -224,18 +226,22 @@ public class GeospatialActivity extends AppCompatActivity
     private final float[] modelViewMatrix = new float[16]; // view x model
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
 
-    private Intent intent;
+    BoardData boardData;
+    String getImgURL;
     private String documentID;
     private boolean anchorBoolean = false;
     boolean avoidLoopAnchor = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedPreferences = getPreferences(Context.MODE_PRIVATE);
 
         //게시글에 있는 카메라를 클릭시 boardData 전달
-        intent = getIntent();
+        Intent intent = getIntent();
         boardData = (BoardData) intent.getSerializableExtra("boardData");
+        getImgURL = (String) intent.getSerializableExtra("imgURL");
+
         documentID = boardData.getDocumentId();
         anchorID = boardData.getAnchorID();
 
@@ -247,9 +253,15 @@ public class GeospatialActivity extends AppCompatActivity
         clearAnchorsButton = findViewById(R.id.clear_anchors_button);
         setLocationButton = findViewById(R.id.set_location);
 
+
+        mContext = this;
+
+
+
 //        //임시로 textview 안보이게 함 (for UI)
 //        geospatialPoseTextView.setVisibility(View.INVISIBLE);
 //        statusTextView.setVisibility(View.INVISIBLE);
+
 
         setAnchorButton.setOnClickListener(view -> handleSetAnchorButton());
         clearAnchorsButton.setOnClickListener(view -> handleClearAnchorsButton());
@@ -264,7 +276,7 @@ public class GeospatialActivity extends AppCompatActivity
 
         System.out.println("boardData = " + boardData);
 
-        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
+//        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
 
 
     }
@@ -450,11 +462,11 @@ public class GeospatialActivity extends AppCompatActivity
             Texture virtualObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/heart_object_baked_just_color.png",
+                            "models/map_pointer_baked.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/heart_object.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/map_pointer_v3.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
@@ -529,7 +541,7 @@ public class GeospatialActivity extends AppCompatActivity
         cameraGeospatial = findViewById(R.id.camera_geospatial);
 
         GeospatialPose geospatialPose = earth.getCameraGeospatialPose();
-//
+
 
         String getUid = "2BXzuCaFIYXf7Dp06sHMCrTNSH43";
 
@@ -558,49 +570,59 @@ public class GeospatialActivity extends AppCompatActivity
                         DocumentSnapshot document = task.getResult();
                         Map<String, Object> data = document.getData();
 
-                        Anchor anchor =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude"),
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
+//                        Anchor anchor =
+//                                earth.createAnchor(
+//                                        (Double) data.get("latitude"),
+//                                        (Double) data.get("longitude"),
+//                                        (Double) data.get("altitude"),
+//                                        0.0f,
+//                                        (float) Math.sin(20 / 2),
+//                                        0.0f,
+//                                        (float) Math.cos(20 / 2));
+//
+//
+//                        Anchor anchor2 =
+//                                earth.createAnchor(
+//                                        (Double) data.get("latitude"),
+//                                        (Double) data.get("longitude"),
+//                                        (Double) data.get("altitude") + 1,
+//                                        0.0f,
+//                                        (float) Math.sin(20 / 2),
+//                                        0.0f,
+//                                        (float) Math.cos(20 / 2));
+//
+//
+//
+//                        Anchor anchor3 =
+//                                earth.createAnchor(
+//                                        (Double) data.get("latitude"),
+//                                        (Double) data.get("longitude"),
+//                                        (Double) data.get("altitude") -1,
+//                                        0.0f,
+//                                        (float) Math.sin(20 / 2),
+//                                        0.0f,
+//                                        (float) Math.cos(20 / 2));
 
+                        for(int i = 0 ; i< 50 ; i++)
+                        {
+                            Anchor anchor =
+                                    earth.createAnchor(
+                                            (Double) data.get("latitude"),
+                                            (Double) data.get("longitude"),
+                                            (Double) data.get("altitude") -5 +i*0.5,
+                                            0.0f,
+                                            (float) Math.sin(20 / 2),
+                                            0.0f,
+                                            (float) Math.cos(20 / 2));
 
-                        Anchor anchor2 =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude") + 1,
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
+                            anchors.add(anchor);
+                        }
 
-
-
-                        Anchor anchor3 =
-                                earth.createAnchor(
-                                        (Double) data.get("latitude"),
-                                        (Double) data.get("longitude"),
-                                        (Double) data.get("altitude") -1,
-                                        0.0f,
-                                        (float) Math.sin(20 / 2),
-                                        0.0f,
-                                        (float) Math.cos(20 / 2));
-                        anchors.add(anchor);
-                        anchors.add(anchor2);
-                        anchors.add(anchor3);
+//                        anchors.add(anchor);
+//                        anchors.add(anchor2);
+//                        anchors.add(anchor3);
                         anchorBoolean = true;
 
-                        Log.e(TAG, "onDrawFrame: anchor 0" + anchors);
-                        Log.e(TAG, "onDrawFrame: anchor to string0 " + anchors.toString());
-                        Log.e(TAG, "onDrawFrame: anchorBoolean 1 "+anchorBoolean );
-                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("latitude"));
-                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("longitude"));
-                        Log.d(TAG, "onDrawFrame:  (Double) data.get(\"latitude\")," +  (Double) data.get("altitude"));
                     }
 
 
@@ -758,12 +780,28 @@ public class GeospatialActivity extends AppCompatActivity
 
                 Log.e(TAG, "onClick: storedGeolocation_Photo" + storedGeolocation_Photo.toString());
 
-                intent = new Intent(getApplicationContext(), CameraActivity.class);
-                intent.putExtra("boardData",boardData);
-                startActivityForResult(intent, 101);
+                Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
+                intent.putExtra("boardData", boardData);
+                intent.putExtra("imgURL", getImgURL);
+                startActivity(intent);
+
             }
         });
+
     }
+//
+//!!!
+//    public void savePhoto(){
+//        if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//                != PackageManager.PERMISSION_GRANTED) {
+//            Log.e(TAG, "onActivityResult: 권한접근");
+//            // Should we show an explanation?
+//            if (shouldShowRequestPermissionRationale(
+//                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+//                // Explain to the user why we need to read the contacts
+//                Log.e(TAG, "onActivityResult: shouldShowRequestPermissionRationale");
+//            }
+//        }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -882,6 +920,13 @@ public class GeospatialActivity extends AppCompatActivity
 
     }
 
+//    public Uri getImageUri(Context context, Bitmap inImage) {
+//        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+//        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+//        String path = MediaStore.Images.Media.insertImage(context.getContentResolver(), inImage, "Title", null);
+//        return Uri.parse(path);
+//    }
+
     /**
      * Configures the session with feature settings.
      */
@@ -960,7 +1005,7 @@ public class GeospatialActivity extends AppCompatActivity
         }
 
         updateGeospatialPoseText(geospatialPose);
-    }w
+    }
 //
 
     /**

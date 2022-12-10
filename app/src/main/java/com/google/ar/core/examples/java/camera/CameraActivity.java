@@ -1,13 +1,16 @@
 package com.google.ar.core.examples.java.camera;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -36,24 +39,24 @@ public class CameraActivity extends AppCompatActivity {
     private MediaScanner ms = MediaScanner.newInstance(CameraActivity.this);
 
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
-    Intent intent, intentBitmap;
-    BoardData boardData;
-    String getImgURL;
+    private Intent intent;
+    private BoardData boardData;
+    private String getImgURL;
+    private Button button;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_camera);
 
-        GeospatialActivity context;
         intent = getIntent();
         boardData = (BoardData) intent.getSerializableExtra("boardData");
-        getImgURL = (String) intent.getSerializableExtra("imgURL");
+        getImgURL = boardData.getImgURL();
 
         this.control();
         this.surfaceView = (CameraSurfaceView) this.findViewById(R.id.surfaceview);
 
-        Button button = (Button) this.findViewById(R.id.capture);
-        button.setOnClickListener(new View.OnClickListener() {
+        button = (Button) this.findViewById(R.id.capture);
+        button.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -77,8 +80,18 @@ public class CameraActivity extends AppCompatActivity {
     }
 
     public void capture() {
-        surfaceView.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
+        surfaceView.camera.autoFocus(mAutoFocus);
     }
+
+    // 포커싱
+    Camera.AutoFocusCallback mAutoFocus = new Camera.AutoFocusCallback() {
+        public void onAutoFocus(boolean success, Camera camera) {
+
+            button.setEnabled(success);
+            surfaceView.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
+
+        }
+    };
 
     private Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
         public void onShutter() {
@@ -112,14 +125,22 @@ public class CameraActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
             byte[] currentData = stream.toByteArray();
 
-            //파일로 저장
+            //파일로 저장 (저장 1)
             new saveImg().execute(currentData);
 
-            intentBitmap = new Intent();
-            intentBitmap.putExtra("bitmap",bitmap);
-            ((GeospatialActivity)GeospatialActivity.mContext).savePhoto();
 
-            camera.startPreview();
+            //bitmap을 uri 로 변환
+            String path = MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, "Title", null);
+            Uri imgURL = Uri.parse(path);
+
+            //다시 GeospatialActivity로 (저장 2)
+            intent = new Intent();
+            intent.putExtra("imgURL",imgURL);
+            setResult(RESULT_OK, intent);
+
+            finish();
+
+            //camera.startPreview();
         }
     };
 
@@ -130,7 +151,7 @@ public class CameraActivity extends AppCompatActivity {
             FileOutputStream outStream = null;
 
             try {
-                String path_name = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString() + File.separator + "Pic-AR";
+                String path_name = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString() + File.separator + "PicAR";
                 File path = new File(path_name);
                 if (!path.exists()) {
                     path.mkdirs();
