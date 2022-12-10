@@ -448,7 +448,7 @@ public class GeospatialActivity extends AppCompatActivity
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/cube.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/heart_object_obj.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
