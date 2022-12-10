@@ -344,7 +344,7 @@ public class ArNav extends AppCompatActivity
             Texture likesObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/heart_object_baked_colored.png",
+                            "models/heart_object_baked_just_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
@@ -469,24 +469,24 @@ public class ArNav extends AppCompatActivity
             for (Iterator<Anchor> iterator = anchors.iterator(); iterator.hasNext(); ) {
                 iterator.next().getPose().toMatrix(modelMatrix, 0);
 
-//                if(counter < distinguisher) {
-//                    // 이 분기는 안내 객체에 대한 분기이다.
-//                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-//                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-//                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-//                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
-//                } else {
-//                    // 이 분기는 좋아요 객체에 대한 분기이다.
-//                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-//                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-//                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-//                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
-//                }
-//                counter++;
-                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-                likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
-                render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
+                if(counter < distinguisher) {
+                    // 이 분기는 안내 객체에 대한 분기이다.
+                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                    navigationObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                    render.draw(navigationObjectMesh, navigationObjectShader, virtualSceneFramebuffer);
+                } else {
+                    // 이 분기는 좋아요 객체에 대한 분기이다.
+                    Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+                    Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+                    likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+                    render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
+                }
+                counter++;
+//                Matrix.multiplyMM(modelViewMatrix, 0, viewMatrix, 0, modelMatrix, 0);
+//                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+//                likesObjectShader.setMat4("u_ModelViewProjection", modelViewProjectionMatrix);
+//                render.draw(likesObjectMesh, likesObjectShader, virtualSceneFramebuffer);
             }
         }
         backgroundRenderer.drawVirtualScene(render, virtualSceneFramebuffer, Z_NEAR, Z_FAR);
@@ -660,7 +660,7 @@ public class ArNav extends AppCompatActivity
                         altitude,
                         45.0f,
 //                        (float) Math.sin(angleRadians),
-                        -140.0f,
+                        -120.0f,
                         45.0f,
                         (float) Math.cos(angleRadians / 2));
         anchors.add(anchor);

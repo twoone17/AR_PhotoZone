@@ -31,7 +31,8 @@ class Fragment1 : Fragment() {
         // Inflate the layout for this fragment
 
         navButton.setOnClickListener{
-            Intent(context, ArNav::class.java).apply {
+            Intent(context, ArLikes::class.java).apply {
+                putExtra("photoZoneName", "야탑역 4번출구")
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }.run { startActivity(this) }
 

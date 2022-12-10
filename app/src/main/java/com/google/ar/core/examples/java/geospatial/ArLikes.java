@@ -2,6 +2,7 @@ package com.google.ar.core.examples.java.geospatial;
 
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
@@ -52,12 +53,16 @@ import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationExceptio
 import com.google.ar.core.exceptions.UnsupportedConfigurationException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -138,6 +143,8 @@ public class ArLikes extends AppCompatActivity
     private final float[] modelViewProjectionMatrix = new float[16]; // projection x view x model
 
 
+    private String photoZoneName;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,9 +169,8 @@ public class ArLikes extends AppCompatActivity
         installRequested = false;
         clearedAnchorsAmount = null;
 
-        auth.signInWithEmailAndPassword("oldstyle4@naver.com", "2580as2580@");
-
-
+        Intent intent = getIntent();
+        photoZoneName = intent.getStringExtra("photoZoneName");
     }
 
     @Override
@@ -326,11 +332,11 @@ public class ArLikes extends AppCompatActivity
             Texture likesObjectTexture =
                     Texture.createFromAsset(
                             render,
-                            "models/color_heart_baked.png",
+                            "models/heart_object_baked_just_color.png",
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.SRGB);
 
-            likesObjectMesh = Mesh.createFromAsset(render, "models/heart.obj");
+            likesObjectMesh = Mesh.createFromAsset(render, "models/heart_object_obj.obj");
             likesObjectShader =
                     Shader.createFromAssets(
                             render,
@@ -543,37 +549,40 @@ public class ArLikes extends AppCompatActivity
             return;
         }
 
-        FirebaseUser user = auth.getCurrentUser();
+        CollectionReference photoZoneLikesRef = db.collection("photoZone").document(photoZoneName)
+                .collection("userLikes");
 
-        DocumentReference likesCoordsRef = db.collection("users").document(user.getUid()).collection("arLikesTest").document(user.getUid());
-        likesCoordsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        photoZoneLikesRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            Double latitude;
+            Double longitude;
+            Double altitude;
+            Double headingDegrees;
             @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful()) {
-                    DocumentSnapshot ds = task.getResult();
-                    if(ds.exists()) {
-                        List<Double> latitudes = (List<Double>) ds.get("latitudes");
-                        List<Double> longitudes = (List<Double>) ds.get("longitudes");
-                        for(int i=0; i<latitudes.size(); i++) {
-                            createAnchor(earth, latitudes.get(i), longitudes.get(i), 55, 100);
-                            storeAnchorParameters(latitudes.get(i), longitudes.get(i), 55, 100);
-                        }
+                    for (QueryDocumentSnapshot results : task.getResult()) {
+                        latitude = (Double) results.get("latitude");
+                        longitude = (Double) results.get("longitude");
+                        altitude = (Double) results.get("altitude");
+                        headingDegrees = (Double) results.get("headingDegrees");
+                        createAnchor(earth, latitude, longitude, altitude, headingDegrees);
                     }
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "onFailure: " + e);
+                Log.e(TAG, "onFailure: " + e );
             }
         });
-        runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
-        if (clearedAnchorsAmount != null) {
-            clearedAnchorsAmount = null;
-        }
+
     }
 
     private void handleSetLikesButton() {
+
+        // 좋아요 객체는 단 하나만 추가됨
+        // 화면에서는 여러개가 뜨지만 다시 접속할 경우 마지막으로 생성한 단 하나의 좋아요만 표시됨
+
         Earth earth = session.getEarth();
         if (earth == null || earth.getTrackingState() != TrackingState.TRACKING) {
             return;
@@ -583,12 +592,34 @@ public class ArLikes extends AppCompatActivity
         double longitude = geospatialPose.getLongitude();
         double altitude = geospatialPose.getAltitude();
         double headingDegrees = geospatialPose.getHeading();
-        createAnchor(earth, latitude, longitude, altitude, headingDegrees);
-        storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
-        runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
-        if (clearedAnchorsAmount != null) {
-            clearedAnchorsAmount = null;
-        }
+
+        DocumentReference photoZoneLikesRef = db.collection("photoZone").document(photoZoneName)
+                .collection("userLikes").document(auth.getCurrentUser().getUid());
+
+        HashMap<String, Double> DBInput = new HashMap<>();
+        DBInput.put("latitude", latitude);
+        DBInput.put("longitude", longitude);
+        DBInput.put("altitude", altitude);
+        DBInput.put("headingDegrees", headingDegrees);
+        photoZoneLikesRef.set(DBInput).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    createAnchor(earth, latitude, longitude, altitude, headingDegrees);
+                    storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
+                    runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
+                    if (clearedAnchorsAmount != null) {
+                        clearedAnchorsAmount = null;
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e(TAG, "onFailure: " + e);
+            }
+        });
+
     }
 
 
