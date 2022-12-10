@@ -32,6 +32,7 @@ class BoardClickActivity : AppCompatActivity() {
     private var firebaseStore: FirebaseStorage? = null
     private var storageReference: StorageReference? = null
 
+    private lateinit var userName : String
 
     var liked = true
     var saved = true
@@ -77,9 +78,15 @@ class BoardClickActivity : AppCompatActivity() {
     // 인텐트로 넘어온 데이터를 뷰에 뿌려주는 함수
     private fun initBoardWithIntentData(boardData: BoardData) {
             Glide.with(this).load(boardData.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(post_image)
-            username.text = boardData.userId
+            db.collection("users").document(boardData.userId).get().addOnCompleteListener { task ->
+                if(task.isSuccessful) {
+                    val document = task.result
+                    userName = document.get("userName").toString()
+                    username.text = userName
+                    publisher.text = userName
+                }
+            }
             description.text = boardData.description
-            publisher.text = boardData.userId
             var likeString = boardData.likes.toString() + " likes"
             likes.text = likeString
 

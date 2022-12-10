@@ -31,6 +31,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
+                    android:text="사용자 명"
                     android:textColor="@color/color_palette_4_light1"
                     android:textSize="15sp"
                     android:textStyle="bold" />
@@ -123,8 +124,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:textSize = "10sp"
                     android:textColor="@color/color_palette_4_light1"
+                    android:textSize="10sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -133,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:textColor="@color/color_palette_4_light1"
-                    android:textSize = "7sp" />
+                    android:textSize="7sp" />
                 <!--android:textColor="@color/colorPrimaryDark"-->
             </LinearLayout>
 
@@ -144,10 +145,10 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="10dp"
-                android:textSize = "12sp"
                 android:text="댓글 더보기"
                 android:textColor="@color/color_palette_2_1"
-                android:textStyle="bold"/>
+                android:textSize="12sp"
+                android:textStyle="bold" />
 
 
         </LinearLayout>
