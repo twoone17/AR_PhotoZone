@@ -14,6 +14,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,7 +43,7 @@ public class CameraActivity extends AppCompatActivity {
     private Intent intent;
     private BoardData boardData;
     private String getImgURL;
-    private Button button;
+    private ImageButton button;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +56,7 @@ public class CameraActivity extends AppCompatActivity {
         this.control();
         this.surfaceView = (CameraSurfaceView) this.findViewById(R.id.surfaceview);
 
-        button = (Button) this.findViewById(R.id.capture);
+        button = (ImageButton) this.findViewById(R.id.capture);
         button.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,9 +137,10 @@ public class CameraActivity extends AppCompatActivity {
             Uri imgURL = Uri.parse(path);
 
             //다시 GeospatialActivity로 (저장 2)
-            intent = new Intent();
+            intent = new Intent(getApplicationContext(), GeospatialActivity.class);
             intent.putExtra("imgURL",imgURL);
-            setResult(RESULT_OK, intent);
+            Log.e(TAG, "onPictureTaken: imgURL0"+ imgURL );
+            setResult(101, intent);
 
             finish();
 
