@@ -48,6 +48,9 @@
         android:usesCleartextTraffic="false"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
+            android:name="com.google.ar.core.examples.java.app.profile.PhotozoneLike.PhotozoneLikeActivity"
+            android:exported="true" />
+        <activity
             android:name="com.google.ar.core.examples.java.app.map.MapLocationActivity"
             android:exported="true" /> <!-- 구글맵 API 키 -->
         <!-- API 키 노출때문에 string xml 안에 정의해두고 해당 파일은 커밋하지 않았습니다. 추후에 공유하도록 하겠습니다! -->
@@ -59,10 +62,11 @@
             android:name="com.google.ar.core.examples.java.app.login.LoginActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
-             <intent-filter>
-             <action android:name="android.intent.action.MAIN" />
-             <category android:name="android.intent.category.LAUNCHER" />
-             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name="com.google.ar.core.examples.java.app.login.SignupActivity"
@@ -113,10 +117,11 @@
             android:name="com.google.ar.core.examples.java.app.HelloActivity"
             android:exported="true"
             android:theme="@style/AppTheme">
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
 
         <meta-data

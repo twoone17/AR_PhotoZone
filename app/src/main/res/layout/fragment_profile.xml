@@ -107,7 +107,7 @@
                             android:src="@drawable/bookmark_btn" />
 
                         <ImageButton
-                            android:id="@+id/Closetbutton"
+                            android:id="@+id/likedPhotozoneButton"
                             android:layout_width="30dp"
                             android:layout_height="30dp"
                             android:layout_marginLeft="20dp"
