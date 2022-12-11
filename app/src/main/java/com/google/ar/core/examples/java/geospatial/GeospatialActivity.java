@@ -200,7 +200,7 @@ public class GeospatialActivity extends AppCompatActivity
     private StoredGeolocation storedGeolocation_Photo;
     private Button setLocationButton;
     private TextView stroedLocationTextView;
-    private Button cameraGeospatial;
+    private ImageButton cameraGeospatial;
     private double location;
 
     FirebaseAuth firebaseAuth;
@@ -603,13 +603,13 @@ public class GeospatialActivity extends AppCompatActivity
 //                                        0.0f,
 //                                        (float) Math.cos(20 / 2));
 
-                        for(int i = 0 ; i< 50 ; i++)
+                        for(int i = 0 ; i< 5 ; i++)
                         {
                             Anchor anchor =
                                     earth.createAnchor(
                                             (Double) data.get("latitude"),
                                             (Double) data.get("longitude"),
-                                            (Double) data.get("altitude") -5 +i*0.5,
+                                            (Double) data.get("altitude") -5 +i,
                                             0.0f,
                                             (float) Math.sin(20 / 2),
                                             0.0f,
@@ -783,7 +783,7 @@ public class GeospatialActivity extends AppCompatActivity
                 Intent intent = new Intent(getApplicationContext(), CameraActivity.class);
                 intent.putExtra("boardData", boardData);
                 intent.putExtra("imgURL", getImgURL);
-                startActivity(intent);
+                startActivityForResult(intent, 101);
 
             }
         });
@@ -806,11 +806,13 @@ public class GeospatialActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Match the request 'pic id with requestCode
-
+        if (resultCode == 101) {
+            Log.d(TAG, "onActivityResult: 권한접근0");
+        }
         Log.d(TAG, "onActivityResult: 권한접근1");
         switch(requestCode) {
             case 101:
-                if (resultCode == RESULT_OK) {
+                if (resultCode == 101) {
                     Log.d(TAG, "onActivityResult: 권한접근2");
                     if (requestCode == 101) {
                         if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)

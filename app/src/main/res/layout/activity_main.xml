@@ -46,13 +46,13 @@
       android:layout_height="wrap_content"
       android:text="위치 저장" />
 
-  <Button
-      android:id="@+id/camera_geospatial"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginStart="10dp"
-      android:layout_toEndOf="@id/set_location"
-      android:text="사진 촬영" />
+<!--  <Button-->
+<!--      android:id="@+id/camera_geospatial"-->
+<!--      android:layout_width="wrap_content"-->
+<!--      android:layout_height="wrap_content"-->
+<!--      android:layout_marginStart="10dp"-->
+<!--      android:layout_toEndOf="@id/set_location"-->
+<!--      android:text="사진 촬영" />-->
 
 <!--  <TextView-->
 <!--      android:id="@+id/stored_location"-->
@@ -108,7 +108,7 @@
         android:orientation="vertical">
       <!--사진 촬영 버튼 대체 id : camera_geospatial -> camera_geospatial2 -->
       <ImageButton
-          android:id="@+id/camera_geospatial2"
+          android:id="@+id/camera_geospatial"
           android:layout_width="100dp"
           android:layout_height="100dp"
           android:layout_gravity="center"
