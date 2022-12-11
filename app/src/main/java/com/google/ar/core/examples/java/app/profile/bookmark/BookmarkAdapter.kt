@@ -11,26 +11,33 @@ import com.bumptech.glide.Glide
 import com.google.ar.core.examples.java.app.board.BoardData
 import com.google.ar.core.examples.java.geospatial.R
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import kotlinx.android.synthetic.main.activity_board_click.*
 
 class BookmarkAdapter (val context : Context) : BaseAdapter() {
 
     val boardDataList = mutableListOf<BoardData>()
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        /* LayoutInflater는 item을 Adapter에서 사용할 View로 부풀려주는(inflate) 역할을 한다. */
+
         val view: View = LayoutInflater.from(context).inflate(R.layout.activity_bookmark_list_element, null)
 
-        /* 위에서 생성된 view를 res-layout-main_lv_item.xml 파일의 각 View와 연결하는 과정이다. */
         val postImg = view.findViewById<ImageView>(R.id.postimg)
         val description = view.findViewById<TextView>(R.id.description)
         val name = view.findViewById<TextView>(R.id.name)
 
-        /* ArrayList<Dog>의 변수 dog의 이미지와 데이터를 ImageView와 TextView에 담는다. */
+        val db = Firebase.firestore
+
         val postInfo = boardDataList[position]
         Glide.with(view).load(postInfo.imgURL).error(R.drawable.ic_baseline_error_outline_24).into(postImg)
         description.text = postInfo.description
-        name.text = postInfo.userId
-
+        db.collection("users").document(postInfo.userId).get().addOnCompleteListener { task ->
+            if(task.isSuccessful) {
+                val document = task.result
+                name.text = document.get("userName").toString()
+            }
+        }
         return view
     }
 

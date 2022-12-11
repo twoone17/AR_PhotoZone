@@ -6,6 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/euisung"
     android:orientation="vertical">
 
     <LinearLayout
@@ -15,7 +16,7 @@
 
 
         <LinearLayout
-            android:background = "@color/color_palette_1"
+            android:background = "@color/euisung"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -75,47 +76,38 @@
                             app:layout_constraintTop_toTopOf="parent" />
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="2px"
-                        android:background="@color/black"
-                        android:layout_gravity ="center" />
-
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="43dp"
-                        android:layout_marginTop="15dp"
-                        android:background="@color/color_palette_1"
+                        android:layout_height="wrap_content"
                         android:orientation="horizontal"
+                        android:layout_marginBottom="10dp"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintVertical_bias="0.784">
 
-                        <!--android:src="@drawable/bluebookmark"-->
-
                         <ImageButton
                             android:id="@+id/bookmarkButton"
-                            android:layout_width="25dp"
-                            android:layout_height="30dp"
-                            android:layout_marginLeft="130dp"
-                            android:layout_marginRight="70dp"
+                            android:layout_width="160dp"
+                            android:layout_height="80dp"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="18dp"
                             android:padding="0dp"
-                            android:paddingLeft="20dp"
+                            android:src="@drawable/profile_bookmark_button"
                             android:scaleType="fitXY"
-                            android:src="@drawable/bookmark_btn" />
+                            android:paddingLeft="20dp" />
 
                         <ImageButton
-                            android:id="@+id/Closetbutton"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:layout_marginLeft="20dp"
-                            android:layout_marginRight="100dp"
+                            android:id="@+id/likedPhotozoneButton"
+                            android:layout_width="160dp"
+                            android:layout_height="80dp"
+
+                            android:layout_marginRight="15dp"
                             android:padding="0dp"
-                            android:paddingLeft="20dp"
+                            android:src="@drawable/profile_heart_button"
                             android:scaleType="fitXY"
-                            android:src="@drawable/liked_list_btn" />
+                            android:paddingLeft="20dp" />
 
                     </LinearLayout>
                 </LinearLayout>

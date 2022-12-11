@@ -596,6 +596,10 @@ public class ArLikes extends AppCompatActivity
         DocumentReference photoZoneLikesRef = db.collection("photoZone").document(photoZoneName)
                 .collection("userLikes").document(auth.getCurrentUser().getUid());
 
+        DocumentReference userPhotoZoneLikesRef = db.collection("users").document(auth.getCurrentUser().getUid())
+                .collection("photoZoneLikes").document(auth.getCurrentUser().getUid());
+
+
         HashMap<String, Double> DBInput = new HashMap<>();
         DBInput.put("latitude", latitude);
         DBInput.put("longitude", longitude);
@@ -612,6 +616,10 @@ public class ArLikes extends AppCompatActivity
                         clearedAnchorsAmount = null;
                     }
                 }
+                HashMap<String, String> map = new HashMap<>();
+                map.put("photoZoneName", photoZoneName);
+                // TODO 리스너 처리 미정
+                userPhotoZoneLikesRef.set(map);
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
