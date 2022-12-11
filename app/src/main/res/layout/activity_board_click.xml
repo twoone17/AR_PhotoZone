@@ -34,7 +34,6 @@
                     android:text="사용자 명"
                     android:textColor="@color/color_palette_4_light1"
                     android:textSize="15sp"
-                    android:text = "Iron_Woong"
                     android:textStyle="bold" />
                 <!--android:textColor="@color/colorPrimaryDark"-->
 

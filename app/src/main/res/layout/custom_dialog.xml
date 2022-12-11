@@ -73,8 +73,9 @@
 
                         <ImageView
                             android:id="@+id/imageView2"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
+                            android:layout_marginLeft = "5dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
                             app:srcCompat="@drawable/img" />
 
                         <TextView
@@ -93,8 +94,9 @@
 
                         <ImageView
                             android:id="@+id/imageView"
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
+                            android:layout_marginLeft = "5dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
                             app:srcCompat="@drawable/ic_liked" />
 
                         <TextView
