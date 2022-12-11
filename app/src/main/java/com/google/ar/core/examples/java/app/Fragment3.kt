@@ -129,7 +129,6 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                                 .title(documentSnapshot.id)
                                 .icon(BitmapDescriptorFactory.fromBitmap(
                                     createDrawableFromView(requireContext(), marker_root_view, resource))))
-
                             markerPerth?.tag = imgURL
                         }
                         override fun onLoadCleared(placeholder: Drawable?) {
@@ -205,6 +204,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
 
                 db.collection("photoZone").document(p0.title!!).collection("boardList").get()
                     .addOnSuccessListener { result ->
+                        profileAdapter.datas.clear()
+                        datas.clear()
                         for (post in result) {
                             datas.apply {
                                 add(
@@ -217,11 +218,11 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                                         documentId = post.id
                                     )
                                 )
-                                profileAdapter.datas = datas
-                                profileAdapter.notifyDataSetChanged()
-
                             }
                         }
+                        profileAdapter.datas = datas
+                        profileAdapter.notifyDataSetChanged()
+
                     }
 
 

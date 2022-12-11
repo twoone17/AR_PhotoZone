@@ -565,7 +565,7 @@ public class ArLikes extends AppCompatActivity
                         longitude = (Double) results.get("longitude");
 //                        altitude = (Double) results.get("altitude");
                         headingDegrees = (Double) results.get("headingDegrees");
-                        createAnchor(earth, latitude, longitude, 55, headingDegrees);
+                        createAnchor(earth, latitude, longitude, 57, headingDegrees);
                     }
                 }
             }
@@ -609,8 +609,8 @@ public class ArLikes extends AppCompatActivity
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()) {
-                    createAnchor(earth, latitude, longitude, altitude, headingDegrees);
-                    storeAnchorParameters(latitude, longitude, altitude, headingDegrees);
+                    createAnchor(earth, latitude, longitude, 57, headingDegrees);
+                    storeAnchorParameters(latitude, longitude, 57, headingDegrees);
                     runOnUiThread(() -> clearAnchorsButton.setVisibility(View.VISIBLE));
                     if (clearedAnchorsAmount != null) {
                         clearedAnchorsAmount = null;
