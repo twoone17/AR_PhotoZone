@@ -157,6 +157,9 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                         if (document != null) {
                             Log.d(TAG, "DocumentSnapshot data: ${document.data}")
                             imgURL= document.data?.get("imgURL")?.toString()
+                            val circle_img : CircleImageView = customDialog.findViewById(R.id.circle_img)
+                            Glide.with(requireContext()).load(imgURL.toString()).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
+
 //                            likes = document.data?.get("likes")?.toString(),
                         } else {
                             Log.d(TAG, "No such document")
@@ -168,8 +171,8 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 Log.e(TAG, "onMarkerClick: tag"+ tag.toString() )
 
                 //포토존 사진 불러오기
-                val circle_img : CircleImageView = customDialog.findViewById(R.id.circle_img)
-                Glide.with(requireContext()).load(imgURL.toString()).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
+//                val circle_img : CircleImageView = customDialog.findViewById(R.id.circle_img)
+//                Glide.with(requireContext()).load(imgURL.toString()).error(R.drawable.ic_baseline_error_outline_24).centerCrop().into(circle_img)
 
                 //포토존 정보 불러오기
                 val photozoneDetail : TextView = customDialog.findViewById(R.id.photozoneDetail)
@@ -187,6 +190,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                 }
 
                 profileAdapter = ProfileAdapter(requireContext())
+                profileAdapter.notifyDataSetChanged()
                 val recyclerView: RecyclerView = customDialog.recycler_mypost
 
                 profileAdapter.setOnItemClickListener(object : ProfileAdapter.OnItemClickListener{
@@ -197,10 +201,13 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                         }.run { startActivity(this) }
                     }
                 })
-
+                profileAdapter.notifyDataSetChanged()
                 recyclerView.adapter = profileAdapter
                 val gm = GridLayoutManager(requireContext(), 2)
                 recyclerView.layoutManager = gm
+                profileAdapter.datas.clear()
+                profileAdapter.notifyDataSetChanged()
+                recyclerView.adapter = profileAdapter
 
                 db.collection("photoZone").document(p0.title!!).collection("boardList").get()
                     .addOnSuccessListener { result ->
@@ -212,7 +219,7 @@ class Fragment3 : Fragment(), OnMapReadyCallback {
                                     BoardData(
                                         imgURL = post.get("imgURL").toString(),
                                         description = post?.get("description").toString(),
-                                        likes = post.get("likes") as Long,
+//                                        likes = post.get("likes") as Long,
                                         publisher = post.get("publisher").toString(),
                                         userId = post.get("userId").toString(),
                                         documentId = post.id

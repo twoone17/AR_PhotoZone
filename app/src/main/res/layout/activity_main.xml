@@ -44,7 +44,7 @@
       android:id="@+id/set_location"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="위치 저장" />
+      android:text="촬영한 위치 확인하기" />
 
 <!--  <Button-->
 <!--      android:id="@+id/camera_geospatial"-->
@@ -97,6 +97,7 @@
         android:background="@android:color/transparent"
         android:padding="30dp"
         android:textColor="#ffffff" />
+
 
     <LinearLayout
         android:layout_width="fill_parent"

@@ -466,7 +466,7 @@ public class GeospatialActivity extends AppCompatActivity
                             Texture.WrapMode.CLAMP_TO_EDGE,
                             Texture.ColorFormat.LINEAR);
 
-            virtualObjectMesh = Mesh.createFromAsset(render, "models/map_pointer_v3.obj");
+            virtualObjectMesh = Mesh.createFromAsset(render, "models/map_pointer_final.obj");
             virtualObjectShader =
                     Shader.createFromAssets(
                                     render,
@@ -603,13 +603,13 @@ public class GeospatialActivity extends AppCompatActivity
 //                                        0.0f,
 //                                        (float) Math.cos(20 / 2));
 
-                        for(int i = 0 ; i< 5 ; i++)
+                        for(int i = 0 ; i< 3 ; i++)
                         {
                             Anchor anchor =
                                     earth.createAnchor(
                                             (Double) data.get("latitude"),
                                             (Double) data.get("longitude"),
-                                            (Double) data.get("altitude") -5 +i,
+                                            79+i*2,
                                             0.0f,
                                             (float) Math.sin(20 / 2),
                                             0.0f,
